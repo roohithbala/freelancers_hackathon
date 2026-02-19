@@ -60,7 +60,20 @@ router.post('/', async (req, res) => {
                 }
                 res.json({ ideas });
             } else {
-                res.json({ blueprint: content });
+                // Extract JSON block from blueprint for structured data (cost, scores, mockUI)
+                let structuredData = {};
+                const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+                if (jsonMatch) {
+                    try {
+                        structuredData = JSON.parse(jsonMatch[1]);
+                    } catch (e) {
+                        console.warn("Failed to parse blueprint JSON:", e);
+                    }
+                }
+                res.json({ 
+                    blueprint: content,
+                    data: structuredData 
+                });
             }
 
         } catch (providerError) {

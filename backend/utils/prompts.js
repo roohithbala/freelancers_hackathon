@@ -43,27 +43,65 @@ const getUserPrompt = (data, isPremium, previousProjects = [], role = 'Student')
        1. 🔥 Startup Name (Unique & Brandable)
        2. 🚀 The "Unfair Advantage" (Why this wins)
        3. 💰 Business Model & Monetization
-       4. � Go-to-Market Strategy
+       4.  Go-to-Market Strategy
        5. 🧩 MVP Features (Must-Haves)
        6. 🏗 Tech Stack (Scalable & Modern)
        `;
    } else {
-       // Student / Learner
-       roleInstruction = `
-       Act as a Senior Staff Engineer & Mentor.
-       Focus on: Educational value, mastering concepts, portfolio building, and best practices.
-       Tone: Encouraging, technical, educational.
-       `;
-       
-       sections = `
-       1. 🎓 Project Title (Impressive for Portfolio)
-       2. 📚 Key Learning Outcomes (What you will master)
-       3. 🚀 The "Wow" Factor (Why recruiters will love this)
-       4. 🏗 Tech Stack (Industry Standard)
-       5. 🧩 Core Features (Manageable scope)
-       6. 📝 Resume Bullet Points (How to list this on CV)
-       `;
-   }
+        // Student / Learner
+        const complexityMatrix = {
+            'Novice': {
+                focus: 'Core syntax, simple logic, and basic HTML/CSS.',
+                constraints: 'NO complex state management (Redux/Context), NO external backend if unnecessary, NO complex APIs. Use local storage or simple variables.',
+                architecture: 'Monolithic, single-file or 2-3 component structure.',
+                scope: '1-2 primary features.'
+            },
+            'Beginner': {
+                focus: 'Component architecture, basic hooks, and API consumption.',
+                constraints: 'Basic state management (useState/useEffect), simple REST API integration, basic routing.',
+                architecture: 'Standard modular structure, 5-8 components.',
+                scope: '3-4 features with basic CRUD.'
+            },
+            'Intermediate': {
+                focus: 'Scalability, modularity, and robust state/data flow.',
+                constraints: 'Advanced hooks/Context API, complex database schemas, Auth systems, middleware, testing.',
+                architecture: 'Full-stack (MERN/PERN), service-based architecture, optimized data fetching.',
+                scope: 'Professional-grade MVP with security and error handling.'
+            },
+            'Advanced': {
+                focus: 'Enterprise-grade architecture, performance, and advanced ecosystems.',
+                constraints: 'Microservices, real-time data (WebSockets), CI/CD, advanced security, multi-tenant patterns, high-concurrency handling.',
+                architecture: 'Distributed systems, serverless, or complex cloud-native architectures.',
+                scope: 'Scalable production-ready platform with deep technical complexity.'
+            }
+        };
+
+        const currentComplexity = complexityMatrix[skillLevel] || complexityMatrix['Intermediate'];
+
+        roleInstruction = `
+        Act as a Senior Staff Engineer & Mentor.
+        Focus on: Educational value, mastering concepts, portfolio building, and best practices.
+        
+        SKILL-LEVEL ADHERENCE (CRITICAL):
+        - Complexity Tier: ${skillLevel}
+        - Focus: ${currentComplexity.focus}
+        - Constraints: ${currentComplexity.constraints}
+        - Architecture Target: ${currentComplexity.architecture}
+        - Recommended Scope: ${currentComplexity.scope}
+
+        Ensure the entire blueprint (Features, Architecture, Roadmap) strictly follows these ${skillLevel} constraints. Do not overcomplicate for Novices; do not simplify for Advanced users.
+        Tone: Encouraging, technical, educational.
+        `;
+        
+        sections = `
+        1. 🎓 Project Title (Impressive for Portfolio)
+        2. 📚 Key Learning Outcomes (What you will master)
+        3. 🚀 The "Wow" Factor (Why recruiters will love this)
+        4. 🏗 Tech Stack (Industry Standard for ${skillLevel})
+        5. 🧩 Core Features (Strictly ${skillLevel} scope)
+        6. 📝 Resume Bullet Points (How to list this on CV)
+        `;
+    }
 
    // Base Prompt
    let prompt = `
@@ -114,6 +152,16 @@ ${sections}
    - Wrap in a code block.
 
    ---
+
+   12. 🎨 Visual Mockup Data
+   - Provide a JSON block for a frontend preview.
+   - VISUAL DENSITY RULE:
+     - Novice: 1-2 simple components (Hero).
+     - Beginner: 2-3 components (Hero, simple stats).
+     - Intermediate: 3-4 components (Hero, stats, analytics).
+     - Advanced: 4-5 high-density components (Hero, analytics, activity-feed, detailed stats).
+
+   ---
    IMPORTANT: After the markdown content, you MUST append a single JSON block strictly in this format:
    \`\`\`json
    {
@@ -130,6 +178,21 @@ ${sections}
          "costEfficiency": 75,
          "innovation": 80,
          "completeness": 95
+      },
+      "mockUI": {
+         "theme": {
+            "primary": "#hex",
+            "secondary": "#hex",
+            "accent": "#hex",
+            "background": "dark/light"
+         },
+         "layout": "sidebar-main | header-body | dashboard-grid",
+         "components": [
+            {"type": "hero", "title": "...", "subtitle": "..."},
+            {"type": "stats", "data": [{"label": "...", "value": "..."}]},
+            {"type": "analytics", "chart": "bar|line|radar"},
+            {"type": "activity-feed", "items": ["...", "..."]}
+         ]
       },
       "pitchDeck": [
          { "title": "Problem", "content": "Short description of the problem." },
@@ -175,7 +238,7 @@ const getIdeasPrompt = (data, previousIdeas = []) => {
     Each object must have:
     - "title": A catchy, professional name.
     - "description": A 1-sentence value prop.
-    - "difficulty": "Beginner", "Intermediate", or "Advanced".
+    - "difficulty": "Novice", "Beginner", "Intermediate", or "Advanced".
     - "tech_stack": Array of key technologies.
     - "id": A unique string ID (kebab-case of title).
 
