@@ -352,7 +352,7 @@ const LandingPage = ({ onGetStarted, onShowFlowDiagram, onShowPortfolio, current
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </div>
             </div>
             
             {/* Animated Stats Section */}
@@ -504,23 +504,6 @@ const FeatureCard = ({ icon, title, description, delay }) => (
         <h3 className="text-xl font-bold text-white mb-3 group-hover:text-nebula-cyan transition-colors">{title}</h3>
         <p className="text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">{description}</p>
     </div>
-);
-
-// Keep original FeatureCard for backward compatibility
-const FeatureCard = ({ icon, title, description, delay }) => (
-    <motion.div 
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay }}
-        className="p-10 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] transition-all duration-500 group h-full relative"
-    >
-        <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center mb-8 border border-white/5 group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-500 group-hover:scale-110">
-            {icon}
-        </div>
-        <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">{title}</h3>
-        <p className="text-slate-400 leading-relaxed font-light group-hover:text-slate-300 transition-colors duration-500">{description}</p>
-    </motion.div>
 );
 
 export default LandingPage;

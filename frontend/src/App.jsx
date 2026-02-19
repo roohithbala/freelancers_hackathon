@@ -12,10 +12,8 @@ import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import AuthModal from './components/AuthModal';
 import ProfileModal from './components/ProfileModal';
 import LandingPage from './components/LandingPage';
-import FlowDiagramModal from './components/FlowDiagramModal';
-import ProjectShowcase from './components/ProjectShowcase';
 
-const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal, setShowFlowDiagram }) => {
+const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal }) => {
   const { currentUser } = useAuth();
 
   return (
@@ -35,14 +33,6 @@ const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal, setShowFl
 
         {/* Actions Area */}
         <div className="flex items-center space-x-3">
-          {/* How It Works Button - Always Visible */}
-          <button 
-            onClick={() => setShowFlowDiagram(true)}
-            className="hidden md:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-purple-500/50 transition-all"
-          >
-            <GitBranch className="h-4 w-4 mr-2 text-purple-400" /> How It Works
-          </button>
-
           {currentUser ? (
             <>
               <button 
@@ -50,16 +40,6 @@ const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal, setShowFl
                 className="hidden sm:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-blue-500/50"
               >
                 <BookOpen className="h-4 w-4 mr-2" /> My Ideas
-              </button>
-              
-              <button 
-                onClick={() => setView('showcase')} 
-                className="hidden sm:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-purple-500/50"
-              >
-                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                Portfolio
               </button>
               
               <button 
@@ -195,6 +175,7 @@ const PremiumModalDesc = ({ onClose, onUpgrade }) => (
 const MainContent = () => {
   // State
   const [blueprint, setBlueprint] = useState(null);
+  const [blueprintData, setBlueprintData] = useState(null);
   const [ideas, setIdeas] = useState([]);
   const [step, setStep] = useState('input'); // 'input' | 'ideas' | 'blueprint'
   const [lastInputData, setLastInputData] = useState(null); // Store input for step 2
@@ -206,7 +187,6 @@ const MainContent = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showFlowDiagram, setShowFlowDiagram] = useState(false);
   const { currentUser } = useAuth();
   const [view, setView] = useState('landing');
 
@@ -329,6 +309,7 @@ const MainContent = () => {
           
           const data = await res.json();
           setBlueprint(data.blueprint);
+          setBlueprintData(data.data);
           setStep('blueprint');
       } catch (error) {
           console.error(error);
@@ -403,13 +384,12 @@ const MainContent = () => {
         {/* Main Content */}
         <div className="relative z-10 flex flex-col min-h-screen">
 
-      <Header setShowSaved={setShowSaved} setShowAuthModal={setShowAuthModal} setShowProfileModal={setShowProfileModal} setShowFlowDiagram={setShowFlowDiagram} />
+      <Header setShowSaved={setShowSaved} setShowAuthModal={setShowAuthModal} setShowProfileModal={setShowProfileModal} />
 
       {showSaved && <SavedProjects onClose={() => setShowSaved(false)} onSelectProject={loadProject} />}
       {showPremiumModal && <PaymentModal onClose={() => setShowPremiumModal(false)} onUpgrade={handleUpgrade} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       {showProfileModal && <ProfileModal onClose={() => setShowProfileModal(false)} />}
-      <FlowDiagramModal isOpen={showFlowDiagram} onClose={() => setShowFlowDiagram(false)} />
 
       <div className="w-full pb-20">
         {view === 'landing' && !blueprint ? (
@@ -421,12 +401,8 @@ const MainContent = () => {
                   setShowAuthModal(true);
                 }
               }}
-              onShowFlowDiagram={() => setShowFlowDiagram(true)}
-              onShowPortfolio={() => setView('showcase')}
               currentUser={currentUser}
             />
-        ) : view === 'showcase' ? (
-            <ProjectShowcase onBack={() => setView(currentUser ? 'generator' : 'landing')} />
         ) : (
             <div className="max-w-7xl mx-auto px-6 animate-fade-in-up">
                 
@@ -469,6 +445,7 @@ const MainContent = () => {
                         
                         <BlueprintView 
                             blueprint={blueprint} 
+                            blueprintData={blueprintData}
                             onSave={handleSave}
                             isSaving={loading}
                         />
@@ -491,8 +468,8 @@ const MainContent = () => {
         )}
       </div>
     </div>
-    </div>
-  );
+  </div>
+);
 };
 
 function App() {

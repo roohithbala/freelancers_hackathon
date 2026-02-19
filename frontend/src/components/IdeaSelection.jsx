@@ -1,6 +1,40 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Lightbulb, ArrowRight, Code, Activity, Layers, Sparkles, ChevronRight, Layout } from 'lucide-react';
+import { 
+    Lightbulb, ArrowRight, Code, Activity, Layers, Sparkles, ChevronRight, Layout,
+    Database, Server, Globe, Cpu, Smartphone, Shield, Zap, Search, Cloud, Box
+} from 'lucide-react';
+
+const TECH_ICONS = {
+    'React': Globe,
+    'Next.js': Globe,
+    'Node.js': Server,
+    'Express': Server,
+    'Python': Code,
+    'FastAPI': Zap,
+    'PostgreSQL': Database,
+    'MongoDB': Database,
+    'Firebase': Cloud,
+    'AWS': Cloud,
+    'Docker': Box,
+    'Redis': Activity,
+    'Tailwind': Layout,
+    'TypeScript': Code,
+    'JavaScript': Code,
+    'OpenAI': Sparkles,
+    'TensorFlow': Cpu,
+    'Pytorch': Cpu,
+    'Framer Motion': Activity,
+    'Stripe': Shield,
+    'Auth0': Shield,
+    'Elasticsearch': Search,
+    'default': Code
+};
+
+const TechIcon = ({ tech, className = "w-3 h-3" }) => {
+    const Icon = TECH_ICONS[tech] || TECH_ICONS['default'];
+    return <Icon className={className} />;
+};
 
 const IdeaSelection = ({ ideas, onSelect, isLoading }) => {
     return (
@@ -75,6 +109,7 @@ const IdeaCard = ({ idea, index, onSelect, isLoading }) => (
                             <Layout className="w-6 h-6 text-white group-hover:text-primary transition-colors" />
                         </div>
                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+                            idea.difficulty === 'Novice' ? 'bg-slate-500/10 border-slate-500/20 text-slate-400' :
                             idea.difficulty === 'Beginner' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
                             idea.difficulty === 'Intermediate' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' :
                             'bg-orange-500/10 border-orange-500/20 text-orange-400'
@@ -95,10 +130,13 @@ const IdeaCard = ({ idea, index, onSelect, isLoading }) => (
                     {/* Footer */}
                     <div className="mt-auto pt-8 border-t border-white/5 group-hover:border-white/10 transition-colors">
                         <div className="flex flex-wrap gap-2 mb-8">
-                            {idea.tech_stack.slice(0, 3).map((tech, i) => (
-                                <span key={i} className="text-[10px] font-bold px-3 py-1.5 bg-white/5 rounded-lg text-slate-500 border border-white/5 tracking-wider uppercase">
-                                    {tech}
-                                </span>
+                            {idea.tech_stack.slice(0, 4).map((tech, i) => (
+                                <div key={i} className="flex items-center space-x-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 group-hover:border-primary/20 transition-all">
+                                    <TechIcon tech={tech} className="w-3.5 h-3.5 text-primary/60 group-hover:text-primary transition-colors" />
+                                    <span className="text-[10px] font-bold text-slate-500 group-hover:text-slate-300 tracking-wider uppercase">
+                                        {tech}
+                                    </span>
+                                </div>
                             ))}
                         </div>
 

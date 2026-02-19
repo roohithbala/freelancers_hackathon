@@ -85,6 +85,7 @@ const InputForm = ({ onGenerate, loading }) => {
                                         onChange={handleChange}
                                         className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white appearance-none cursor-pointer focus:bg-white/[0.05] focus:border-primary/50 outline-none transition-all font-light"
                                     >
+                                        <option value="Novice">Novice (Simple Logic)</option>
                                         <option value="Beginner">Beginner (Fast Prototype)</option>
                                         <option value="Intermediate">Intermediate (Scalable Core)</option>
                                         <option value="Advanced">Advanced (Enterprise Grade)</option>

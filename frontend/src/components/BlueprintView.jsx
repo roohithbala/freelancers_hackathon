@@ -5,8 +5,9 @@ import { Download, Share2, Edit, ExternalLink, Box, Layers, Code, Zap, Save, Che
 import { motion } from 'framer-motion';
 import DeepDiveStats from './DeepDiveStats';
 import ExportTools from './ExportTools';
+import MockUIPreview from './MockUIPreview';
 
-const BlueprintView = ({ blueprint, onSave, isSaving }) => {
+const BlueprintView = ({ blueprint, blueprintData, onSave, isSaving }) => {
     const blueprintRef = useRef(null);
     const [parsedStats, setParsedStats] = useState(null);
     const [cleanMarkdown, setCleanMarkdown] = useState('');
@@ -121,6 +122,36 @@ const BlueprintView = ({ blueprint, onSave, isSaving }) => {
                     </div>
 
                     <div className="p-8 md:p-12 md:px-20">
+                        {/* Visual Prototype / Mock UI - From New Request */}
+                        {blueprintData?.mockUI && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.1 }}
+                                className="mb-20"
+                            >
+                                <div className="flex items-center mb-8 space-x-3">
+                                    <div className="p-2 bg-primary/10 rounded-xl">
+                                        <Globe className="w-5 h-5 text-primary" />
+                                    </div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-[0.2em]">Visual Product DNA</h3>
+                                </div>
+                                
+                                <MockUIPreview mockData={blueprintData.mockUI} />
+                                
+                                <div className="mt-6 flex items-center justify-center space-x-6">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Aesthetic Alignment</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Layout Calibrated</span>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
                         {/* Mermaid Diagram Section */}
                         {mermaidCode && (
                             <motion.div

@@ -11,93 +11,93 @@ const FlowDiagramModal = ({ isOpen, onClose }) => {
         {
             id: 'system-flow',
             title: '🔄 Complete System Flow',
-            description: 'Technical architecture showing how all components work together',
+            description: 'Hyper-detailed technical architecture showing the synergy between AI, Backend, and Frontend.',
             icon: <GitBranch className="h-5 w-5" />,
             mermaidCode: `graph TB
     %% User Interface Layer
-    subgraph "🎨 Frontend (React + Vite)"
-        A[👤 Student/User] --> B[🏠 Landing Page]
-        B --> C[🔐 Firebase Authentication]
-        C --> D{Authenticated?}
-        D -->|Yes| E[📝 Input Form]
-        D -->|No| F[🔑 Login Required]
-        E --> G[📊 Project Configuration]
-        G --> H[🚀 Generate Blueprint]
+    subgraph "🎨 Frontend (High-Performance React)"
+        A[👤 Student/Innovator] --> B[🏠 Systems Lab Landing]
+        B --> C[🔐 Firebase Auth Service]
+        C --> D{Identity Verified?}
+        D -->|Yes| E[📝 Command Deck Input]
+        D -->|No| F[🔑 Auth Barrier]
+        E --> G[📊 Synthesis Engine Parameters]
+        G --> H[🚀 Trigger Architect Logic]
     end
 
     %% Input Processing
-    subgraph "📋 User Input Data"
-        G --> I[🎯 Domain<br/>Fintech/Healthcare/EdTech]
-        G --> J[⭐ Skill Level<br/>Beginner/Intermediate/Expert]
-        G --> K[💻 Tech Stack<br/>React/Node/Python etc.]
-        G --> L[🎪 Project Goal<br/>MVP/Learning/Portfolio]
-        G --> M[⏰ Timeframe<br/>1 Week to 6 Months]
+    subgraph "📋 Parameter Vectorization"
+        G --> I["🎯 Domain Strategy (e.g. Fintech 4.0)"]
+        G --> J["⭐ Complexity Calibration (L1-L3)"]
+        G --> K["💻 Optimized Stack (e.g. T3 Stack)"]
+        G --> L["🎪 Product North Star (MVP/Scale)"]
+        G --> M["⏰ Sprint Timeframe (Hyper-Burst)"]
     end
 
     %% Backend Processing
-    subgraph "⚙️ Backend API (Node.js + Express)"
+    subgraph "⚙️ Pro-Backend (Node.js + L7 Routing)"
         H --> N[🌐 POST /api/generate]
-        N --> O[✅ Input Validation]
-        O --> P[📝 Prompt Generation]
-        P --> Q[🧠 AI Provider Service]
+        N --> O[✅ Schema Validation]
+        O --> P[📝 Multi-Stage Prompt Injection]
+        P --> Q[🧠 AI Orchestrator Node]
     end
 
     %% AI Processing Layer
-    subgraph "🤖 AI Processing Engine"
-        Q --> R{Primary AI Available?}
-        R -->|Yes| S[🦾 Groq API<br/>llama-3.3-70b-versatile]
-        R -->|No| T[💎 Gemini Flash<br/>Fallback Provider]
-        S --> U[📋 System Prompt<br/>+ User Prompt]
+    subgraph "🤖 Neural Synthesis Interface"
+        Q --> R{Latency/Reliability Check}
+        R -->|Active| S["🦾 Groq Llama-3 (70B Inference)"]
+        R -->|Degraded| T["💎 Gemini 1.5 Flash (Fallback)"]
+        S --> U[📋 Systematic Prompt Context]
         T --> U
-        U --> V[🧮 AI Model Processing]
-        V --> W[📄 Generated Blueprint]
+        U --> V[🧮 Neural Architecture Generation]
+        V --> W[📄 Blueprint Object (Proto-JSON)]
     end
 
     %% Content Generation
-    subgraph "📖 Blueprint Content Structure"
-        W --> X[📝 Markdown Content<br/>Problem Statement<br/>Features List<br/>Implementation Guide]
-        W --> Y[🎨 Mermaid Diagram<br/>System Architecture<br/>Data Flow Charts]
-        W --> Z[📊 JSON Statistics<br/>Complexity Metrics<br/>Time Estimates]
+    subgraph "📖 Component Factory"
+        W --> X[📝 Technical Specs (MD)]
+        W --> Y[🎨 System Layouts (Mermaid)]
+        W --> Z[📊 Unit Metrics (JSON/Stats)]
     end
 
     %% Display Layer
-    subgraph "🖥️ Blueprint Display"
-        X --> AA[📱 Blueprint View Component]
-        Y --> AB[🎨 Mermaid Renderer<br/>Visual Diagrams]
-        Z --> AC[📈 Deep Dive Stats<br/>Interactive Charts]
-        AA --> AD[💾 Save to Firebase]
+    subgraph "🖥️ Visual Intelligence Hub"
+        X --> AA[📱 Blueprint Intelligence View]
+        Y --> AB[🎨 Dynamic Schema Renderer]
+        Z --> AC[📈 Performance Analytics Panel]
+        AA --> AD[💾 Persistent State Storage]
         AB --> AD
         AC --> AD
     end
 
     %% User Actions
-    subgraph "🛠️ User Actions"
-        AD --> AE[📚 View Saved Blueprints]
-        AD --> AF[📤 Export Tools<br/>PDF/PNG/Markdown]
-        AD --> AG[✏️ Edit in Draw.io<br/>Custom Diagrams]
-        AD --> AH[🔄 Generate New Version]
+    subgraph "🛠️ Post-Generation Operations"
+        AD --> AE[📚 Personal Archive Repository]
+        AD --> AF[📤 Multi-Format Export (PDF/MD)]
+        AD --> AG[✏️ CAD-Level Diagram Sync]
+        AD --> AH[🔄 Revision Control Sync]
     end
 
     %% Database Layer
-    subgraph "🗄️ Data Storage (Firebase)"
-        C --> AI[(🔐 User Authentication<br/>Google OAuth)]
-        AD --> AJ[(💾 Firestore Database<br/>Saved Blueprints)]
+    subgraph "🗄️ Secure Data Core (Firebase)"
+        C --> AI[(🔐 Encrypted Identity Store)]
+        AD --> AJ[(💾 Production-Grade Firestore)]
         AE --> AJ
     end
 
     %% External Services
-    subgraph "🌍 External Integrations"
-        AG --> AK[🎨 Draw.io Integration<br/>Manual Diagram Editing]
-        AF --> AL[📄 Export Formats<br/>PDF, PNG, MD]
+    subgraph "🌍 Global Integrations"
+        AG --> AK[🎨 Diagram System Interaction]
+        AF --> AL[📄 Document Pipeline]
     end
 
     %% Styling
-    classDef userLayer fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
-    classDef frontendLayer fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef backendLayer fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    classDef aiLayer fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    classDef dataLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    classDef externalLayer fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    classDef userLayer fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#fff
+    classDef frontendLayer fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    classDef backendLayer fill:#0f172a,stroke:#10b981,stroke-width:2px,color:#fff
+    classDef aiLayer fill:#1e1b4b,stroke:#f59e0b,stroke-width:2px,color:#fff
+    classDef dataLayer fill:#1e293b,stroke:#ec4899,stroke-width:2px,color:#fff
+    classDef externalLayer fill:#0f172a,stroke:#6366f1,stroke-width:2px,color:#fff
 
     class A,B,C userLayer
     class E,G,AA,AB,AC frontendLayer
@@ -109,176 +109,143 @@ const FlowDiagramModal = ({ isOpen, onClose }) => {
         {
             id: 'student-journey',
             title: '🎓 Student Journey Flow',
-            description: 'Step-by-step guide for students to use the AI generator',
+            description: 'Empowering students from raw curiosity to a portfolio-ready technical roadmap.',
             icon: <Users className="h-5 w-5" />,
             mermaidCode: `flowchart TD
     %% Student Journey Flow
-    Start([🎓 Student starts learning<br/>wants project idea]) --> Login[🔐 Sign in with Google<br/>Firebase Authentication]
+    Start([🎓 Student ID 101: Needs Portfolio-Winner]) --> Login[🔐 Secure Gateway Access]
     
-    Login --> Form[📝 Fill Project Configuration Form]
+    Login --> Form[📝 Precision Parameter Input]
     
-    subgraph "📋 Student Input"
-        Form --> Domain[🎯 Choose Domain<br/>🏥 Healthcare<br/>💰 Fintech<br/>📚 Education<br/>🎮 Gaming]
-        Form --> Skill[⭐ Select Skill Level<br/>🌱 Beginner<br/>🔧 Intermediate<br/>💪 Expert]
-        Form --> Tech[💻 Pick Tech Stack<br/>⚛️ React<br/>🟢 Node.js<br/>🐍 Python<br/>📱 Mobile]
-        Form --> Goal[🎪 Set Goal<br/>📖 Learning Project<br/>🚀 Startup MVP<br/>💼 Portfolio Piece]
-        Form --> Time[⏰ Choose Timeframe<br/>📅 1 Week<br/>📅 1 Month<br/>📅 3 Months]
+    subgraph "📋 Student Choice Vector"
+        Form --> Domain["🎯 Domain Expertise <br/>(AI-Ops / Crypto / MedTech)"]
+        Form --> Skill["⭐ Technical Tier <br/>(Rising Star to Master)"]
+        Form --> Tech["💻 Preferred Ecosystem <br/>(Rust / Golang / React)"]
+        Form --> Goal["🎪 Success Metric <br/>(VC Pitch / Resume / MVP)"]
+        Form --> Time["⏰ Development Window <br/>(Speed-Build vs Deep-Dev)"]
     end
     
-    Domain --> Generate[🚀 Click Generate Blueprint]
-    Skill --> Generate
-    Tech --> Generate
-    Goal --> Generate
-    Time --> Generate
-    
-    Generate --> Loading[⏳ AI Processing...<br/>🤖 Generating custom blueprint]
-    
-    Loading --> Result[📊 Generated Blueprint Ready!]
-    
-    subgraph "📖 What Student Gets"
-        Result --> Problem[📝 Problem Statement<br/>Clear project description<br/>Why it matters]
-        Result --> Features[✨ Feature List<br/>What to build<br/>Step-by-step features]
-        Result --> Architecture[🏗️ System Architecture<br/>Visual diagrams<br/>How components connect]
-        Result --> Roadmap[🗓️ Implementation Roadmap<br/>Week-by-week plan<br/>Learning milestones]
-        Result --> Code[💻 Tech Guidelines<br/>Code structure<br/>Best practices]
+    subgraph "⚡ AI Architect Engine"
+        Domain --> Architect[🚀 Neural Blueprint Induction]
+        Skill --> Architect
+        Tech --> Architect
+        Goal --> Architect
+        Time --> Architect
+        
+        Architect --> Synthesis[⏳ Real-time Structural Analysis]
     end
     
-    subgraph "🛠️ Student Actions"
-        Problem --> Save[💾 Save to My Collection]
-        Features --> Export[📤 Export as PDF/PNG<br/>Share with friends/mentors]
-        Architecture --> Edit[✏️ Edit diagrams in Draw.io<br/>Customize visually]
-        Roadmap --> Implement[🔨 Start Implementation<br/>Follow the roadmap]
-        Code --> Learn[📚 Learn & Code<br/>Build the project]
+    Synthesis --> Result[📊 Blueprint v1.0 Generated]
+    
+    subgraph "💎 Premium Deliverables"
+        Result --> Problem["📝 Master Narrative <br/>(Problem/Solution/Market)"]
+        Result --> Features["✨ Logic Matrix <br/>(MVP vs Phase 2 Features)"]
+        Result --> Architecture["🏗️ Diagrammatic Schema <br/>(Visual Infrastructure)"]
+        Result --> Roadmap["🗓️ Sprint Roadmap <br/>(Weekly Deliverables)"]
+        Result --> Code["💻 Code Standards <br/>(Architecture Patterns)"]
     end
     
-    Save --> Profile[👤 My Profile<br/>View all saved projects<br/>Track progress]
-    Export --> Share[🔗 Share with others<br/>Get feedback]
-    Edit --> CustomDiagram[🎨 Custom Architecture<br/>Personal modifications]
-    Implement --> Portfolio[🏆 Add to Portfolio<br/>Showcase skills]
-    Learn --> NewIdea[💡 Need another idea?<br/>Generate more projects]
+    subgraph "🛠️ Professional Actions"
+        Problem --> Save[💾 Cloud Persistence]
+        Features --> Export[📤 Production Export]
+        Architecture --> Edit[✏️ Visual Refinement]
+        Roadmap --> Build[🔨 Direct Implementation]
+        Code --> Mastery[📚 Skills Acquisition]
+    end
     
-    NewIdea --> Form
-    Portfolio --> Form
+    Save --> Archive[👤 Personal IP Repository]
+    Export --> Success[🔗 Recruiter/Founder Showcase]
+    Edit --> Finalize[🎨 Design Optimization]
+    Build --> Launch[🚀 Production Deployment]
+    Mastery --> Upskill[💡 Advanced Knowledge Leap]
     
-    %% Styling for better visual appeal
-    classDef startNode fill:#4CAF50,stroke:#2E8B57,stroke-width:3px,color:#fff
-    classDef inputNode fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#fff
-    classDef processNode fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#fff
-    classDef resultNode fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#fff
-    classDef actionNode fill:#607D8B,stroke:#455A64,stroke-width:2px,color:#fff
-    classDef endNode fill:#E91E63,stroke:#C2185B,stroke-width:2px,color:#fff
+    Upskill --> NewEdge[💡 Generate Next Evolution]
+    NewEdge --> Form
     
-    class Start,NewIdea startNode
-    class Login,Form,Domain,Skill,Tech,Goal,Time inputNode
-    class Generate,Loading processNode
-    class Result,Problem,Features,Architecture,Roadmap,Code resultNode
-    class Save,Export,Edit,Implement,Learn actionNode
-    class Profile,Share,CustomDiagram,Portfolio endNode`
+    %% Styling
+    classDef stepNode fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
+    classDef highlightNode fill:#1e1b4b,stroke:#f59e0b,stroke-width:3px,color:#fff
+    classDef launchNode fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#fff
+    
+    class Start,Login,Form stepNode
+    class Architect,Synthesis,Result highlightNode
+    class Launch,Success,Archive launchNode`
         },
         {
             id: 'technical-architecture',
             title: '💻 Technical Architecture',
-            description: 'Code components and their relationships in the system',
+            description: 'Advanced component topology and dependency mapping.',
             icon: <Book className="h-5 w-5" />,
             mermaidCode: `graph TB
-    %% Frontend Components
-    subgraph "🎨 Frontend Components (React)"
-        App[📱 App.jsx<br/>Main Application Container]
-        Landing[🏠 LandingPage.jsx<br/>Welcome & Features]
-        Auth[🔐 AuthModal.jsx<br/>Login Interface]
-        Input[📝 InputForm.jsx<br/>Project Configuration]
-        Blueprint[📊 BlueprintView.jsx<br/>Display Generated Content]
-        Profile[👤 ProfileModal.jsx<br/>User Profile]
-        Loading[⏳ LoadingTerminal.jsx<br/>AI Processing Animation]
+    %% Frontend Atomic Components
+    subgraph "🎨 Frontend Micro-Architecture (Next/React)"
+        App[📱 Root Module]
+        Landing[🏠 Hero Ecosystem]
+        Auth[🔐 Secure Auth Bridge]
+        Input[📝 Dynamic Logic Form]
+        Blueprint[📊 Blueprint Viewport]
+        MockUI[🎨 Live Mock Prototype]
+        Stats[📈 Real-time Analytics]
     end
 
-    %% Frontend Services
-    subgraph "🔧 Frontend Services"
-        AuthContext[🔐 AuthContext.jsx<br/>User Authentication State]
-        AIService[🧠 aiService.js<br/>API Communication]
-        Firebase[🔥 firebase.js<br/>Firebase Configuration]
+    %% State & Data Management
+    subgraph "🔧 Global State & Intelligence"
+        AuthContext[🔐 Identity Context]
+        AIService[🧠 AI Dispatcher]
+        Firebase[🔥 Firebase Driver]
+        IconMapper[🖼️ Tech Icon Factory]
     end
 
-    %% Backend Structure
-    subgraph "⚙️ Backend API (Node.js)"
-        Server[🌐 server.js<br/>Express Server Setup]
-        Routes[🛣️ routes/generate.js<br/>API Endpoint Handler]
-        AIProvider[🤖 utils/aiProvider.js<br/>AI Service Manager]
-        Prompts[📝 utils/prompts.js<br/>Prompt Templates]
+    %% API Backend Service
+    subgraph "⚙️ Edge Backend (Node.js)"
+        Server[🌐 Express Gateway]
+        Routes[🛣️ Architecture Routes]
+        Orchestrator[🤖 AI Provider Logic]
+        Prompter[📝 Prompt Template System]
     end
 
-    %% External Services
-    subgraph "🌍 External APIs & Services"
-        GroqAPI[🦾 Groq API<br/>Primary AI Provider<br/>llama-3.3-70b-versatile]
-        GeminiAPI[💎 Gemini API<br/>Fallback AI Provider<br/>gemini-1.5-flash]
-        FirebaseAuth[🔐 Firebase Auth<br/>Google OAuth]
-        Firestore[💾 Firestore Database<br/>User Data & Blueprints]
-        DrawIO[🎨 Draw.io<br/>Diagram Editing]
+    %% Cloud Infrastructure
+    subgraph "🌎 Distributed Services"
+        Groq[🦾 Groq Neural Engine]
+        Gemini[💎 Google AI Cluster]
+        AuthCluster[🔐 Google OAuth Node]
+        Database[(💾 Distributed Firestore)]
     end
 
-    %% Component Relationships
+    %% Integration Flows
     App --> Landing
-    App --> Auth
-    App --> Input
-    App --> Blueprint
-    App --> Profile
-    App --> Loading
-    
-    Auth --> AuthContext
-    Blueprint --> AuthContext
-    Profile --> AuthContext
-    
     Input --> AIService
-    Blueprint --> AIService
-    
-    AuthContext --> Firebase
-    Firebase --> FirebaseAuth
-    Firebase --> Firestore
+    Blueprint --> MockUI
+    Blueprint --> Stats
     
     AIService --> Server
-    Server --> Routes
-    Routes --> AIProvider
-    Routes --> Prompts
+    Server --> Orchestrator
+    Orchestrator --> Prompter
+    Orchestrator --> Groq
+    Orchestrator --> Gemini
     
-    AIProvider --> GroqAPI
-    AIProvider --> GeminiAPI
-    
-    Blueprint --> DrawIO
-    
-    %% Data Flow
-    subgraph "📊 Data Flow Process"
-        UserInput[👤 User Input<br/>Domain, Skills, Tech Stack] --> ValidationStep[✅ Input Validation<br/>Backend Processing]
-        ValidationStep --> PromptGeneration[📝 Dynamic Prompt Creation<br/>Based on User Preferences]
-        PromptGeneration --> AIProcessing[🧠 AI Model Processing<br/>Blueprint Generation]
-        AIProcessing --> ContentParsing[📖 Content Parsing<br/>Markdown + Mermaid + JSON]
-        ContentParsing --> UIRendering[🖥️ UI Rendering<br/>Display Blueprint]
-        UIRendering --> UserActions[🛠️ User Actions<br/>Save, Export, Edit]
-    end
+    AuthContext --> AuthCluster
+    Blueprint --> Database
+    Stats --> Database
 
-    %% Technical Implementation Details
-    subgraph "💻 Key Technologies Used"
-        ReactVite[⚛️ React + Vite<br/>Frontend Framework<br/>Fast Development]
-        TailwindCSS[🎨 Tailwind CSS<br/>Styling Framework<br/>Responsive Design]
-        FramerMotion[✨ Framer Motion<br/>Animations<br/>Smooth Transitions]
-        MermaidJS[📊 Mermaid.js<br/>Diagram Rendering<br/>Auto-Generated Charts]
-        ExpressJS[🟢 Express.js<br/>Backend Framework<br/>RESTful APIs]
-        NodeFetch[🌐 Node-fetch<br/>HTTP Requests<br/>API Communication]
+    %% Technology Topology
+    subgraph "🛠️ Build Framework Stack"
+        Vite[⚡ Vite Build Engine]
+        Tailwind[🎨 Tailwind CSS v3]
+        Framer[✨ Motion Engine]
+        Mermaid[📊 Render Logic]
     end
 
     %% Styling
-    classDef frontend fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef service fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef backend fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    classDef external fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    classDef process fill:#fce4ec,stroke:#c2185b,stroke-width:2px
-    classDef tech fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    classDef component fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#fff
+    classDef logic fill:#1e1b4b,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    classDef backend fill:#052e16,stroke:#10b981,stroke-width:2px,color:#fff
+    classDef cloud fill:#450a0a,stroke:#ef4444,stroke-width:2px,color:#fff
     
-    class App,Landing,Auth,Input,Blueprint,Profile,Loading frontend
-    class AuthContext,AIService,Firebase service
-    class Server,Routes,AIProvider,Prompts backend
-    class GroqAPI,GeminiAPI,FirebaseAuth,Firestore,DrawIO external
-    class UserInput,ValidationStep,PromptGeneration,AIProcessing,ContentParsing,UIRendering,UserActions process
-    class ReactVite,TailwindCSS,FramerMotion,MermaidJS,ExpressJS,NodeFetch tech`
+    class App,Landing,Auth,Input,Blueprint,MockUI,Stats component
+    class AuthContext,AIService,Firebase,IconMapper logic
+    class Server,Routes,Orchestrator,Prompter backend
+    class Groq,Gemini,AuthCluster,Database cloud`
         }
     ];
 
