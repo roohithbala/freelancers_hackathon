@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { generateProjectIdea } from './services/aiService';
 import InputForm from './components/InputForm';
 import BlueprintView from './components/BlueprintView';
-import { Rocket, LogIn, LogOut, Save, BookOpen } from 'lucide-react';
+import { Rocket, LogIn, LogOut, Save, BookOpen, GitBranch } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { db } from './firebase';
 import LoadingTerminal from './components/LoadingTerminal';
@@ -12,9 +12,10 @@ import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import AuthModal from './components/AuthModal';
 import ProfileModal from './components/ProfileModal';
 import LandingPage from './components/LandingPage';
-import IdeaSelection from './components/IdeaSelection';
+import FlowDiagramModal from './components/FlowDiagramModal';
+import ProjectShowcase from './components/ProjectShowcase';
 
-const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal }) => {
+const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal, setShowFlowDiagram }) => {
   const { currentUser } = useAuth();
 
   return (
@@ -34,13 +35,31 @@ const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal }) => {
 
         {/* Actions Area */}
         <div className="flex items-center space-x-3">
+          {/* How It Works Button - Always Visible */}
+          <button 
+            onClick={() => setShowFlowDiagram(true)}
+            className="hidden md:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-purple-500/50 transition-all"
+          >
+            <GitBranch className="h-4 w-4 mr-2 text-purple-400" /> How It Works
+          </button>
+
           {currentUser ? (
             <>
               <button 
                 onClick={() => setShowSaved(true)} 
-                className="hidden sm:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-400 hover:text-white"
+                className="hidden sm:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-blue-500/50"
               >
-                <BookOpen className="h-4 w-4 mr-2" /> My Designs
+                <BookOpen className="h-4 w-4 mr-2" /> My Ideas
+              </button>
+              
+              <button 
+                onClick={() => setView('showcase')} 
+                className="hidden sm:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-purple-500/50"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Portfolio
               </button>
               
               <button 
@@ -187,6 +206,7 @@ const MainContent = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showFlowDiagram, setShowFlowDiagram] = useState(false);
   const { currentUser } = useAuth();
   const [view, setView] = useState('landing');
 
@@ -383,16 +403,30 @@ const MainContent = () => {
         {/* Main Content */}
         <div className="relative z-10 flex flex-col min-h-screen">
 
-      <Header setShowSaved={setShowSaved} setShowAuthModal={setShowAuthModal} setShowProfileModal={setShowProfileModal} />
+      <Header setShowSaved={setShowSaved} setShowAuthModal={setShowAuthModal} setShowProfileModal={setShowProfileModal} setShowFlowDiagram={setShowFlowDiagram} />
 
       {showSaved && <SavedProjects onClose={() => setShowSaved(false)} onSelectProject={loadProject} />}
       {showPremiumModal && <PaymentModal onClose={() => setShowPremiumModal(false)} onUpgrade={handleUpgrade} />}
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       {showProfileModal && <ProfileModal onClose={() => setShowProfileModal(false)} />}
+      <FlowDiagramModal isOpen={showFlowDiagram} onClose={() => setShowFlowDiagram(false)} />
 
       <div className="w-full pb-20">
         {view === 'landing' && !blueprint ? (
-            <LandingPage onGetStarted={() => setView('generator')} />
+            <LandingPage 
+              onGetStarted={() => {
+                if (currentUser) {
+                  setView('generator');
+                } else {
+                  setShowAuthModal(true);
+                }
+              }}
+              onShowFlowDiagram={() => setShowFlowDiagram(true)}
+              onShowPortfolio={() => setView('showcase')}
+              currentUser={currentUser}
+            />
+        ) : view === 'showcase' ? (
+            <ProjectShowcase onBack={() => setView(currentUser ? 'generator' : 'landing')} />
         ) : (
             <div className="max-w-7xl mx-auto px-6 animate-fade-in-up">
                 
