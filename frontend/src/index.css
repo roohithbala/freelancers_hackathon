@@ -5,92 +5,244 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71% 4%;
+    /* Design tokens: refined neutral scale + single accent
+      Default: Neutral dark-on-light (user requested) */
+    :root {
+    /* Spacing (8px system) */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 40px;
+    --space-8: 48px;
 
-    --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    /* Typography */
+    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    --text-xxs: 11px;
+    --text-xs: 12px;
+    --text-sm: 13px;
+    --text-base: 15px;
+    --text-lg: 18px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+    --text-3xl: 28px;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    /* Radii */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 210 40% 98%;
+    /* Neutral palette (soft, layered) */
+    --bg: #FBFBFE;
+    --surface-1: #FFFFFF;
+    --surface-2: #FBFBFD;
+    --muted-100: #6b7280;
+    --muted-200: #9aa0b4;
+    --text-900: #0b1220;
+    --text-700: #3f4959;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11.2%;
+    /* Accent - single refined hue */
+    --accent-50: #E8F3FF;
+    --accent-100: #CFE8FF;
+    --accent-400: #4A8CFF;
+    --accent-600: #2563EB;
+    --accent-700: #1748C8;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84.7% 4.9%;
-
-    --radius: 0.5rem;
-    --surface: 0 0% 98%;
+    /* Semantic */
+    --border: rgba(15,20,30,0.06);
+    --elev-1: 0 6px 20px rgba(12,18,30,0.04);
+    --elev-2: 0 10px 30px rgba(12,18,30,0.06);
+    --glass-1: rgba(10,12,16,0.02);
   }
 
+  /* Dark theme toggle */
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
-
-    --popover: 224 71% 4%;
-    --popover-foreground: 213 31% 91%;
-
-    --primary: 217 91% 60%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 222 47% 11.2%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 223 47% 11.2%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 222 47% 11.2%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    
-    --surface: 222 47% 7%;
+    --bg: #0B0B12;
+    --surface-1: #0f1115;
+    --surface-2: #13151a;
+    --muted-100: #8b93a7;
+    --muted-200: #6f7586;
+    --text-900: #f7f8fb;
+    --text-700: #cbd2e1;
+    --border: rgba(255,255,255,0.06);
+    --elev-1: 0 6px 18px rgba(8,10,14,0.6);
+    --elev-2: 0 10px 30px rgba(8,10,14,0.7);
+    --glass-1: rgba(255,255,255,0.02);
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden transition-colors duration-300;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    background: var(--bg);
+    color: var(--text-900);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
+
+  /* small helpers to enforce the 8px grid rhythm */
+  .rhythm-1 { padding: var(--space-2); }
+  .rhythm-2 { padding: var(--space-4); }
+  .rhythm-3 { padding: var(--space-5); }
+  .rhythm-4 { padding: var(--space-6); }
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-surface/80 backdrop-blur-xl border border-white/5 shadow-2xl;
+  /* Cards */
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    box-shadow: var(--elev-1);
+    border-radius: var(--radius-lg);
+    color: var(--text-900);
   }
 
-  .glass-card {
-    @apply bg-surface/50 backdrop-blur-md border border-white/5 hover:border-primary/50 transition-all duration-300;
+  .card--lift { box-shadow: var(--elev-2); transform: translateZ(0); }
+
+  /* Buttons - design system primitives */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: transform 160ms cubic-bezier(.2,.9,.2,1), box-shadow 200ms, background 160ms;
+    will-change: transform, box-shadow;
   }
 
-  .glass-button {
-    @apply bg-white/5 hover:bg-white/10 border border-white/10 text-white backdrop-blur-sm transition-all duration-300 active:scale-95;
+  .btn:active { transform: translateY(1px) scale(0.995); }
+
+  .btn--primary {
+    background: linear-gradient(180deg, var(--accent-400), var(--accent-600));
+    color: white;
+    box-shadow: 0 8px 30px rgba(37,99,235,0.18);
   }
 
+  .btn--secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-900);
+    box-shadow: none;
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--text-700);
+    border: none;
+  }
+
+  .btn--sm { padding: 6px 10px; border-radius: var(--radius-sm); font-size: var(--text-sm); }
+  .btn--md { padding: 10px 16px; border-radius: var(--radius-md); font-size: var(--text-base); }
+  .btn--lg { padding: 14px 20px; border-radius: var(--radius-lg); font-size: var(--text-lg); }
+
+  /* Inputs */
   .input-field {
-    @apply bg-surface/50 border border-white/10 text-white placeholder:text-muted-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/50 rounded-xl px-4 py-3 transition-all duration-300 outline-none;
+    width: 100%;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--text-900);
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    transition: box-shadow 160ms, border-color 160ms, transform 160ms;
+    outline: none;
+    font-weight: 500;
   }
+
+  .input-field:focus {
+    box-shadow: 0 6px 24px rgba(37,99,235,0.12);
+    border-color: var(--accent-600);
+    transform: translateY(-1px);
+  }
+
+  /* Typography tokens (semantic) */
+  :root {
+    --type-primary: var(--text-900);
+    --type-secondary: var(--text-700);
+    --type-muted: var(--muted-200);
+    --type-subtle: var(--muted-100);
+    --type-inverse: #ffffff;
+    --type-accent: var(--accent-600);
+  }
+
+  /* Map common Tailwind text color utilities to semantic tokens for project-wide consistency */
+  .text-gray-900 { color: var(--type-primary) !important; }
+  .text-gray-800 { color: var(--type-primary) !important; }
+  .text-gray-700 { color: var(--type-secondary) !important; }
+  .text-gray-600 { color: var(--type-subtle) !important; }
+  .text-gray-500 { color: var(--type-muted) !important; }
+  .text-gray-400 { color: rgba(63,73,89,0.7) !important; }
+  .text-gray-300 { color: rgba(63,73,89,0.5) !important; }
+  .text-gray-200 { color: rgba(63,73,89,0.35) !important; }
+  .text-white { color: var(--type-inverse) !important; }
+  .dark .text-white { color: var(--type-inverse) !important; }
+
+  .text-indigo-600, .text-indigo-500 { color: var(--type-accent) !important; }
+  .text-indigo-400 { color: color-mix(in srgb, var(--type-accent) 60%, white) !important; }
+  .text-purple-600 { color: var(--accent-700) !important; }
+
+  /* Headings default mapping using semantic tokens */
+  h1, h2, h3, h4, h5, h6 { color: var(--type-primary); font-family: var(--font-sans); }
+  p, li, span, a, label, button { color: var(--type-secondary); font-family: var(--font-sans); }
+
+  /* Links and interactive text use accent */
+  a { color: var(--type-accent); text-decoration: underline; text-underline-offset: 4px; }
+  a:hover { opacity: 0.95; }
+
+  /* Enforce system surfaces and borders across existing Tailwind usage */
+  .bg-white { background: var(--surface-1) !important; }
+  .bg-gray-50 { background: var(--surface-2) !important; }
+  .bg-slate-900 { background: var(--surface-1) !important; }
+  .dark .bg-slate-900 { background: var(--surface-1) !important; }
+
+  .border-gray-200, .border-gray-100 { border-color: var(--border) !important; }
+  .dark .border-slate-800, .border-slate-800 { border-color: rgba(255,255,255,0.06) !important; }
+
+  /* Inputs / selects / textareas default to tokenized styles unless overridden */
+  input, select, textarea, button {
+    font-family: var(--font-sans);
+    color: var(--type-primary);
+    background: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--type-muted); }
+
+  /* Headings: stronger hierarchy and consistent rhythm */
+  h1 { font-size: var(--text-3xl); line-height: 1.03; font-weight: 800; color: var(--type-primary); margin-bottom: var(--space-3); }
+  h2 { font-size: var(--text-2xl); line-height: 1.08; font-weight: 700; color: var(--type-primary); margin-bottom: var(--space-2); }
+  h3 { font-size: var(--text-xl); line-height: 1.1; font-weight: 700; color: var(--type-primary); margin-bottom: var(--space-2); }
+  p, li { color: var(--type-secondary); }
+
+  /* Page containers: ensure consistent background across pages */
+  .min-h-screen { background: var(--bg) !important; }
+
+  /* Utility for muted surfaces used as badges/pills */
+  .muted-surface { background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent); border: 1px solid var(--border); color: var(--type-secondary); }
+
+  .input-label { font-size: 12px; font-weight: 700; color: var(--muted-200); letter-spacing: .06em; }
+
+  /* Toasts */
+  .toast {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    box-shadow: 0 20px 50px rgba(3,7,18,0.55);
+    color: var(--text-900);
+  }
+
+  .toast .icon { margin-right: 12px; flex-shrink: 0; }
+
+  /* Refined loading visuals */
+  .loader-ring { width: 44px; height: 44px; border-radius: 9999px; display:inline-grid; place-items:center; }
+  .loader-ring svg { filter: drop-shadow(0 6px 18px rgba(37,99,235,0.14)); }
+
 
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;

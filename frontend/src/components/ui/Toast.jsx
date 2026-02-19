@@ -88,26 +88,32 @@ const ToastItem = ({ toast, onRemove }) => {
     }
   };
 
-  const getBackgroundClass = () => {
-    return 'bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]';
+  const tone = {
+    success: { bg: 'bg-emerald-50', accent: 'text-emerald-500' },
+    error: { bg: 'bg-rose-50', accent: 'text-rose-500' },
+    warning: { bg: 'bg-amber-50', accent: 'text-amber-500' },
+    info: { bg: 'bg-indigo-50', accent: 'text-indigo-600' },
   };
+
+  const t = tone[toast.type] || tone.info;
 
   return (
     <Motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      initial={{ opacity: 0, y: 14, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-      className={`flex items-center space-x-4 p-5 rounded-2xl backdrop-blur-xl min-w-[320px] max-w-md ${getBackgroundClass()}`}
+      exit={{ opacity: 0, y: 6, scale: 0.98, transition: { duration: 0.18 } }}
+      className={`toast flex items-start ${t.bg} min-w-[320px] max-w-md ${toast.type === 'error' ? '' : ''}`}
     >
-      <div className="flex-shrink-0">
-         {getIcon()}
+      <div className="icon">
+        {getIcon()}
       </div>
-      <p className="flex-1 text-sm font-bold text-gray-900 dark:text-white leading-tight">{toast.message}</p>
+
+      <div className="flex-1">
+        <p className="text-sm font-semibold" style={{ color: 'var(--text-900)' }}>{toast.message}</p>
+      </div>
+
       {!toast.persistent && (
-        <button
-          onClick={() => onRemove(toast.id)}
-          className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1"
-        >
+        <button onClick={() => onRemove(toast.id)} className="text-muted-200 hover:text-text-900 transition-colors p-1">
           <X className="w-4 h-4" />
         </button>
       )}

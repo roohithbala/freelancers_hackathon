@@ -6,7 +6,7 @@ const GEMINI_DIRECT_MODEL_NAME = "gemini-1.5-flash";
 const GEMINI_DIRECT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_DIRECT_MODEL_NAME}:generateContent`;
 
 // Helper for Groq via OpenAI SDK
-async function callGroq(messages, apiKey) {
+async function callGroq(messages, apiKey, options = {}) {
     console.log("Attempting Groq API via OpenAI SDK...");
 
     const client = new OpenAI({
@@ -15,11 +15,14 @@ async function callGroq(messages, apiKey) {
     });
 
     try {
-        const completion = await client.chat.completions.create({
+        const payload = {
             messages: messages,
-            model: "llama-3.3-70b-versatile", // Updated to current stable model
-            temperature: 0.7,
-        });
+            model: "llama-3.3-70b-versatile",
+            temperature: typeof options.temperature === 'number' ? options.temperature : 0.2,
+        };
+        if (options.maxTokens) payload.max_output_tokens = Math.min(options.maxTokens, 1024);
+
+        const completion = await client.chat.completions.create(payload);
 
         return {
             choices: [{
@@ -34,7 +37,7 @@ async function callGroq(messages, apiKey) {
 }
 
 // Helper for Google Gemini Direct (Backup)
-async function callGeminiDirect(messages, apiKey) {
+async function callGeminiDirect(messages, apiKey, options = {}) {
     console.log(`Attempting Google Gemini Direct API (${GEMINI_DIRECT_MODEL_NAME})...`);
 
     // Gemini Pro doesn't support system instructions well in v1beta, so we combine them.
@@ -42,12 +45,15 @@ async function callGeminiDirect(messages, apiKey) {
     const userMessage = messages.find(m => m.role === 'user')?.content || "";
     const combinedPrompt = `${systemMessage}\n\nUser Request:\n${userMessage}`;
 
+    const body = {
+        contents: [{ parts: [{ text: combinedPrompt }] }]
+    };
+    if (options.maxTokens) body.maxOutputTokens = options.maxTokens;
+
     const response = await fetch(`${GEMINI_DIRECT_URL}?key=${apiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: combinedPrompt }] }]
-        })
+        body: JSON.stringify(body)
     });
 
     if (!response.ok) {
@@ -67,11 +73,11 @@ async function callGeminiDirect(messages, apiKey) {
     };
 }
 
-async function generateCompletion(messages, avoidList = []) {
+async function generateCompletion(messages, avoidList = [], options = {}) {
     // 1. Try Groq (Primary)
     if (process.env.GROQ_API_KEY) {
         try {
-            return await callGroq(messages, process.env.GROQ_API_KEY);
+            return await callGroq(messages, process.env.GROQ_API_KEY, options);
         } catch (e) {
             console.error(e.message);
         }
@@ -80,7 +86,7 @@ async function generateCompletion(messages, avoidList = []) {
     // 2. Try Google Gemini Direct (Secondary)
     if (process.env.GOOGLE_API_KEY) {
         try {
-            return await callGeminiDirect(messages, process.env.GOOGLE_API_KEY);
+            return await callGeminiDirect(messages, process.env.GOOGLE_API_KEY, options);
         } catch (e) {
             console.error(e.message);
         }
