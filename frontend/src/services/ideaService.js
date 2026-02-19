@@ -1,6 +1,19 @@
 import { db } from '../firebase';
 import { collection, addDoc, getDocs, query, where, doc, deleteDoc, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 
+// Simple deterministic 53-bit hash for strings (cyrb53)
+function cyrb53(str, seed = 0) {
+  let h1 = 0xDEADBEEF ^ seed, h2 = 0x41C6CE57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+    ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+
 class IdeaService {
   constructor() {
     this.apiBase = 'http://localhost:5000/api';
@@ -88,6 +101,30 @@ class IdeaService {
       // Get previous projects to avoid duplicates
       const previousProjects = currentUser ? await this.getPreviousProjectTitles(currentUser) : [];
 
+      // compute prompt hash to prevent duplicate regeneration
+      const promptObj = { mode: 'ideas', domain: formData.domain, skillLevel: formData.skillLevel, techStack: formData.techStack, goal: formData.goal, timeframe: formData.timeframe };
+      const promptKey = JSON.stringify(promptObj);
+      const promptHash = cyrb53(promptKey).toString();
+
+      // If user and existing generated content for same prompt exists, return cached result
+      if (currentUser) {
+        try {
+          const cachedQ = query(
+            collection(db, 'generated_content'),
+            where('userId', '==', currentUser.uid),
+            where('promptHash', '==', promptHash),
+            where('type', '==', 'ideas')
+          );
+          const cachedSnap = await getDocs(cachedQ);
+          if (!cachedSnap.empty) {
+            const d = cachedSnap.docs[0].data();
+            return { success: true, data: d.ideas, cached: true };
+          }
+        } catch (e) {
+          console.warn('Cache lookup failed:', e);
+        }
+      }
+
       // Save this prompt to history
       await this.savePromptHistory(currentUser, {
         type: 'generate_ideas',
@@ -110,7 +147,11 @@ class IdeaService {
           mode: 'ideas',
           previousProjects: previousProjects,
           role: 'Student',
-          isPremium: false
+          isPremium: false,
+          // Ask backend to limit tokens and temperature to reduce cost and verbosity
+          maxTokens: 512,
+          temperature: 0.2,
+          promptHash
         }),
       });
 
@@ -121,13 +162,14 @@ class IdeaService {
       
       const result = await res.json();
 
-      // Save all generated ideas to Firestore
+      // Save all generated ideas to Firestore (include promptHash)
       if (currentUser && result.ideas?.length) {
         try {
           await addDoc(collection(db, "generated_content"), {
             userId: currentUser.uid,
             type: 'ideas',
             ideas: result.ideas,
+            promptHash,
             prompt: {
               domain: formData.domain,
               skillLevel: formData.skillLevel,
@@ -159,6 +201,30 @@ class IdeaService {
         skillLevel: formData.skillLevel
       });
 
+      // compute prompt hash for blueprint (include selected idea title to avoid duplicates)
+      const blueprintPromptObj = { mode: 'blueprint', selectedTitle: idea.title, domain: formData.domain, skillLevel: formData.skillLevel, techStack: formData.techStack, goal: formData.goal, timeframe: formData.timeframe };
+      const blueprintPromptKey = JSON.stringify(blueprintPromptObj);
+      const blueprintPromptHash = cyrb53(blueprintPromptKey).toString();
+
+      // Check cache for existing blueprint
+      if (currentUser) {
+        try {
+          const cachedQ = query(
+            collection(db, 'generated_content'),
+            where('userId', '==', currentUser.uid),
+            where('promptHash', '==', blueprintPromptHash),
+            where('type', '==', 'blueprint')
+          );
+          const cachedSnap = await getDocs(cachedQ);
+          if (!cachedSnap.empty) {
+            const docData = cachedSnap.docs[0].data();
+            return { success: true, data: { ...idea, blueprint: docData.blueprint, data: docData.structuredData }, cached: true };
+          }
+        } catch (e) {
+          console.warn('Blueprint cache lookup failed:', e);
+        }
+      }
+
       const res = await fetch(`${this.apiBase}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -171,7 +237,11 @@ class IdeaService {
           mode: 'blueprint',
           selectedIdea: idea,
           isPremium: false,
-          role: 'Student'
+          role: 'Student',
+          // token limit and temperature to control cost and verbosity
+          maxTokens: 768,
+          temperature: 0.15,
+          promptHash: blueprintPromptHash
         }),
       });
 
@@ -182,6 +252,9 @@ class IdeaService {
       
       const data = await res.json();
       
+      // Ensure we always have a readable title for the generated idea
+      const fallbackTitle = (data.data && data.data.title) || idea.title || (idea.description ? idea.description.split(/[\.\n]/)[0].slice(0,60) : 'New Project Idea');
+
       const generatedIdea = {
         ...idea,
         blueprint: data.blueprint,
@@ -192,20 +265,22 @@ class IdeaService {
         techStack: Array.isArray(data.data?.techStack)
           ? data.data.techStack.map(t => typeof t === 'string' ? t : t.name || t)
           : idea.tech_stack || [],
-        title: data.data?.title || idea.title || '',
+        title: (data.data && data.data.title) || idea.title || fallbackTitle,
         domain: formData.domain,
         skillLevel: formData.skillLevel
       };
 
-      // Save the full blueprint to Firestore
+      // Save the full blueprint and verification to Firestore
       if (currentUser) {
         try {
           await addDoc(collection(db, "generated_content"), {
             userId: currentUser.uid,
             type: 'blueprint',
-            title: idea.title,
+            title: (data.data && data.data.title) || idea.title || fallbackTitle,
             blueprint: data.blueprint,
             structuredData: data.data,
+            promptHash: blueprintPromptHash,
+            verification: data.verification || { summary: 'not-run', issues: [] },
             prompt: {
               domain: formData.domain,
               skillLevel: formData.skillLevel,
@@ -230,11 +305,18 @@ class IdeaService {
   async saveIdea(idea, currentUser) {
     if (!currentUser) return { success: false, error: 'User not authenticated' };
     try {
+      // Determine a clear title to save (avoid generic empty titles)
+      const structuredData = idea.data || {};
+      const derivedTitle = (idea.title && idea.title.toString().trim())
+        || (structuredData.title && structuredData.title.toString().trim())
+        || (idea.description ? idea.description.split(/[\.\n]/)[0].slice(0,80) : null)
+        || `New Project — ${idea.domain || 'Idea'} — ${new Date().toISOString().slice(0,10)}`;
+
       // Check for duplicate: don't save if title already exists for this user
       const existingQ = query(
         collection(db, "projects"),
         where("userId", "==", currentUser.uid),
-        where("title", "==", idea.title || "Untitled Project")
+        where("title", "==", derivedTitle)
       );
       const existingSnap = await getDocs(existingQ);
       if (!existingSnap.empty) {
@@ -242,10 +324,9 @@ class IdeaService {
       }
 
       // Save the COMPLETE project data including all structured fields
-      const structuredData = idea.data || {};
       const projectData = {
         userId: currentUser.uid,
-        title: idea.title || "Untitled Project",
+        title: derivedTitle,
         description: idea.description || '',
         problem: idea.problem || '',
         features: Array.isArray(idea.features) ? idea.features : [],

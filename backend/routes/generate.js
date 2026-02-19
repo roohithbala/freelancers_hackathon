@@ -3,6 +3,7 @@ const router = express.Router();
 const fetch = require('node-fetch');
 const { getSystemPrompt, getUserPrompt, getIdeasPrompt } = require('../utils/prompts');
 const { generateCompletion } = require('../utils/aiProvider');
+const { verifyBlueprint } = require('../utils/hfVerifier');
 
 // Helper: parse markdown blueprint into structured fields
 function parseBlueprintMarkdown(content) {
@@ -121,7 +122,13 @@ router.post('/', async (req, res) => {
                 { role: "user", content: userPrompt }
             ];
 
-            const data = await generateCompletion(messages, previousProjects);
+            // Allow client to request lower-cost generation by supplying maxTokens and lower temperature
+            const genOptions = {
+                maxTokens: req.body.maxTokens || 512,
+                temperature: typeof req.body.temperature === 'number' ? req.body.temperature : 0.2
+            };
+
+            const data = await generateCompletion(messages, previousProjects, genOptions);
             const content = data.choices[0].message.content;
 
             if (mode === 'ideas') {
@@ -170,9 +177,18 @@ router.post('/', async (req, res) => {
                     title: parsedFields.title || structuredData.title || selectedIdea?.title || ''
                 };
 
-                res.json({ 
+                // Run HF verifier to identify possible hallucinations or risky claims
+                let verification = { summary: 'Verification skipped', issues: [] };
+                try {
+                    verification = await verifyBlueprint(content);
+                } catch (e) {
+                    console.warn('Verification step failed:', e.message);
+                }
+
+                res.json({
                     blueprint: content,
-                    data: mergedData
+                    data: mergedData,
+                    verification
                 });
             }
 
