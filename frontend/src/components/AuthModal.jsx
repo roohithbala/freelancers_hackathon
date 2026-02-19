@@ -25,8 +25,7 @@ const AuthModal = ({ onClose }) => {
                 return 'An account already exists with this email.';
             case 'auth/weak-password':
                 return 'Password should be at least 6 characters.';
-            case 'auth/operation-not-allowed':
-                return 'Email/Password login is not enabled. Please contact support or check Firebase Console.';
+                return 'Email/Password login is not enabled for project "hackathon-fe6a5". Please enable it in Firebase Console > Authentication > Sign-in method.';
             case 'auth/popup-closed-by-user':
                 return 'Sign-in popup was closed before completing.';
             default:
