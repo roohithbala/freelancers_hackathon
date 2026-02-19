@@ -6,14 +6,14 @@ const { generateCompletion } = require('../utils/aiProvider');
 
 router.post('/', async (req, res) => {
     try {
-        const { domain, skillLevel, techStack, goal, timeframe, isPremium, previousProjects } = req.body;
+        const { domain, skillLevel, techStack, goal, timeframe, isPremium, previousProjects, role } = req.body;
 
         if (!domain || !skillLevel || !techStack || !goal || !timeframe) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
         const systemPrompt = getSystemPrompt();
-        const userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal, timeframe }, isPremium, previousProjects);
+        const userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal, timeframe }, isPremium, previousProjects, role);
 
         // Legacy check removed. aiProvider handles keys and fallbacks.
 

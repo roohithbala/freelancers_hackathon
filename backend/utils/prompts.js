@@ -25,11 +25,49 @@ Every idea must:
 Think like a VC-backed founder.`;
 };
 
-const getUserPrompt = (data, isPremium, avoidList = []) => {
+const getUserPrompt = (data, isPremium, previousProjects = [], role = 'Student') => {
    const { domain, skillLevel, techStack, goal, timeframe } = data;
 
+   // Role-Based Customization
+   let roleInstruction = "";
+   let sections = "";
+
+   if (role === 'Startup') {
+       roleInstruction = `
+       Act as a Y Combinator Startup Mentor.
+       Focus on: Business viability, monetization, scalability, and market gap.
+       Tone: Professional, ambitious, business-oriented.
+       `;
+       
+       sections = `
+       1. 🔥 Startup Name (Unique & Brandable)
+       2. 🚀 The "Unfair Advantage" (Why this wins)
+       3. 💰 Business Model & Monetization
+       4. � Go-to-Market Strategy
+       5. 🧩 MVP Features (Must-Haves)
+       6. 🏗 Tech Stack (Scalable & Modern)
+       `;
+   } else {
+       // Student / Learner
+       roleInstruction = `
+       Act as a Senior Staff Engineer & Mentor.
+       Focus on: Educational value, mastering concepts, portfolio building, and best practices.
+       Tone: Encouraging, technical, educational.
+       `;
+       
+       sections = `
+       1. 🎓 Project Title (Impressive for Portfolio)
+       2. 📚 Key Learning Outcomes (What you will master)
+       3. 🚀 The "Wow" Factor (Why recruiters will love this)
+       4. 🏗 Tech Stack (Industry Standard)
+       5. 🧩 Core Features (Manageable scope)
+       6. 📝 Resume Bullet Points (How to list this on CV)
+       `;
+   }
+
    // Base Prompt
-   let prompt = `Generate a highly innovative project blueprint.
+   let prompt = `
+${roleInstruction}
 
 User Profile:
 - Domain: ${domain}
@@ -37,33 +75,36 @@ User Profile:
 - Preferred Stack: ${techStack}
 - Goal: ${goal}
 - Timeframe: ${timeframe}
+- Role Mode: ${role}
 
-Generate exactly ONE deeply developed project idea.
-`;
+Generate exactly ONE deeply developed project blueprint.
 
-   if (avoidList && avoidList.length > 0) {
-      prompt += `\nCRITICAL: You must AVOID generating ideas similar to the following titles/concepts:\n- ${avoidList.join('\n- ')}\n\nGenerate something completely different.\n`;
-   }
+Avoide these previous projects: ${previousProjects.join(', ')}
 
-   prompt += `
-Return structured output in the following format:
+Return structured output in the following Markdown format:
 
-1. 🔥 Project Title (unique and brandable)
+${sections}
 
-2. 🎯 Core Problem (real-world, clearly defined, underserved problem)
+7. 🏗 System Architecture
+   - Frontend
+   - Backend
+   - Database
+   - Deployment
 
-3. 🧠 Why Existing Solutions Fail
-   - Mention competitors or common solutions
-   - Explain their gap
+8. 📊 System Architecture Diagram
+   - Provide a Mermaid.js 'graph TD' code block.
+   - Start strictly with: \`\`\`mermaid
+   - Content MUST start with: graph TD
+   - Use ONLY this node format: id["Node Label"]
+   - NO brackets () [] {} in text.
 
-4. 🚀 Unique Innovation Layer
-   - What makes this 10x better?
-   - Technical differentiation`;
+9. 🧪 Detailed Implementation Roadmap (Step-by-Step)
+   - Week 1: Setup & Core
+   - Week 2: Features
+   - Week 3: Polish & Deploy
 
+10. � Future Improvements
 
-   // Common instructions for JSON output
-   const jsonInstruction = `
-   
    ---
    IMPORTANT: After the markdown content, you MUST append a single JSON block strictly in this format:
    \`\`\`json
@@ -71,98 +112,31 @@ Return structured output in the following format:
       "costEstimate": {
          "monthlyTotal": "$X.XX",
          "breakdown": [
-            {"service": "Service Name", "cost": "$X.XX"},
-            {"service": "Service Name", "cost": "$X.XX"}
+            {"service": "Service 1", "cost": "$10.00"},
+            {"service": "Service 2", "cost": "$5.00"}
          ]
       },
       "scores": {
          "scalability": 85,
          "security": 90,
          "costEfficiency": 75,
-         "innovation": 95,
-         "completeness": 80
+         "innovation": 80,
+         "completeness": 95
       },
       "pitchDeck": [
-         {"title": "Problem", "content": "Short blurb about the problem"},
-         {"title": "Solution", "content": "Short blurb about the solution"},
-         {"title": "Secret Sauce", "content": "The unique tech insight"},
-         {"title": "Business Model", "content": "How it makes money"},
-         {"title": "Ask", "content": "What is needed (e.g. Seed Round)"}
+         { "title": "Problem", "content": "Short description of the problem." },
+         { "title": "Solution", "content": "How this project solves it." },
+         { "title": "Market", "content": "Target audience and potential." }
       ]
    }
    \`\`\`
    `;
 
-   // Premium Sections
+   // Premium Extras if applicable (append to sections)
    if (isPremium) {
-      prompt += `
-   - AI or system design edge
-
-5. 🏗 Technical Architecture
-   - Frontend
-   - Backend
-   - AI Model Usage
-   - Database
-   - Deployment
-   - Scaling Strategy
-
-6. 🧩 Core Features (MVP)
-
-7. 🛠 Advanced Features (Post-MVP)
-
-    8. 📊 System Architecture Diagram
-       - Provide a Mermaid.js 'graph TD' code block.
-       - Start strictly with: \`\`\`mermaid
-       - Content MUST start with: graph TD
-       - Use ONLY this node format: id["Node Label"]
-       - Use ONLY simple arrows: A --> B or A -- "Label" --> B
-       - NO brackets () or {} or [] in the text.
-       - NO special arrow types like |>
-
-
-      9. 💰 Monetization Strategy
-         - Early monetization
-            - Long - term revenue model
-
-      10. 📈 Future Expansion Vision(How this becomes a big startup)
-
-      11. 🏆 Hackathon Demo Strategy(How to impress judges)
-
-      12. 🧪 Implementation Roadmap(Week - by - week plan)
-
-Be highly specific.
-Be bold.
-Be technically detailed.
-Avoid fluff.
-${jsonInstruction}
-`;
-   } else {
-      // Free Tier (Concise)
-      prompt += `
-
-      5. 🏗 Core Tech Stack(Brief)
-
-      6. 🧩 Key Features(MVP Only)
-
-      7. 🧪 Simple Implementation Steps
-
-      8. 📊 System Architecture Diagram
-       - Provide a Mermaid.js 'graph TD' code block.
-       - Start strictly with: \`\`\`mermaid
-       - Content MUST start with: graph TD
-       - Use ONLY this node format: id["Node Label"]
-       - Use ONLY simple arrows: A --> B or A -- "Label" --> B
-       - NO brackets () or {} or [] in the text.
-       - NO special arrow types like |> 
-       - example:
-         graph TD
-         A["User"] -- "Request" --> B["Backend"]
-         B --> C["Database"]
-         
-    KEEP IT CONCISE. This is a Free Tier generation.
-    Do NOT include monetization or expansion plans.
-    ${jsonInstruction}
-`;
+       prompt += `
+       \n[PREMIUM MODE ACTIVE: Add Deep Technical Deep Dive & Advanced Scaling Strategies]
+       `;
    }
 
    return prompt;

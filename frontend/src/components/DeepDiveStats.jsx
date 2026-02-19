@@ -5,7 +5,7 @@ import { DollarSign, Shield, Cpu, Activity, Zap } from 'lucide-react';
 const DeepDiveStats = ({ stats }) => {
     if (!stats) return null;
 
-    const { costEstimate, scores, pitchDeck } = stats;
+    const { costEstimate = {}, scores = {}, pitchDeck = [] } = stats;
 
     const radarData = [
         { subject: 'Scalability', A: scores.scalability || 0, fullMark: 100 },

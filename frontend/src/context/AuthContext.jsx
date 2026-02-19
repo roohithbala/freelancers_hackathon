@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { auth } from "../firebase";
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 const AuthContext = createContext();
 
@@ -19,13 +19,21 @@ export const AuthProvider = ({ children }) => {
         return unsubscribe;
     }, []);
 
+    const signupEmail = (email, password) => {
+        return createUserWithEmailAndPassword(auth, email, password);
+    };
+
+    const loginEmail = (email, password) => {
+        return signInWithEmailAndPassword(auth, email, password);
+    };
+
     const loginGoogle = async () => {
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
         } catch (error) {
             console.error("Login Failed:", error);
-            alert("Login Failed: " + error.message);
+            throw error;
         }
     };
 
@@ -35,6 +43,8 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         currentUser,
+        signupEmail,
+        loginEmail,
         loginGoogle,
         logout
     };
