@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { collection, addDoc, getDocs, query, where, doc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, deleteDoc, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 
 class IdeaService {
   constructor() {
@@ -261,7 +261,8 @@ class IdeaService {
         scores: structuredData.scores || idea.scores || {},
         costEstimate: structuredData.costEstimate || idea.costEstimate || {},
         mockUI: structuredData.mockUI || idea.mockUI || {},
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
+        savedAt: serverTimestamp(),
         saved: true
       };
 
@@ -274,7 +275,7 @@ class IdeaService {
         domain: idea.domain
       });
 
-      return { success: true, data: { ...projectData, id: docRef.id } };
+      return { success: true, data: { ...projectData, id: docRef.id, createdAt: new Date(), savedAt: new Date() } };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -285,7 +286,16 @@ class IdeaService {
     try {
       const q = query(collection(db, "projects"), where("userId", "==", currentUser.uid));
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return querySnapshot.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          // Convert Firestore Timestamps to JS Dates for display
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date(),
+          savedAt: data.savedAt?.toDate ? data.savedAt.toDate() : data.savedAt || data.createdAt?.toDate?.() || new Date()
+        };
+      });
     } catch (error) {
       console.error('Error reading saved ideas:', error);
       return [];

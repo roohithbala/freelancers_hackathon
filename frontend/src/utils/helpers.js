@@ -10,7 +10,10 @@ export const capitalizeFirst = (str) => {
 
 // Date formatting utilities
 export const formatDate = (date, format = DATE_FORMATS.SHORT) => {
-  const d = new Date(date);
+  if (!date) return 'N/A';
+  // Handle Firestore Timestamp objects
+  const d = date?.toDate ? date.toDate() : new Date(date);
+  if (isNaN(d.getTime())) return 'N/A';
   
   switch (format) {
     case DATE_FORMATS.SHORT:
