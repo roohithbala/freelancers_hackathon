@@ -1,148 +1,257 @@
 import React from 'react';
-import { Rocket, Zap, Layers, Users, ArrowRight, CheckCircle, Sparkles, Box } from 'lucide-react';
+import { Rocket, Zap, Layers, Users, ArrowRight, CheckCircle, Sparkles, Box, Layout, Cpu, Globe } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const LandingPage = ({ onGetStarted }) => {
     return (
-        <div className="w-full flex flex-col items-center overflow-hidden">
+        <div className="w-full flex flex-col items-center bg-background selection:bg-primary/30">
             
             {/* Hero Section */}
-            <div className="w-full max-w-7xl mx-auto px-6 pt-24 pb-32 flex flex-col items-center text-center relative z-10">
+            <div className="w-full max-w-7xl mx-auto px-6 pt-32 pb-40 flex flex-col items-center text-center relative overflow-visible">
                 
-                {/* Ambient Background Glows */}
-                <div className="absolute top-0 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-nebula-purple/20 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
-                <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-nebula-cyan/20 rounded-full blur-[100px] pointer-events-none animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+                {/* Background Decor */}
+                <div className="absolute top-0 inset-x-0 h-[500px] bg-dots [mask-image:radial-gradient(ellipse_at_center,black,transparent)] opacity-20 pointer-events-none"></div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
 
                 {/* Badge */}
-                <div className="inline-flex items-center space-x-2 bg-white/5 border border-white/10 rounded-full py-1.5 px-4 mb-8 backdrop-blur-md animate-fade-in-up hover:bg-white/10 transition-colors cursor-default">
-                    <Sparkles className="h-4 w-4 text-nebula-amber" />
-                    <span className="text-sm text-slate-300 font-medium">AI Architect v2.0 is Live</span>
-                </div>
+                <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="inline-flex items-center space-x-2 bg-secondary/50 border border-white/10 rounded-full py-1.5 px-4 mb-10 backdrop-blur-xl shadow-inner group cursor-default"
+                >
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                    <span className="text-sm text-slate-300 font-medium tracking-wide">Enterprise Intelligence Powered by AI</span>
+                </motion.div>
 
                 {/* Main Heading */}
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white mb-8 tracking-tight leading-[1.1] font-display animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                    Architect Your <br className="hidden md:block" />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-nebula-cyan via-white to-nebula-purple text-glow">
-                        Next Big Thing
+                <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.1 }}
+                    className="text-6xl md:text-8xl font-bold text-white mb-8 tracking-tighter leading-[1.05] font-display"
+                >
+                    Build the future <br className="hidden md:block" />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-blue-400 text-glow">
+                        at the speed of thought
                     </span>
-                </h1>
+                </motion.h1>
 
-                <p className="max-w-2xl text-lg md:text-xl text-slate-400 mb-10 animate-fade-in-up leading-relaxed" style={{ animationDelay: '0.2s' }}>
-                    Stop brainstorming, start building. Generate production-ready <span className="text-white font-semibold">System Architectures, Cost Estimates, and Roadmaps</span> in seconds with AI.
-                </p>
+                <motion.p 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
+                    className="max-w-2xl text-xl text-slate-400 mb-12 leading-relaxed font-light"
+                >
+                    Transform your sketches into scalable systems. AI Architect generates <span className="text-white">full-scale blueprints</span>, infrastructure maps, and development roadmaps in seconds.
+                </motion.p>
 
                 {/* CTA Button */}
-                <button 
-                    onClick={onGetStarted}
-                    className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-nebula-purple rounded-2xl font-bold text-white shadow-[0_0_50px_-10px_rgba(124,58,237,0.5)] hover:shadow-[0_0_70px_-10px_rgba(124,58,237,0.7)] transition-all transform hover:scale-105 animate-fade-in-up overflow-hidden" 
-                    style={{ animationDelay: '0.3s' }}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.3 }}
                 >
-                    <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 translate-x-[-200%] group-hover:animate-shimmer"></div>
-                    <span className="relative flex items-center text-lg tracking-wide">
-                        Initialize Generator <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                </button>
+                    <button 
+                        onClick={onGetStarted}
+                        className="group relative px-10 py-5 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 to-transparent skew-x-12 translate-x-[-200%] group-hover:animate-shimmer"></div>
+                        <span className="relative flex items-center text-lg tracking-tight">
+                            Create a Blueprint <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        </span>
+                    </button>
+                </motion.div>
             
                 {/* 3D Visual Preview */}
-                <div className="mt-24 relative w-full max-w-5xl perspective-1000 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-                    
-                    {/* Floating Elements */}
-                    <div className="absolute -top-12 -left-12 p-4 glass-panel rounded-2xl animate-float-slow hidden md:block z-20">
-                        <Box className="h-8 w-8 text-nebula-cyan mb-2" />
-                        <div className="h-2 w-24 bg-white/20 rounded mb-2"></div>
-                        <div className="h-2 w-16 bg-white/10 rounded"></div>
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="mt-32 relative w-full max-w-6xl px-4"
+                >
+                    {/* Floating Decorative Elements */}
+                    <div className="absolute -top-16 -left-16 p-4 bg-brand-card/80 backdrop-blur-3xl rounded-3xl animate-float hidden lg:block z-20 border border-white/10 shadow-black/40">
+                        <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-blue-500/20 rounded-xl">
+                                <Cpu className="h-6 w-6 text-blue-400" />
+                            </div>
+                            <div>
+                                <div className="h-2 w-20 bg-white/20 rounded mb-1.5"></div>
+                                <div className="h-1.5 w-12 bg-white/10 rounded"></div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div className="absolute -bottom-8 -right-8 p-4 glass-panel rounded-2xl animate-float hidden md:block z-20" style={{ animationDelay: '1s' }}>
-                        <div className="flex items-center space-x-2 mb-2">
-                            <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                            <div className="text-xs text-green-400 font-mono">System Online</div>
+                    <div className="absolute -bottom-10 -right-20 p-5 bg-brand-card/80 backdrop-blur-3xl rounded-3xl animate-float hidden lg:block z-20 border border-white/10 shadow-black/40" style={{ animationDelay: '2s' }}>
+                        <div className="flex items-center space-x-3 mb-4">
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                            <span className="text-xs text-slate-300 font-mono tracking-widest uppercase">System Integrity: 100%</span>
                         </div>
-                        <div className="h-2 w-32 bg-white/10 rounded"></div>
+                        <div className="space-y-2">
+                            <div className="h-1.5 w-40 bg-white/5 rounded"></div>
+                            <div className="h-1.5 w-32 bg-white/5 rounded"></div>
+                        </div>
                     </div>
 
                     {/* Main Interface Mockup */}
-                    <div className="relative rounded-xl bg-[#0F0F1A] border border-white/10 shadow-2xl overflow-hidden transform rotate-x-12 hover:rotate-x-0 transition-transform duration-700 ease-out group">
-                        {/* Fake Browser Header */}
-                        <div className="h-10 bg-[#1A1A2E] border-b border-white/5 flex items-center px-4 space-x-2">
-                            <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                            <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                            <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                            <div className="ml-4 h-5 w-64 bg-white/5 rounded-md flex items-center px-2 text-[10px] text-slate-500 font-mono">
-                                ai-architect.app/generator
+                    <div className="relative group [perspective:1000px]">
+                        <div className="relative rounded-[32px] bg-brand-dark border border-white/5 shadow-[0_0_100px_-20px_rgba(0,0,0,0.8)] overflow-hidden transition-all duration-1000 ease-out transform group-hover:[transform:rotateX(2deg)]">
+                            {/* Browser Header */}
+                            <div className="h-14 bg-white/[0.02] border-b border-white/5 flex items-center px-6 space-x-2">
+                                <div className="flex space-x-1.5">
+                                    <div className="w-3 h-3 rounded-full bg-white/10"></div>
+                                    <div className="w-3 h-3 rounded-full bg-white/10"></div>
+                                    <div className="w-3 h-3 rounded-full bg-white/10"></div>
+                                </div>
+                                <div className="ml-6 h-7 flex-grow max-w-sm bg-black/40 rounded-full border border-white/5 flex items-center px-4 text-[11px] text-slate-500 font-medium font-mono">
+                                    <Globe className="w-3 h-3 mr-2 opacity-50" /> dashboard.ai-architect.dev
+                                </div>
+                            </div>
+                            
+                            {/* Content Mockup */}
+                            <div className="p-8 md:p-12 h-[500px] flex gap-8">
+                                <div className="w-1/4 space-y-6">
+                                    <div className="h-6 w-3/4 bg-white/10 rounded-md"></div>
+                                    <div className="space-y-3">
+                                        {[1,2,3,4,5].map(i => (
+                                            <div key={i} className="h-12 w-full bg-white/5 rounded-xl border border-white/5"></div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex-grow space-y-8">
+                                    <div className="flex justify-between items-end">
+                                        <div className="space-y-3">
+                                            <div className="h-10 w-64 bg-white/10 rounded-lg"></div>
+                                            <div className="h-4 w-48 bg-white/5 rounded-md"></div>
+                                        </div>
+                                        <div className="h-12 w-32 bg-primary/20 rounded-xl border border-primary/30"></div>
+                                    </div>
+                                    <div className="h-full bg-black/40 rounded-3xl border border-white/5 relative p-8">
+                                        <div className="absolute inset-0 bg-dots opacity-5 [mask-image:radial-gradient(circle,black,transparent)]"></div>
+                                        <div className="flex gap-4">
+                                            <div className="w-2/3 h-64 bg-white/5 rounded-2xl border border-white/5"></div>
+                                            <div className="flex-grow space-y-4">
+                                                <div className="h-12 w-full bg-white/5 rounded-2xl border border-white/5"></div>
+                                                <div className="h-12 w-full bg-white/5 rounded-2xl border border-white/5"></div>
+                                                <div className="h-12 w-full bg-white/5 rounded-2xl border border-white/5"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        {/* Mock Content */}
-                        <div className="p-8 grid grid-cols-1 md:grid-cols-4 gap-8 opacity-80 group-hover:opacity-100 transition-opacity">
-                            {/* Simulator Sidebar */}
-                            <div className="col-span-1 space-y-4">
-                                <div className="h-8 w-3/4 bg-white/10 rounded-lg animate-pulse"></div>
-                                <div className="space-y-2">
-                                    {[1,2,3,4].map(i => (
-                                        <div key={i} className="h-10 w-full bg-white/5 rounded-lg border border-white/5"></div>
-                                    ))}
-                                </div>
-                            </div>
-                            {/* Simulator Main */}
-                            <div className="col-span-3 space-y-6">
-                                <div className="flex justify-between">
-                                    <div className="h-12 w-1/2 bg-white/10 rounded-lg animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                                    <div className="h-12 w-32 bg-nebula-purple/20 rounded-lg border border-nebula-purple/30"></div>
-                                </div>
-                                <div className="h-64 w-full bg-[#0B0B15] rounded-xl border border-white/10 relative overflow-hidden">
-                                     {/* Mock Graph */}
-                                     <div className="absolute inset-0 flex items-center justify-center">
-                                         <div className="w-24 h-24 rounded-full border-4 border-nebula-cyan/30 animate-spin-slow border-t-nebula-cyan"></div>
-                                     </div>
-                                </div>
-                                <div className="grid grid-cols-3 gap-4">
-                                    <div className="h-24 bg-white/5 rounded-lg border border-white/5"></div>
-                                    <div className="h-24 bg-white/5 rounded-lg border border-white/5"></div>
-                                    <div className="h-24 bg-white/5 rounded-lg border border-white/5"></div>
-                                </div>
-                            </div>
-                        </div>
+                        {/* Decorative Background Glow for Mockup */}
+                        <div className="absolute -inset-10 bg-primary/20 blur-[100px] -z-10 group-hover:opacity-100 transition-opacity opacity-50"></div>
+                    </div>
+                </motion.div>
+            </div>
 
-                        {/* Overlay Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F1A] via-transparent to-transparent opacity-50 pointer-events-none"></div>
+            {/* Features Section */}
+            <div className="w-full py-40 relative overflow-hidden">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/2 rounded-full blur-[150px] pointer-events-none"></div>
+                
+                <div className="max-w-7xl mx-auto px-6 relative">
+                    <div className="text-center mb-24">
+                        <motion.span 
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            viewport={{ once: true }}
+                            className="text-primary font-bold tracking-[0.3em] text-[10px] uppercase mb-4 block"
+                        >
+                            Infrastructure Optimization
+                        </motion.span>
+                        <motion.h2 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.7 }}
+                            className="text-5xl md:text-6xl font-bold text-white mb-8 font-display tracking-tight"
+                        >
+                            Architectural Excellence. <br /> Automated.
+                        </motion.h2>
+                        <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.7, delay: 0.1 }}
+                            className="text-slate-400 max-w-2xl mx-auto text-xl font-light leading-relaxed"
+                        >
+                            Professional-grade tools combined with adaptive AI to build systems that scale effortlessly.
+                        </motion.p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                        <FeatureCard 
+                            icon={<Cpu className="h-7 w-7 text-indigo-400" />}
+                            title="Intelligent Stacks"
+                            description="AI-driven stack selection based on performance, scalability, and cost efficiency."
+                            delay={0}
+                        />
+                        <FeatureCard 
+                            icon={<Layout className="h-7 w-7 text-white" />}
+                            title="System Mapping"
+                            description="Interactive infrastructure visualizations that bridge the gap between idea and code."
+                            delay={0.1}
+                        />
+                        <FeatureCard 
+                            icon={<CheckCircle className="h-7 w-7 text-emerald-400" />}
+                            title="Validated Patterns"
+                            description="Every blueprint follows rigorous industry standards and cloud-native architectural patterns."
+                            delay={0.2}
+                        />
                     </div>
                 </div>
             </div>
 
-            {/* Features Section */}
-            <div className="w-full relative z-10 py-24">
-                <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-3xl -z-10 skew-y-3 transform origin-top-left scale-110"></div>
-                
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <span className="text-nebula-cyan font-bold tracking-widest text-sm uppercase mb-2 block">Powerful Features</span>
-                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 font-display">Engineered for Excellence</h2>
-                        <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-                            We've combined state-of-the-art AI models with real-world architectural patterns.
-                        </p>
-                    </div>
+            {/* CTA Section */}
+            <div className="w-full py-32 px-6 flex flex-col items-center">
+                <div className="w-full max-w-5xl rounded-[40px] bg-gradient-to-br from-white/[0.05] to-transparent border border-white/5 p-12 md:p-20 flex flex-col items-center text-center relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">Ready to build your masterpiece?</h2>
+                    <p className="text-slate-400 text-lg mb-10 max-w-xl font-light">Join the next generation of architects and start generating your project blueprints today.</p>
+                    <button 
+                        onClick={onGetStarted}
+                        className="px-10 py-5 bg-primary text-white font-bold rounded-2xl hover:bg-primary/90 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-primary/20"
+                    >
+                        Initialize Your First Project
+                    </button>
+                </div>
+            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <FeatureCard 
-                            icon={<Zap className="h-6 w-6 text-nebula-amber" />}
-                            title="Instant Tech Stacks"
-                            description="Forget dependency hell. Get perfectly matched frontend, backend, and DB choices tailored to your project goals."
-                            delay="0"
-                        />
-                         <FeatureCard 
-                            icon={<Layers className="h-6 w-6 text-nebula-purple" />}
-                            title="Full Implementation Roadmaps"
-                            description="Week-by-week implementation guides broken down into manageable sprints for rapid development."
-                            delay="0.1"
-                        />
-                         <FeatureCard 
-                            icon={<Users className="h-6 w-6 text-nebula-cyan" />}
-                            title="Role-Based Intelligence"
-                            description="Switch between 'Student' mode for learning and 'Startup' mode for MVPs and investor-ready pitches."
-                            delay="0.2"
-                        />
+            {/* Footer Style */}
+            <div className="w-full border-t border-white/5 pt-20 pb-12 px-6">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center text-slate-500 text-sm">
+                    <div className="flex flex-col space-y-4 mb-8 md:mb-0">
+                        <div className="flex items-center space-x-3 text-white">
+                            <Box className="w-6 h-6 text-primary" />
+                            <span className="text-xl font-bold tracking-tighter font-display uppercase">AI Architect</span>
+                        </div>
+                        <p className="max-w-xs text-xs leading-relaxed text-slate-600">The world's most advanced AI-powered system architecture and roadmap generator.</p>
                     </div>
+                    <div className="flex flex-wrap gap-x-12 gap-y-4">
+                        <div className="flex flex-col space-y-3">
+                            <span className="text-white font-bold text-xs uppercase tracking-widest mb-1">Product</span>
+                            <a href="#" className="hover:text-white transition-colors">Features</a>
+                            <a href="#" className="hover:text-white transition-colors">Roadmap</a>
+                            <a href="#" className="hover:text-white transition-colors">Changelog</a>
+                        </div>
+                        <div className="flex flex-col space-y-3">
+                            <span className="text-white font-bold text-xs uppercase tracking-widest mb-1">Resources</span>
+                            <a href="#" className="hover:text-white transition-colors">Documentation</a>
+                            <a href="#" className="hover:text-white transition-colors">API Reference</a>
+                            <a href="#" className="hover:text-white transition-colors">Community</a>
+                        </div>
+                        <div className="flex flex-col space-y-3">
+                            <span className="text-white font-bold text-xs uppercase tracking-widest mb-1">Legal</span>
+                            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+                            <a href="#" className="hover:text-white transition-colors">Terms</a>
+                        </div>
+                    </div>
+                </div>
+                <div className="max-w-7xl mx-auto mt-20 text-[10px] text-slate-700 uppercase tracking-[0.2em] font-bold text-center border-t border-white/[0.02] pt-8">
+                    &copy; 2026 AI Architect Labs. All rights reserved.
                 </div>
             </div>
             
@@ -151,16 +260,19 @@ const LandingPage = ({ onGetStarted }) => {
 };
 
 const FeatureCard = ({ icon, title, description, delay }) => (
-    <div 
-        className="p-8 rounded-2xl glass-panel group hover:-translate-y-2 transition-all duration-300"
-        style={{ animationDelay: `${delay}s` }}
+    <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, delay }}
+        className="p-10 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] transition-all duration-500 group h-full relative"
     >
-        <div className="h-14 w-14 rounded-xl bg-white/5 flex items-center justify-center mb-6 border border-white/10 group-hover:border-white/20 group-hover:bg-white/10 transition-all shadow-[0_0_20px_-5px_rgba(0,0,0,0.5)]">
+        <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center mb-8 border border-white/5 group-hover:bg-primary/20 group-hover:border-primary/30 transition-all duration-500 group-hover:scale-110">
             {icon}
         </div>
-        <h3 className="text-xl font-bold text-white mb-3 group-hover:text-nebula-cyan transition-colors">{title}</h3>
-        <p className="text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors">{description}</p>
-    </div>
+        <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">{title}</h3>
+        <p className="text-slate-400 leading-relaxed font-light group-hover:text-slate-300 transition-colors duration-500">{description}</p>
+    </motion.div>
 );
 
 export default LandingPage;

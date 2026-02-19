@@ -147,7 +147,49 @@ ${sections}
        `;
    }
 
-   return prompt;
+    return prompt;
 };
 
-module.exports = { getSystemPrompt, getUserPrompt };
+const getIdeasPrompt = (data, previousIdeas = []) => {
+    const { domain, skillLevel, techStack, goal, timeframe } = data;
+
+    return `
+    You are a Silicon Valley Startup Mentor and Technical Co-Founder.
+    
+    The user wants 15 HIGH-QUALITY, UNIQUE project ideas based on:
+    - Domain: ${domain}
+    - Skill Level: ${skillLevel}
+    - Tech Stack: ${techStack}
+    - Goal: ${goal}
+    - Timeframe: ${timeframe}
+
+    AVOID these previously generated ideas:
+    ${previousIdeas.join(', ')}
+
+    Rules:
+    1. Ideas must be DISTINCT from each other.
+    2. Ideas must be practical but impressive.
+    3. Focus on solving real problems, not just "learning exercises".
+
+    Return ONLY a raw JSON array of objects (no markdown code blocks).
+    Each object must have:
+    - "title": A catchy, professional name.
+    - "description": A 1-sentence value prop.
+    - "difficulty": "Beginner", "Intermediate", or "Advanced".
+    - "tech_stack": Array of key technologies.
+    - "id": A unique string ID (kebab-case of title).
+
+    Example Format:
+    [
+        {
+            "title": "EcoTrack AI",
+            "description": "AI-powered waste classification system for smart cities using computer vision.",
+            "difficulty": "Intermediate",
+            "tech_stack": ["Python", "TensorFlow", "React", "FastAPI"],
+            "id": "eco-track-ai"
+        }
+    ]
+    `;
+};
+
+module.exports = { getSystemPrompt, getUserPrompt, getIdeasPrompt };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateProjectIdea } from './services/aiService';
 import InputForm from './components/InputForm';
 import BlueprintView from './components/BlueprintView';
@@ -12,6 +12,7 @@ import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import AuthModal from './components/AuthModal';
 import ProfileModal from './components/ProfileModal';
 import LandingPage from './components/LandingPage';
+import IdeaSelection from './components/IdeaSelection';
 
 const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal }) => {
   const { currentUser } = useAuth();
@@ -19,15 +20,15 @@ const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal }) => {
   return (
     <header className="sticky top-4 z-40 w-full max-w-7xl mx-auto px-4 mb-8">
       <div className="glass-panel rounded-2xl p-4 flex justify-between items-center">
-        {/* Logo Area */}
-        <div className="flex items-center space-x-3 group cursor-pointer">
-          <div className="p-2.5 bg-blue-600/20 rounded-xl border border-blue-500/30 group-hover:bg-blue-600/30 transition-all duration-500 relative overflow-hidden">
-            <div className="absolute inset-0 bg-blue-400/20 blur-lg group-hover:blur-md transition-all"></div>
-            <Rocket className="h-6 w-6 text-blue-400 relative z-10" />
+                {/* Logo Area */}
+        <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => window.location.reload()}>
+          <div className="p-2.5 bg-primary/10 rounded-xl border border-primary/20 group-hover:bg-primary/20 transition-all duration-500 relative overflow-hidden">
+            <div className="absolute inset-0 bg-primary/20 blur-lg group-hover:blur-md transition-all"></div>
+            <Rocket className="h-6 w-6 text-primary relative z-10" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold text-white tracking-tight font-display">AI Architect</span>
-            <span className="text-xs text-slate-400 uppercase tracking-widest text-[10px]">Blueprint Generator</span>
+            <span className="text-xl font-bold text-white tracking-tighter font-display uppercase">AI Architect</span>
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Systems Lab</span>
           </div>
         </div>
 
@@ -37,32 +38,32 @@ const Header = ({ setShowSaved, setShowAuthModal, setShowProfileModal }) => {
             <>
               <button 
                 onClick={() => setShowSaved(true)} 
-                className="hidden sm:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:border-blue-500/50"
+                className="hidden sm:flex items-center px-4 py-2 glass-button rounded-xl text-sm font-medium text-slate-400 hover:text-white"
               >
-                <BookOpen className="h-4 w-4 mr-2" /> My Ideas
+                <BookOpen className="h-4 w-4 mr-2" /> My Designs
               </button>
               
               <button 
                   onClick={() => setShowProfileModal(true)}
-                  className="flex items-center p-1.5 pr-4 glass-button rounded-full hover:border-blue-500/50 group"
+                  className="flex items-center p-1.5 pr-4 glass-button rounded-full group"
               >
                 <img 
                   src={currentUser.photoURL || `https://ui-avatars.com/api/?name=${currentUser.email}&background=0D8ABC&color=fff`} 
                   alt="User" 
-                  className="h-8 w-8 rounded-full border border-slate-600 group-hover:border-blue-400 transition-colors" 
+                  className="h-8 w-8 rounded-full border border-white/10 group-hover:border-primary/50 transition-colors" 
                 />
-                <span className="ml-3 text-sm font-medium text-slate-300 group-hover:text-white hidden sm:block">
-                  Profile
+                <span className="ml-3 text-sm font-medium text-slate-400 group-hover:text-white hidden sm:block">
+                  Account
                 </span>
               </button>
             </>
           ) : (
             <button 
               onClick={() => setShowAuthModal(true)} 
-              className="flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium shadow-lg shadow-blue-900/20 transition-all hover:scale-105"
+              className="flex items-center px-6 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-95"
             >
               <LogIn className="h-4 w-4 mr-2" /> 
-              Login
+              Sign In
             </button>
           )}
         </div>
@@ -173,7 +174,13 @@ const PremiumModalDesc = ({ onClose, onUpgrade }) => (
 );
 
 const MainContent = () => {
+  // State
   const [blueprint, setBlueprint] = useState(null);
+  const [ideas, setIdeas] = useState([]);
+  const [step, setStep] = useState('input'); // 'input' | 'ideas' | 'blueprint'
+  const [lastInputData, setLastInputData] = useState(null); // Store input for step 2
+  const [selectedIdea, setSelectedIdea] = useState(null);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSaved, setShowSaved] = useState(false);
@@ -184,7 +191,7 @@ const MainContent = () => {
   const [view, setView] = useState('landing');
 
   // Handle Auth State Changes (Login & Logout)
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentUser) {
       setView('generator');
     } else {
@@ -194,6 +201,7 @@ const MainContent = () => {
       setShowSaved(false);
       setShowProfileModal(false);
       setShowPremiumModal(false);
+      setSelectedIdea(null);
     }
   }, [currentUser]);
 
@@ -209,6 +217,9 @@ const MainContent = () => {
     setLoading(true);
     setError(null);
     setBlueprint(null);
+    setIdeas([]);
+    setLastInputData(formData);
+    setSelectedIdea(null);
 
     try {
       const { doc, getDoc, setDoc, updateDoc, increment } = await import('firebase/firestore');
@@ -240,23 +251,29 @@ const MainContent = () => {
         return;
       }
 
-      // Start the request
-      // Fetch previous projects to avoid repetition
-      let previousProjects = [];
-      try {
-        const q = query(collection(db, "projects"), where("userId", "==", currentUser.uid));
-        const historySnap = await getDocs(q);
-        previousProjects = historySnap.docs.map(doc => doc.data().title).filter(t => t);
-      } catch (e) {
-        console.warn("Failed to fetch history for avoidance:", e);
+      // Step 1: Generate Ideas
+      const res = await fetch('http://localhost:5000/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          mode: 'ideas',
+          previousProjects: [], // Ideally fetch history here if needed
+          role: role,
+          isPremium: isPremium
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to generate ideas');
+      
+      const result = await res.json();
+      if (result.ideas) {
+          setIdeas(result.ideas);
+          setStep('ideas');
+          setView('generator');
+      } else {
+          throw new Error('No ideas returned from AI');
       }
-
-      const generatePromise = generateProjectIdea({ ...formData, isPremium, previousProjects, role });
-      const delayPromise = new Promise(resolve => setTimeout(resolve, 8000)); // Min 8 sec for animation
-
-      const [blueprintResult] = await Promise.all([generatePromise, delayPromise]);
-
-      setBlueprint(blueprintResult);
 
       await updateDoc(userDocRef, {
         usageCount: increment(1),
@@ -271,11 +288,46 @@ const MainContent = () => {
     }
   };
 
+  const handleIdeaSelect = async (idea) => {
+      setLoading(true);
+      setSelectedIdea(idea);
+      try {
+          // Step 2: Generate Blueprint for selected idea
+          const res = await fetch('http://localhost:5000/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...lastInputData,
+              mode: 'blueprint',
+              selectedIdea: idea,
+              isPremium: currentUser?.isPremium || false,
+              role: currentUser?.role || 'Student'
+            }),
+          });
+    
+          if (!res.ok) throw new Error('Failed to generate blueprint');
+          
+          const data = await res.json();
+          setBlueprint(data.blueprint);
+          setStep('blueprint');
+      } catch (error) {
+          console.error(error);
+          alert('Error generating blueprint. Please try again.');
+      } finally {
+          setLoading(false);
+      }
+  };
+
   const handleSave = async () => {
     if (!currentUser || !blueprint) return;
     try {
-      const titleMatch = blueprint.match(/# (.*)/);
-      const title = titleMatch ? titleMatch[1].replace(/#|\*/g, '').trim() : "New Project Idea";
+      // Use selected idea title, or fallback to regex match, or default
+      let title = selectedIdea?.title;
+      
+      if (!title) {
+          const titleMatch = blueprint.match(/# (.*)/);
+          title = titleMatch ? titleMatch[1].replace(/#|\*/g, '').trim() : "New Project Idea";
+      }
 
       // Fetch user role again for saving (optional but good for metadata)
       // For now we just save basic info
@@ -284,6 +336,7 @@ const MainContent = () => {
         userId: currentUser.uid,
         blueprint: blueprint,
         title: title,
+        role: selectedIdea?.difficulty || 'Project', // Also save difficulty/role
         createdAt: new Date()
       });
       alert("Project Saved!");
@@ -321,11 +374,11 @@ const MainContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B15] relative text-white selection:bg-nebula-cyan/30 overflow-x-hidden font-sans">
+    <div className="min-h-screen bg-background relative text-white selection:bg-primary/30 overflow-x-hidden font-sans">
         {/* Background Effects */}
-        <div className="fixed inset-0 bg-grid opacity-30 pointer-events-none z-0"></div>
-        <div className="fixed top-0 inset-x-0 h-[500px] bg-gradient-to-b from-nebula-purple/10 via-transparent to-transparent pointer-events-none z-0"></div>
-        <div className="fixed bottom-0 right-0 w-[800px] h-[800px] bg-nebula-cyan/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+        <div className="fixed inset-0 bg-dots opacity-20 pointer-events-none z-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent)]"></div>
+        <div className="fixed top-0 inset-x-0 h-[500px] bg-gradient-to-b from-primary/10 via-transparent to-transparent pointer-events-none z-0"></div>
+        <div className="fixed bottom-0 right-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
         
         {/* Main Content */}
         <div className="relative z-10 flex flex-col min-h-screen">
@@ -341,26 +394,43 @@ const MainContent = () => {
         {view === 'landing' && !blueprint ? (
             <LandingPage onGetStarted={() => setView('generator')} />
         ) : (
-            <div className="max-w-6xl mx-auto px-6 animate-fade-in-up">
-                {!blueprint ? (
+            <div className="max-w-7xl mx-auto px-6 animate-fade-in-up">
+                
+                {/* Step 1: Input Form */}
+                {step === 'input' && (
                     <div className="flex flex-col items-center">
                         <div className="mb-10 text-center space-y-4">
-                            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 tracking-tight font-display">
+                            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight font-display uppercase">
                                 Architect Your Vision
                             </h1>
-                            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+                            <p className="text-lg text-slate-400 max-w-2xl mx-auto font-light">
                                 Configure the parameters below to generate a comprehensive production-ready blueprint.
                             </p>
                         </div>
                         <InputForm onGenerate={handleGenerate} loading={loading} />
                     </div>
-                ) : (
+                )}
+
+                {/* Step 2: Idea Selection */}
+                {step === 'ideas' && (
+                    <IdeaSelection 
+                        ideas={ideas} 
+                        onSelect={handleIdeaSelect} 
+                        isLoading={loading} 
+                    />
+                )}
+
+                {/* Step 3: Blueprint View */}
+                {step === 'blueprint' && blueprint && (
                     <div className="relative animate-fade-in">
                         <button 
-                            onClick={() => setBlueprint(null)}
+                            onClick={() => {
+                                setBlueprint(null);
+                                setStep('ideas');
+                            }}
                             className="mb-8 px-4 py-2 glass-button rounded-lg text-slate-300 hover:text-white flex items-center group"
                         >
-                            <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Generator
+                            <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Ideas
                         </button>
                         
                         <BlueprintView 
@@ -368,6 +438,19 @@ const MainContent = () => {
                             onSave={handleSave}
                             isSaving={loading}
                         />
+
+                        <div className="mt-8 text-center">
+                             <button 
+                                onClick={() => {
+                                    setBlueprint(null);
+                                    setStep('input');
+                                    setIdeas([]);
+                                }}
+                                className="text-slate-500 hover:text-white transition-colors underline"
+                            >
+                                Start New Project
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

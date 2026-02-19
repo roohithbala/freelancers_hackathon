@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, FileText, Presentation } from 'lucide-react';
+import { Download, FileText, Presentation, ChevronRight, Share2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -12,7 +12,7 @@ const ExportTools = ({ blueprintRef, markdownContent, title }) => {
             const canvas = await html2canvas(blueprintRef.current, {
                 scale: 2,
                 useCORS: true,
-                backgroundColor: '#0f172a' // match slate-900
+                backgroundColor: '#050508' // Using the brand background color
             });
 
             const imgData = canvas.toDataURL('image/png');
@@ -24,7 +24,7 @@ const ExportTools = ({ blueprintRef, markdownContent, title }) => {
             pdf.save(`${title || 'project-blueprint'}.pdf`);
         } catch (err) {
             console.error("PDF Export failed", err);
-            alert("Failed to export PDF provided ref is possibly null or too large.");
+            alert("Failed to export PDF. The content might be too complex or the reference is invalid.");
         }
     };
 
@@ -33,36 +33,35 @@ const ExportTools = ({ blueprintRef, markdownContent, title }) => {
         const file = new Blob([markdownContent], { type: 'text/markdown' });
         element.href = URL.createObjectURL(file);
         element.download = "README.md";
-        document.body.appendChild(element); // Required for this to work in FireFox
+        document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
     };
 
     return (
-        <div className="flex space-x-4 mt-8 print:hidden">
+        <div className="flex flex-wrap gap-4 print:hidden">
             <button
                 onClick={handleExportPDF}
-                className="flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-all font-medium text-sm"
+                className="flex items-center space-x-3 px-6 py-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-primary/50 text-white rounded-2xl transition-all font-bold text-xs uppercase tracking-widest group"
             >
-                <Download className="w-4 h-4 mr-2" />
-                Export PDF
+                <Download className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+                <span>Export PDF</span>
             </button>
 
             <button
                 onClick={handleExportReadme}
-                className="flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-all font-medium text-sm"
+                className="flex items-center space-x-3 px-6 py-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-primary/50 text-white rounded-2xl transition-all font-bold text-xs uppercase tracking-widest group"
             >
-                <FileText className="w-4 h-4 mr-2" />
-                Download README.md
+                <FileText className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+                <span>README.MD</span>
             </button>
 
             <button
-                // Placeholder for future slide generator
-                className="flex items-center px-4 py-2 bg-slate-800/50 text-slate-500 rounded-lg border border-slate-800 cursor-not-allowed font-medium text-sm"
+                className="flex items-center space-x-3 px-6 py-3 bg-white/[0.02] text-slate-600 border border-white/5 rounded-2xl cursor-not-allowed font-bold text-xs uppercase tracking-widest"
                 disabled
             >
-                <Presentation className="w-4 h-4 mr-2" />
-                Slides (Coming Soon)
+                <Presentation className="w-4 h-4 opacity-50" />
+                <span>Slides (Waitlisted)</span>
             </button>
         </div>
     );

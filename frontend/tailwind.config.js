@@ -7,32 +7,46 @@ export default {
     theme: {
         extend: {
             colors: {
-                slate: {
-                    850: '#151f32',
-                    900: '#0f172a',
-                    950: '#020617',
+                primary: {
+                    DEFAULT: 'hsl(var(--primary))',
+                    foreground: 'hsl(var(--primary-foreground))',
                 },
-                nebula: {
-                    void: '#0B0B15', // Deepest background
-                    purple: '#6D28D9',
-                    cyan: '#06B6D4',
-                    pink: '#EC4899',
-                    amber: '#F59E0B',
+                secondary: {
+                    DEFAULT: 'hsl(var(--secondary))',
+                    foreground: 'hsl(var(--secondary-foreground))',
+                },
+                background: 'hsl(var(--background))',
+                foreground: 'hsl(var(--foreground))',
+                surface: {
+                    DEFAULT: 'hsl(var(--surface))',
+                    hover: 'rgba(255, 255, 255, 0.05)',
+                    active: 'rgba(255, 255, 255, 0.08)',
+                },
+                muted: {
+                    DEFAULT: 'hsl(var(--muted))',
+                    foreground: 'hsl(var(--muted-foreground))',
+                },
+                accent: {
+                    cyan: '#0ea5e9',
+                    indigo: '#6366f1',
+                    violet: '#8b5cf6',
+                    amber: '#f59e0b',
+                },
+                brand: {
+                    dark: '#030712',
+                    card: '#0f172a',
+                    border: 'rgba(255, 255, 255, 0.08)',
                 }
             },
             fontFamily: {
-                sans: ['Inter', 'sans-serif'],
-                display: ['Outfit', 'sans-serif'],
+                sans: ['Inter', 'system-ui', 'sans-serif'],
+                display: ['Outfit', 'Inter', 'sans-serif'],
             },
             animation: {
-                'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
-                'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                'float': 'float 6s ease-in-out infinite',
-                'float-slow': 'float 8s ease-in-out infinite reverse',
-                'glow': 'glow 3s ease-in-out infinite alternate',
-                'shimmer': 'shimmer 2.5s linear infinite',
-                'spin-slow': 'spin 12s linear infinite',
+                'fade-in': 'fadeIn 0.6s ease-out forwards',
+                'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                'float': 'float 8s ease-in-out infinite',
+                'shimmer': 'shimmer 2s linear infinite',
             },
             keyframes: {
                 fadeIn: {
@@ -47,18 +61,14 @@ export default {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%': { transform: 'translateY(-15px)' },
                 },
-                glow: {
-                    'from': { boxShadow: '0 0 15px -5px rgba(59, 130, 246, 0.3)' },
-                    'to': { boxShadow: '0 0 30px 5px rgba(59, 130, 246, 0.6)' },
-                },
                 shimmer: {
-                    '0%': { backgroundPosition: '-1000px 0' },
-                    '100%': { backgroundPosition: '1000px 0' },
+                    '0%': { backgroundPosition: '-200% 0' },
+                    '100%': { backgroundPosition: '200% 0' },
                 }
             },
             backgroundImage: {
-                'grid-pattern': "linear-gradient(to right, #1e293b 1px, transparent 1px), linear-gradient(to bottom, #1e293b 1px, transparent 1px)",
-                'nebula-gradient': "radial-gradient(circle at 50% 0%, rgba(109, 40, 217, 0.15), transparent 60%), radial-gradient(circle at 100% 0%, rgba(6, 182, 212, 0.1), transparent 50%)",
+                'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+                'dots': 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
             }
         },
     },

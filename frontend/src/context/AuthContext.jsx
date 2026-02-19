@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { auth } from "../firebase";
-import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
 
 const AuthContext = createContext();
 
@@ -41,12 +41,18 @@ export const AuthProvider = ({ children }) => {
         return signOut(auth);
     };
 
+    const updateUserPassword = (password) => {
+        if (!currentUser) throw new Error("No user logged in");
+        return updatePassword(currentUser, password);
+    };
+
     const value = {
         currentUser,
         signupEmail,
         loginEmail,
         loginGoogle,
-        logout
+        logout,
+        updateUserPassword
     };
 
     return (
