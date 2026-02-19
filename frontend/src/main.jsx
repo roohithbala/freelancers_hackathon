@@ -8,3 +8,6 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+// Remove boot overlay once the app mounts
+const boot = document.getElementById('boot');
+if (boot) boot.remove();

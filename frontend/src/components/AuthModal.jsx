@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/authCore';
 import { X, Mail, Lock, LogIn, UserPlus, Check, AlertCircle, Sparkles } from 'lucide-react';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion as Motion } from 'framer-motion';
 
 const AuthModal = ({ onClose }) => {
     const [isLogin, setIsLogin] = useState(true);
@@ -115,13 +115,13 @@ const AuthModal = ({ onClose }) => {
 
     return (
         <AnimatePresence>
-            <motion.div 
+            <Motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-[#0B0B15]/80 z-50 flex items-center justify-center p-4 backdrop-blur-md"
             >
-                <motion.div 
+                <Motion.div 
                     initial={{ scale: 0.95, opacity: 0, y: 30 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.95, opacity: 0, y: 30 }}
@@ -163,14 +163,14 @@ const AuthModal = ({ onClose }) => {
                                 {/* Body */}
                                 <div className="px-8 pb-8 relative z-10">
                                     {error && (
-                                        <motion.div 
+                                        <Motion.div 
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
                                             className="bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-3 rounded-xl mb-6 text-sm flex items-center"
                                         >
                                             <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
                                             {error}
-                                        </motion.div>
+                                        </Motion.div>
                                     )}
 
                                     <form onSubmit={handleSubmit} className="space-y-5">
@@ -223,7 +223,7 @@ const AuthModal = ({ onClose }) => {
                                         {/* Confirm Password (Signup Only) */}
                                         <AnimatePresence>
                                             {!isLogin && (
-                                                <motion.div 
+                                                <Motion.div 
                                                     initial={{ height: 0, opacity: 0 }}
                                                     animate={{ height: "auto", opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
@@ -277,7 +277,7 @@ const AuthModal = ({ onClose }) => {
                                                             <div className="text-[10px] opacity-70">Building</div>
                                                         </button>
                                                     </div>
-                                                </motion.div>
+                                                </Motion.div>
                                             )}
                                         </AnimatePresence>
 
@@ -350,8 +350,8 @@ const AuthModal = ({ onClose }) => {
                             </div>
                         </div>
                     </div>
-                </motion.div>
-            </motion.div>
+                </Motion.div>
+            </Motion.div>
         </AnimatePresence>
     );
 };

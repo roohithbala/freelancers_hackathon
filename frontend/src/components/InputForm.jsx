@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Send, Target, Clock, Terminal, Zap, Code, Award, Sparkles, ChevronRight, ArrowRight } from 'lucide-react';
 
 const InputForm = ({ onGenerate, loading }) => {
@@ -21,7 +21,7 @@ const InputForm = ({ onGenerate, loading }) => {
     };
 
     return (
-        <motion.div 
+        <Motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -180,7 +180,7 @@ const InputForm = ({ onGenerate, loading }) => {
                     </form>
                 </div>
             </div>
-        </motion.div>
+        </Motion.div>
     );
 };
 
