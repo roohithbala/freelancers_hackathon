@@ -5,26 +5,35 @@
 @tailwind utilities;
 
 body {
-  background-color: #020617; /* Slate 950 */
+  background-color: #0B0B15; /* Nebula Void */
   color: #e2e8f0;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(109, 40, 217, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.08), transparent 25%);
 }
 
 .bg-grid {
-  background-size: 50px 50px;
+  background-size: 60px 60px;
   background-image: 
-    linear-gradient(to right, rgba(30, 41, 59, 0.5) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
-  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
 }
 
+/* Premium Glassmorphism v2 */
 .glass-panel {
-  @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 shadow-xl;
+  @apply bg-[#13132B]/60 backdrop-blur-2xl border border-white/5 shadow-2xl shadow-black/40;
+  background-image: linear-gradient(to bottom right, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
 }
 
 .glass-button {
-  @apply bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all duration-300 backdrop-blur-md;
+  @apply bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all duration-300 backdrop-blur-md hover:shadow-[0_0_15px_-3px_rgba(6,182,212,0.4)] hover:border-white/20 active:scale-95;
+}
+
+.input-glitch {
+  @apply bg-[#0F0F1A] border-white/10 text-white placeholder:text-slate-600 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300;
 }
 
 @layer utilities {

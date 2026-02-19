@@ -106,6 +106,14 @@ ${sections}
 10. � Future Improvements
 
    ---
+   
+   11. 📂 Project File Structure
+   - Provide a comprehensive directory structure tree.
+   - Use standard ASCII format (├──, └──).
+   - Include key configuration files.
+   - Wrap in a code block.
+
+   ---
    IMPORTANT: After the markdown content, you MUST append a single JSON block strictly in this format:
    \`\`\`json
    {

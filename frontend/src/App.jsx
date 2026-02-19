@@ -321,11 +321,14 @@ const MainContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] relative text-white selection:bg-blue-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#0B0B15] relative text-white selection:bg-nebula-cyan/30 overflow-x-hidden font-sans">
         {/* Background Effects */}
-        <div className="fixed inset-0 bg-grid opacity-20 pointer-events-none"></div>
-        <div className="fixed top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.15),transparent_50%)] pointer-events-none"></div>
-        <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-purple-600/10 blur-[100px] rounded-full pointer-events-none"></div>
+        <div className="fixed inset-0 bg-grid opacity-30 pointer-events-none z-0"></div>
+        <div className="fixed top-0 inset-x-0 h-[500px] bg-gradient-to-b from-nebula-purple/10 via-transparent to-transparent pointer-events-none z-0"></div>
+        <div className="fixed bottom-0 right-0 w-[800px] h-[800px] bg-nebula-cyan/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+        
+        {/* Main Content */}
+        <div className="relative z-10 flex flex-col min-h-screen">
 
       <Header setShowSaved={setShowSaved} setShowAuthModal={setShowAuthModal} setShowProfileModal={setShowProfileModal} />
 
@@ -370,6 +373,7 @@ const MainContent = () => {
             </div>
         )}
       </div>
+    </div>
     </div>
   );
 };

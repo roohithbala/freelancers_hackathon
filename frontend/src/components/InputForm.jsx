@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Loader2, Code2, Target, Briefcase, Clock, Sparkles } from 'lucide-react';
+import { Send, Target, Clock, Terminal, Zap, Code, Award } from 'lucide-react';
 
 const InputForm = ({ onGenerate, loading }) => {
     const [formData, setFormData] = useState({
@@ -23,133 +23,138 @@ const InputForm = ({ onGenerate, loading }) => {
     const labelClasses = "block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1";
 
     return (
-        <div className="w-full max-w-3xl mx-auto">
-            <div className="glass-panel p-8 md:p-10 rounded-3xl relative overflow-hidden group">
+
+        <div className="w-full max-w-4xl mx-auto">
+            {/* Command Deck Container */}
+            <div className="glass-panel p-1 rounded-3xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-nebula-purple via-nebula-cyan to-nebula-pink opacity-50"></div>
                 
-                {/* Decorative gradients */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none group-hover:bg-blue-500/20 transition-all duration-700"></div>
-                
-                <div className="relative z-10">
-                    <div className="text-center mb-10">
-                        <div className="inline-flex items-center justify-center p-3 bg-blue-500/10 rounded-2xl mb-4 border border-blue-500/20 ring-1 ring-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                            <Sparkles className="h-6 w-6 text-blue-400" />
-                        </div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 font-display">Configure Your Project</h2>
-                        <p className="text-slate-400">Define your parameters and let our AI architect the blueprint.</p>
+                <div className="bg-[#0B0B15]/80 p-6 md:p-8 rounded-[22px]">
+                    <div className="flex items-center mb-8 border-b border-white/5 pb-4">
+                        <Terminal className="h-5 w-5 text-nebula-cyan mr-3" />
+                        <h2 className="text-lg font-mono text-slate-300 tracking-wider">PROJECT_CONFIGURATION_PROTOCOL</h2>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Domain */}
-                        <div className="group/field">
-                            <label className={labelClasses}>Project Domain</label>
-                            <div className="relative">
-                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within/field:text-blue-400 transition-colors" />
-                                <input
-                                    type="text"
-                                    name="domain"
-                                    value={formData.domain}
-                                    onChange={handleChange}
-                                    placeholder="e.g., FinTech, HealthTech, Web3, Generative AI"
-                                    className={`${inputClasses} pl-12`}
-                                    required
-                                />
-                            </div>
-                        </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            {/* Domain Input */}
+                            <div className="md:col-span-2 group">
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-nebula-cyan transition-colors">
+                                    Target Domain
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                        <Zap className="h-5 w-5 text-slate-500 group-focus-within:text-nebula-cyan transition-colors" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="domain"
+                                        value={formData.domain}
+                                        onChange={handleChange}
+                                        placeholder="e.g. Healthcare, FinTech, E-commerce, EdTech"
+                                        className="w-full pl-12 pr-4 py-4 input-glitch rounded-xl focus:outline-none"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
                             {/* Skill Level */}
                             <div>
-                                <label className={labelClasses}>Skill Level</label>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Likely Complexity</label>
                                 <div className="relative">
+                                    <Award className="absolute left-4 top-4 h-5 w-5 text-slate-500" />
                                     <select
                                         name="skillLevel"
                                         value={formData.skillLevel}
                                         onChange={handleChange}
-                                        className={`${inputClasses} appearance-none cursor-pointer`}
+                                        className="w-full pl-12 pr-4 py-4 input-glitch rounded-xl appearance-none cursor-pointer"
                                     >
-                                        <option>Beginner</option>
-                                        <option>Intermediate</option>
-                                        <option>Advanced</option>
+                                        <option value="Beginner">Beginner (CRUD, Basic UI)</option>
+                                        <option value="Intermediate">Intermediate (Auth, API)</option>
+                                        <option value="Advanced">Advanced (Microservices, AI)</option>
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </div>
                                 </div>
                             </div>
 
-                            {/* Goal */}
+                            {/* Tech Stack */}
                             <div>
-                                <label className={labelClasses}>Target Goal</label>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Preferred Stack</label>
                                 <div className="relative">
+                                    <Code className="absolute left-4 top-4 h-5 w-5 text-slate-500" />
+                                    <input
+                                        type="text"
+                                        name="techStack"
+                                        value={formData.techStack}
+                                        onChange={handleChange}
+                                        placeholder="e.g. React, Node, Python"
+                                        className="w-full pl-12 pr-4 py-4 input-glitch rounded-xl"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Project Goal */}
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Objective</label>
+                                <div className="relative">
+                                    <Target className="absolute left-4 top-4 h-5 w-5 text-slate-500" />
                                     <select
                                         name="goal"
                                         value={formData.goal}
                                         onChange={handleChange}
-                                        className={`${inputClasses} appearance-none cursor-pointer`}
+                                        className="w-full pl-12 pr-4 py-4 input-glitch rounded-xl appearance-none cursor-pointer"
                                     >
-                                        <option>Hackathon</option>
-                                        <option>Portfolio</option>
-                                        <option>Startup MVP</option>
-                                        <option>Research</option>
+                                        <option value="Portfolio">Portfolio Piece</option>
+                                        <option value="Hackathon">Hackathon Winner</option>
+                                        <option value="Startup">Startup MVP</option>
+                                        <option value="Learning">Learning Concept</option>
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Timeframe */}
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Timeline</label>
+                                <div className="relative">
+                                    <Clock className="absolute left-4 top-4 h-5 w-5 text-slate-500" />
+                                    <select
+                                        name="timeframe"
+                                        value={formData.timeframe}
+                                        onChange={handleChange}
+                                        className="w-full pl-12 pr-4 py-4 input-glitch rounded-xl appearance-none cursor-pointer"
+                                    >
+                                        <option value="1 Weekend">1 Weekend</option>
+                                        <option value="1 Week">1 Week</option>
+                                        <option value="1 Month">1 Month</option>
+                                        <option value="3 Months">3 Months</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Tech Stack */}
-                        <div className="group/field">
-                            <label className={labelClasses}>Preferred Tech Stack</label>
-                            <div className="relative">
-                                <Code2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within/field:text-purple-400 transition-colors" />
-                                <input
-                                    type="text"
-                                    name="techStack"
-                                    value={formData.techStack}
-                                    onChange={handleChange}
-                                    placeholder="e.g., MERN, Next.js + Supabase, Python"
-                                    className={`${inputClasses} pl-12 focus:ring-purple-500/50 focus:border-purple-500/50`}
-                                    required
-                                />
-                            </div>
+                        {/* Submit Button */}
+                        <div className="pt-6">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-5 bg-gradient-to-r from-blue-600 via-nebula-purple to-nebula-pink rounded-xl font-bold text-white text-lg hover:shadow-[0_0_30px_-5px_rgba(124,58,237,0.5)] transition-all transform hover:scale-[1.01] active:scale-[0.99] flex justify-center items-center relative overflow-hidden group"
+                            >
+                                {loading ? (
+                                    <>
+                                        <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                        <span className="relative z-10 flex items-center">
+                                            <div className="h-5 w-5 border-2 border-white/50 border-t-white rounded-full animate-spin mr-3"></div>
+                                            Generating Blueprint...
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span className="flex items-center relative z-10">
+                                        <Send className="mr-2 h-5 w-5" /> Generate Architecture
+                                    </span>
+                                )}
+                                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors"></div>
+                            </button>
                         </div>
-
-                        {/* Timeframe */}
-                        <div className="group/field">
-                            <label className={labelClasses}>Timeline</label>
-                            <div className="relative">
-                                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within/field:text-cyan-400 transition-colors" />
-                                <input
-                                    type="text"
-                                    name="timeframe"
-                                    value={formData.timeframe}
-                                    onChange={handleChange}
-                                    placeholder="e.g., 48 Hours, 2 Weeks, 3 Months"
-                                    className={`${inputClasses} pl-12 focus:ring-cyan-500/50 focus:border-cyan-500/50`}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-4 mt-4 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all transform hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed group"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 className="animate-spin mr-3 h-5 w-5" />
-                                    <span>Architecting Solution...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <span className="mr-2">Generate Blueprint</span>
-                                    <Send className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                                </>
-                            )}
-                        </button>
                     </form>
                 </div>
             </div>
