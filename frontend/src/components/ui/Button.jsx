@@ -18,6 +18,7 @@ const Button = ({
     primary: 'btn btn--primary',
     secondary: 'btn btn--secondary',
     ghost: 'btn btn--ghost',
+    outline: 'btn btn--outline',
   };
 
   const sizeMap = {

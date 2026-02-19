@@ -56,13 +56,16 @@ const LandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#020617] transition-colors duration-500 overflow-x-hidden relative">
       <Navigation />
       
+      {/* Noise Texture Overlay */}
+      <div className="fixed inset-0 bg-noise z-[1]"></div>
+      
       {/* Decorative Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-indigo-500/10 dark:bg-indigo-600/10 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-purple-500/10 dark:bg-purple-600/10 blur-[120px] rounded-full"></div>
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-indigo-500/10 dark:bg-indigo-600/20 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-purple-500/10 dark:bg-purple-600/20 blur-[120px] rounded-full"></div>
       </div>
 
       <main className="relative z-10">
@@ -73,23 +76,23 @@ const LandingPage = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center space-x-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800/50 rounded-full px-6 py-2.5 mb-8 shadow-sm backdrop-blur-sm"
+              className="inline-flex items-center space-x-2 bg-white/50 dark:bg-slate-900/30 border border-border rounded-full px-6 py-2.5 mb-8 shadow-sm backdrop-blur-md"
             >
-              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              <span className="text-sm font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider">The Intelligent Project Architect</span>
+              <Sparkles className="w-4 h-4 text-accent-500" />
+              <span className="text-sm font-bold text-accent-700 dark:text-accent-100 uppercase tracking-widest">The Intelligent Project Architect</span>
             </Motion.div>
 
             <Motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-[1.1]"
+              className="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-[1.05] font-heading"
             >
-              <span className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-gray-100 dark:to-white bg-clip-text text-transparent">
+              <span className="text-900">
                 Blueprint Your
               </span>
               <br />
-              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-gradient">
                 Next Innovation
               </span>
             </Motion.h1>
@@ -98,7 +101,7 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed mb-12 font-medium"
+              className="text-lg md:text-xl text-700 dark:text-muted max-w-3xl mx-auto leading-relaxed mb-12 font-medium"
             >
               IdeaForge transforms your ambition into actionable projects. 
               Get AI-generated blueprints with tech stacks, features, and roadmaps 
@@ -112,7 +115,7 @@ const LandingPage = () => {
               className="flex flex-col sm:flex-row gap-6 justify-center w-full sm:w-auto"
             >
               <Link to="/generate">
-                <Button size="xl" className="group text-lg px-10 py-5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-2xl shadow-indigo-500/30 dark:shadow-indigo-500/20">
+                <Button size="xl" className="group text-base px-10 py-5 rounded-2xl bg-gradient-cosmic text-white border-0 shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] transition-transform font-black uppercase tracking-widest">
                   <Rocket className="w-5 h-5 mr-3 group-hover:animate-bounce" />
                   Launch Project Agent
                   <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -120,7 +123,7 @@ const LandingPage = () => {
               </Link>
               {!currentUser && (
                 <Link to="/signup">
-                  <Button variant="secondary" size="xl" className="text-lg px-10 py-5 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 text-gray-900 dark:text-white shadow-xl hover:bg-gray-50 dark:hover:bg-slate-800">
+                  <Button variant="secondary" size="xl" className="text-base px-10 py-5 rounded-2xl card-glass text-900 shadow-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all font-black uppercase tracking-widest">
                     <UserPlus className="w-5 h-5 mr-3" />
                     Join The Community
                   </Button>
@@ -137,8 +140,8 @@ const LandingPage = () => {
             >
               {stats.map((stat, index) => (
                 <div key={index} className="flex flex-col items-center">
-                  <div className="text-5xl font-black text-gray-900 dark:text-white mb-2">{stat.number}</div>
-                  <div className="text-sm font-bold text-gray-500 dark:text-gray-500 uppercase tracking-widest">{stat.label}</div>
+                  <div className="text-5xl font-black text-900 mb-2 font-heading">{stat.number}</div>
+                  <div className="text-sm font-bold text-500 uppercase tracking-widest font-body">{stat.label}</div>
                 </div>
               ))}
             </Motion.div>
@@ -146,16 +149,16 @@ const LandingPage = () => {
         </section>
 
         {/* Features Section */}
-        <section className="px-6 py-24 bg-gray-50 dark:bg-slate-950/50">
-          <div className="max-w-7xl mx-auto">
+        <section className="px-6 py-24 bg-surface-2 dark:bg-slate-900/20 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
               <div className="text-left max-w-2xl">
-                <h2 className="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em] mb-4">Core Capabilities</h2>
-                <h3 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
-                  Everything you need to <span className="text-indigo-600 dark:text-indigo-400">ideate and build</span>.
+                <h2 className="text-sm font-black text-accent-500 uppercase tracking-[0.3em] mb-4">Core Capabilities</h2>
+                <h3 className="text-4xl md:text-6xl font-black text-900 leading-tight">
+                  Everything you need to <span className="text-gradient">ideate and build</span>.
                 </h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 text-lg max-w-md text-left font-medium">
+              <p className="text-700 dark:text-400 text-lg max-w-md text-left font-medium">
                 Our AI considers thousands of variables to ensure your project idea is both challenging and achievable.
               </p>
             </div>
@@ -165,13 +168,13 @@ const LandingPage = () => {
                 <Motion.div
                   key={index}
                   whileHover={{ y: -10 }}
-                  className="p-10 rounded-3xl bg-white dark:bg-slate-900/50 border border-gray-100 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300"
+                  className="p-10 card-glass shadow-xl hover:shadow-2xl transition-all duration-300"
                 >
-                  <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg shadow-indigo-500/20">
+                  <div className="w-14 h-14 bg-gradient-cosmic rounded-2xl flex items-center justify-center text-white mb-8 shadow-lg shadow-indigo-500/20">
                     {feature.icon}
                   </div>
-                  <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{feature.title}</h4>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                  <h4 className="text-2xl font-bold text-900 mb-4">{feature.title}</h4>
+                  <p className="text-700 dark:text-400 leading-relaxed font-medium">
                     {feature.description}
                   </p>
                 </Motion.div>
@@ -183,26 +186,27 @@ const LandingPage = () => {
         {/* Integration Preview */}
         <section className="px-6 py-24">
           <div className="max-w-5xl mx-auto">
-            <div className="overflow-hidden rounded-[3rem] bg-slate-900 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)]">
-              <div className="p-16 flex flex-col items-center text-center">
-                <div className="mb-10 p-5 bg-white/10 rounded-3xl backdrop-blur-md">
+            <div className="overflow-hidden rounded-[3rem] bg-[#020617] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] relative">
+              <div className="absolute inset-0 bg-noise opacity-10"></div>
+              <div className="p-16 flex flex-col items-center text-center relative z-10">
+                <div className="mb-10 p-5 bg-white/5 rounded-3xl backdrop-blur-md border border-white/10">
                    <Code className="w-12 h-12 text-white" />
                 </div>
-                <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight">
-                  Build with <span className="italic">Expert Precision</span>
+                <h2 className="text-4xl md:text-7xl font-black text-white mb-8 leading-[1.1]">
+                  Build with <span className="text-gradient">Expert Precision</span>
                 </h2>
-                <p className="text-xl text-indigo-200/80 max-w-2xl mb-12 font-medium">
+                <p className="text-xl text-slate-400 max-w-2xl mb-12 font-medium">
                   Join the elite group of developers using IdeaForge to architect 
                   their portfolio and production applications. 
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
                    <Link to="/generate">
-                     <button className="rounded-2xl bg-white text-indigo-900 hover:bg-gray-100 px-10 py-4 font-bold text-lg transition-colors shadow-xl">
+                     <button className="rounded-2xl bg-white text-[#0F172A] hover:bg-slate-100 px-10 py-4 font-bold text-lg transition-all shadow-2xl hover:scale-105 active:scale-95">
                        Get Started Free
                      </button>
                    </Link>
                    <Link to="/saved">
-                     <button className="rounded-2xl border-2 border-white/20 text-white hover:bg-white/10 px-10 py-4 font-bold text-lg transition-colors bg-transparent">
+                     <button className="rounded-2xl border-2 border-white/10 text-white hover:bg-white/5 px-10 py-4 font-bold text-lg transition-all bg-transparent">
                        View Examples
                      </button>
                    </Link>

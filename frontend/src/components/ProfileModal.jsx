@@ -102,18 +102,23 @@ const ProfileModal = ({ onClose }) => {
 
         setSaving(true);
         try {
-            await changePassword(newPassword);
-            setPasswordMessage({ type: 'success', text: 'Password updated successfully!' });
-            setNewPassword('');
-            setConfirmNewPassword('');
-            setTimeout(() => setShowPasswordChange(false), 2000);
+            const result = await changePassword(newPassword);
+            if (result && result.success) {
+                setPasswordMessage({ type: 'success', text: 'Password updated successfully!' });
+                setNewPassword('');
+                setConfirmNewPassword('');
+                setTimeout(() => setShowPasswordChange(false), 2000);
+            } else {
+                const errMsg = result?.error || 'Failed to update password.';
+                if (errMsg.includes('recent') || errMsg.includes('re-authenticate')) {
+                    setPasswordMessage({ type: 'error', text: 'Please log out and log in again to change password.' });
+                } else {
+                    setPasswordMessage({ type: 'error', text: errMsg });
+                }
+            }
         } catch (err) {
             console.error(err);
-            if (err.code === 'auth/requires-recent-login') {
-                setPasswordMessage({ type: 'error', text: 'Please log out and log in again to change password.' });
-            } else {
-                setPasswordMessage({ type: 'error', text: 'Failed to update password.' });
-            }
+            setPasswordMessage({ type: 'error', text: 'Failed to update password.' });
         } finally {
             setSaving(false);
         }

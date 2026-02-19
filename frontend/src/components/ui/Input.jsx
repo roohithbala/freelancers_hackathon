@@ -16,7 +16,7 @@ const Input = ({ label, error, helperText, icon, type = 'text', className = '', 
 
         <input
           type={type}
-          className={base}
+          className={`${base} ${icon ? 'pl-12' : ''} ${rightIcon ? 'pr-12' : ''}`}
           aria-invalid={!!error}
           {...props}
         />

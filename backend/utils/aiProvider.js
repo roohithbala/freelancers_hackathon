@@ -17,10 +17,10 @@ async function callGroq(messages, apiKey, options = {}) {
     try {
         const payload = {
             messages: messages,
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             temperature: typeof options.temperature === 'number' ? options.temperature : 0.2,
         };
-        if (options.maxTokens) payload.max_output_tokens = Math.min(options.maxTokens, 1024);
+        if (options.maxTokens) payload.max_tokens = Math.min(options.maxTokens, 8192);
 
         const completion = await client.chat.completions.create(payload);
 
@@ -48,7 +48,14 @@ async function callGeminiDirect(messages, apiKey, options = {}) {
     const body = {
         contents: [{ parts: [{ text: combinedPrompt }] }]
     };
-    if (options.maxTokens) body.maxOutputTokens = options.maxTokens;
+    
+    // Support generationConfig for maxTokens
+    if (options.maxTokens) {
+        body.generationConfig = {
+            maxOutputTokens: options.maxTokens,
+            temperature: typeof options.temperature === 'number' ? options.temperature : 0.2
+        };
+    }
 
     const response = await fetch(`${GEMINI_DIRECT_URL}?key=${apiKey}`, {
         method: "POST",
@@ -73,8 +80,66 @@ async function callGeminiDirect(messages, apiKey, options = {}) {
     };
 }
 
+// Helper for Hugging Face Inference API
+async function callHuggingFace(messages, apiKey, options = {}) {
+    console.log("Attempting Hugging Face Inference API (Llama-3.1-8B-Instruct)...");
+
+    const model = "meta-llama/Llama-3.1-8B-Instruct";
+    const url = `https://api-inference.huggingface.co/models/${model}`;
+
+    // Format chat messages for Llama 3.1 Instruct
+    // Simple version: join them as a single string if templates aren't handled server-side
+    const prompt = messages.map(m => `${m.role === 'system' ? 'System' : m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n');
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                inputs: prompt,
+                parameters: {
+                    max_new_tokens: options.maxTokens || 2048,
+                    temperature: typeof options.temperature === 'number' ? Math.max(options.temperature, 0.01) : 0.2,
+                    return_full_text: false
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`HF API failed: ${response.status} ${err}`);
+        }
+
+        const data = await response.json();
+        // HF usually returns an array for text-generation
+        const text = Array.isArray(data) ? data[0]?.generated_text : data.generated_text;
+
+        if (!text) throw new Error("Hugging Face returned no text.");
+
+        return {
+            choices: [{
+                message: { content: text }
+            }]
+        };
+    } catch (error) {
+        throw new Error(`Hugging Face failed: ${error.message}`);
+    }
+}
+
 async function generateCompletion(messages, avoidList = [], options = {}) {
-    // 1. Try Groq (Primary)
+    // 1. Try Hugging Face (New Primary)
+    if (process.env.HF_API_KEY) {
+        try {
+            return await callHuggingFace(messages, process.env.HF_API_KEY, options);
+        } catch (e) {
+            console.error(`HF Attempt Failed: ${e.message}`);
+        }
+    }
+
+    // 2. Try Groq (Secondary)
     if (process.env.GROQ_API_KEY) {
         try {
             return await callGroq(messages, process.env.GROQ_API_KEY, options);
@@ -83,7 +148,7 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
         }
     }
 
-    // 2. Try Google Gemini Direct (Secondary)
+    // 3. Try Google Gemini Direct (Tertiary)
     if (process.env.GOOGLE_API_KEY) {
         try {
             return await callGeminiDirect(messages, process.env.GOOGLE_API_KEY, options);
@@ -92,8 +157,9 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
         }
     }
 
-    // 3. Fallback: Mock Data
+    // 4. Fallback: Mock Data
     console.warn("All APIs failed. Switching to DEMO MODE with random blueprint.");
+    // ... [rest of mock data code remains same]
 
     const mockBlueprints = [
         `

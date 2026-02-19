@@ -15,6 +15,9 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [userTier, setUserTier] = useState(() => {
+    return localStorage.getItem('userTier') || 'free'; // 'free', 'pro', 'elite'
+  });
   const [loading, setLoading] = useState(true);
   const { error, success } = useToast();
 
@@ -27,117 +30,82 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  const setTier = (tier) => {
+    setUserTier(tier);
+    localStorage.setItem('userTier', tier);
+    success(`Upgrade Successful! You are now in the ${tier.toUpperCase()} tier.`);
+  };
+
   const login = async (email, password) => {
-    setLoading(true);
-    try {
-      const result = await authService.login(email, password);
-      if (result.success) {
-        success(SUCCESS_MESSAGES.LOGIN_SUCCESS);
-        return { success: true };
-      } else {
-        error(result.error);
-        return { success: false, error: result.error };
-      }
-    } catch (err) {
-      error(ERROR_MESSAGES.INVALID_CREDENTIALS);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
+    const result = await authService.login(email, password);
+    if (result.success) {
+      setCurrentUser(result.user);
+      success(SUCCESS_MESSAGES.LOGIN);
+    } else {
+      error(result.error);
     }
+    return result;
   };
 
   const loginGoogle = async () => {
-    setLoading(true);
-    try {
-      const result = await authService.loginGoogle();
-      if (result.success) {
-        success(SUCCESS_MESSAGES.LOGIN_SUCCESS);
-        return { success: true };
-      } else {
-        error(result.error);
-        return { success: false, error: result.error };
-      }
-    } catch (err) {
-      error(ERROR_MESSAGES.GENERIC_ERROR);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
+    const result = await authService.loginGoogle();
+    if (result.success) {
+      setCurrentUser(result.user);
+      success(SUCCESS_MESSAGES.LOGIN);
+    } else {
+      error(result.error);
     }
+    return result;
   };
 
   const signup = async (name, email, password) => {
-    setLoading(true);
-    try {
-      const result = await authService.signup(name, email, password);
-      if (result.success) {
-        success(SUCCESS_MESSAGES.SIGNUP_SUCCESS);
-        return { success: true };
-      } else {
-        error(result.error);
-        return { success: false, error: result.error };
-      }
-    } catch (err) {
-      error(ERROR_MESSAGES.GENERIC_ERROR);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
+    const result = await authService.signup(name, email, password);
+    if (result.success) {
+      setCurrentUser(result.user);
+      success(SUCCESS_MESSAGES.SIGNUP);
+    } else {
+      error(result.error);
     }
+    return result;
   };
 
   const logout = async () => {
-    try {
-      const result = await authService.logout();
-      if (result.success) {
-        success(SUCCESS_MESSAGES.LOGOUT_SUCCESS);
-      } else {
-        error(ERROR_MESSAGES.GENERIC_ERROR);
-      }
-    } catch (err) {
-      error(ERROR_MESSAGES.GENERIC_ERROR);
+    const result = await authService.logout();
+    if (result.success) {
+      setCurrentUser(null);
+      success(SUCCESS_MESSAGES.LOGOUT);
+    } else {
+      error(result.error);
     }
+    return result;
   };
 
   const updateProfile = async (updates) => {
-    setLoading(true);
-    try {
-      const result = await authService.updateProfile(updates);
-      if (result.success) {
-        success(SUCCESS_MESSAGES.PROFILE_UPDATED);
-        return { success: true };
-      } else {
-        error(result.error);
-        return { success: false, error: result.error };
-      }
-    } catch (err) {
-      error(ERROR_MESSAGES.GENERIC_ERROR);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
+    const result = await authService.updateProfile(updates);
+    if (result.success) {
+      setCurrentUser({ ...authService.getCurrentUser() });
+      success('Profile updated successfully');
+    } else {
+      error(result.error);
     }
+    return result;
   };
 
   const changePassword = async (newPassword) => {
-    setLoading(true);
-    try {
-      const result = await authService.updatePassword(newPassword);
-      if (result.success) {
-        success(SUCCESS_MESSAGES.PASSWORD_CHANGED);
-        return { success: true };
-      } else {
-        error(result.error);
-        return { success: false, error: result.error };
-      }
-    } catch (err) {
-      error(ERROR_MESSAGES.GENERIC_ERROR);
-      return { success: false, error: err.message };
-    } finally {
-      setLoading(false);
+    const result = await authService.updatePassword(newPassword);
+    if (result.success) {
+      success('Password changed successfully');
+    } else {
+      error(result.error);
     }
+    return result;
   };
 
   const value = {
     currentUser,
     isAuthenticated: !!currentUser,
+    userTier,
+    setTier,
     loading,
     login,
     loginGoogle,

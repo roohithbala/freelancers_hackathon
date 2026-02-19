@@ -106,24 +106,8 @@ class IdeaService {
       const promptKey = JSON.stringify(promptObj);
       const promptHash = cyrb53(promptKey).toString();
 
-      // If user and existing generated content for same prompt exists, return cached result
-      if (currentUser) {
-        try {
-          const cachedQ = query(
-            collection(db, 'generated_content'),
-            where('userId', '==', currentUser.uid),
-            where('promptHash', '==', promptHash),
-            where('type', '==', 'ideas')
-          );
-          const cachedSnap = await getDocs(cachedQ);
-          if (!cachedSnap.empty) {
-            const d = cachedSnap.docs[0].data();
-            return { success: true, data: d.ideas, cached: true };
-          }
-        } catch (e) {
-          console.warn('Cache lookup failed:', e);
-        }
-      }
+      // Disable caching for 'ideas' mode to ensure uniqueness every time the user clicks generate
+      // Only keep caching for the detailed 'blueprint' mode to save tokens on identical requests
 
       // Save this prompt to history
       await this.savePromptHistory(currentUser, {
@@ -267,7 +251,8 @@ class IdeaService {
           : idea.tech_stack || [],
         title: (data.data && data.data.title) || idea.title || fallbackTitle,
         domain: formData.domain,
-        skillLevel: formData.skillLevel
+        skillLevel: formData.skillLevel,
+        verification: data.verification
       };
 
       // Save the full blueprint and verification to Firestore

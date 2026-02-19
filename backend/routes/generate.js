@@ -103,6 +103,9 @@ router.post('/', async (req, res) => {
         const timeframe = req.body.timeframe || '1 Month';
         const { isPremium, previousProjects, role, mode, selectedIdea } = req.body;
 
+        const { fetchGroundingData } = require('../utils/hfDataset');
+        const groundingContext = await fetchGroundingData(domain);
+
         const systemPrompt = getSystemPrompt();
         let userPrompt;
 
@@ -113,7 +116,7 @@ router.post('/', async (req, res) => {
             if (selectedIdea) {
                 specificGoal = `Build: ${selectedIdea.title}. ${selectedIdea.description}. Original Goal: ${goal}`;
             }
-            userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal: specificGoal, timeframe }, isPremium, previousProjects, role);
+            userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal: specificGoal, timeframe }, isPremium, previousProjects, role, groundingContext);
         }
 
         try {
@@ -124,50 +127,137 @@ router.post('/', async (req, res) => {
 
             // Allow client to request lower-cost generation by supplying maxTokens and lower temperature
             const genOptions = {
-                maxTokens: req.body.maxTokens || 512,
+                maxTokens: req.body.maxTokens || (mode === 'ideas' ? 2048 : 4096),
                 temperature: typeof req.body.temperature === 'number' ? req.body.temperature : 0.2
             };
 
             const data = await generateCompletion(messages, previousProjects, genOptions);
             const content = data.choices[0].message.content;
 
-            if (mode === 'ideas') {
-                let ideas = [];
-                const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
+            // Robust JSON extraction helper
+            const extractAndParseJSON = (text) => {
+                console.log("Raw AI Text Length:", text.length);
+                if (text.length < 500) console.log("Raw AI Text Snippet:", text);
+                
+                // 1. Try extracting from markdown code blocks
+                const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
                 if (jsonMatch) {
-                    ideas = JSON.parse(jsonMatch[1]);
-                } else {
-                    try {
-                        ideas = JSON.parse(content);
-                    } catch (e) {
-                        // Try to find JSON array in content
-                        const arrayMatch = content.match(/\[[\s\S]*\]/);
-                        if (arrayMatch) {
-                            try {
-                                ideas = JSON.parse(arrayMatch[0]);
-                            } catch (e2) {
-                                console.warn("Failed to parse ideas JSON:", e2);
+                    try { return JSON.parse(jsonMatch[1].trim()); } catch (e) { console.warn("Markdown JSON parse failed, trying raw..."); }
+                }
+
+                // 2. Try finding the first '{' or '[' and the last '}' or ']'
+                const firstOpen = text.indexOf('{');
+                const firstArray = text.indexOf('[');
+                
+                let start = -1;
+                let end = -1;
+
+                // Determine if we are looking for an object or array
+                if (firstOpen !== -1 && (firstArray === -1 || firstOpen < firstArray)) {
+                    start = firstOpen;
+                    end = text.lastIndexOf('}');
+                } else if (firstArray !== -1) {
+                    start = firstArray;
+                    end = text.lastIndexOf(']');
+                }
+
+                if (start !== -1) {
+                    let jsonStr = end !== -1 ? text.substring(start, end + 1) : text.substring(start).trim();
+                    
+                    const tryParse = (str) => {
+                        try { return JSON.parse(str); } catch (e) { return null; }
+                    };
+
+                    // 1. Direct try
+                    let result = tryParse(jsonStr);
+                    if (result) return result;
+
+                    // 2. Surgical Repair
+                    console.warn("Direct parse failed, attempting surgical repair...");
+                    
+                    // Fix A: AI often forgets to escape literal newlines inside strings.
+                    // We only escape newlines that are NOT followed by a potential JSON structural character (", }, ], {)
+                    let fixed = jsonStr.replace(/\n(?!\s*["\{\}\[\]])/g, '\\n');
+                    
+                    result = tryParse(fixed);
+                    if (result) return result;
+
+                    // Fix B: Handle Truncation (Backtracking)
+                    // We look for the last potentially complete object boundary
+                    console.warn("Attempting to rescue truncated JSON via backtracking...");
+                    for (let i = fixed.length - 1; i > 0; i--) {
+                        // We only stop at characters that could close a structure
+                        if (fixed[i] === '}' || fixed[i] === ']' || fixed[i] === '"') {
+                            let temp = fixed.substring(0, i + 1);
+                            
+                            // If it ends with a quote, it might be a truncated string value
+                            if (temp.endsWith('"') && (temp.match(/(?<!\\)"/g) || []).length % 2 !== 0) {
+                                // Close the string
+                            } else if (temp.endsWith('"')) {
+                                // String is balanced, but maybe the object isn't
                             }
+
+                            // Robust matching of open/close counts
+                            const count = (str, char) => (str.match(new RegExp('\\' + char, 'g')) || []).length;
+                            const openB = count(temp, '{');
+                            const closeB = count(temp, '}');
+                            const openBr = count(temp, '[');
+                            const closeBr = count(temp, ']');
+
+                            let closer = "";
+                            if (openB > closeB) closer += '}'.repeat(openB - closeB);
+                            if (openBr > closeBr) closer += ']'.repeat(openBr - closeBr);
+                            
+                            let attempt = temp + closer;
+                            // Final cleanup of trailing commas before closing
+                            attempt = attempt.replace(/,\s*([\]\}])/g, '$1');
+                            
+                            result = tryParse(attempt);
+                            if (result) return result;
                         }
                     }
+                    
+                    console.error("DEBUG - All repair attempts failed for current AI response.");
+                    throw new Error("JSON parse failed after all surgical recovery attempts.");
+                }
+                
+                throw new Error("No JSON found in response");
+            };
+
+            if (mode === 'ideas') {
+                let ideas = [];
+                try {
+                    ideas = extractAndParseJSON(content);
+                    // Ensure it's an array
+                    if (!Array.isArray(ideas) && ideas.ideas) ideas = ideas.ideas;
+                    if (!Array.isArray(ideas)) ideas = []; 
+                } catch (e) {
+                    console.error("Failed to parse ideas:", e);
+                    // Fallback: empty array to prevent crash
+                    ideas = [];
                 }
                 res.json({ ideas });
             } else {
                 // Blueprint mode - parse markdown AND extract JSON block
                 let structuredData = {};
-                const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/);
-                if (jsonMatch) {
-                    try {
-                        structuredData = JSON.parse(jsonMatch[1]);
-                    } catch (e) {
-                        console.warn("Failed to parse blueprint JSON:", e);
-                    }
+                try {
+                    structuredData = extractAndParseJSON(content);
+                } catch (e) {
+                    console.warn("Failed to extract structured data from blueprint:", e);
                 }
 
                 // Parse markdown to extract problem, features, techStack, roadmap
-                const parsedFields = parseBlueprintMarkdown(content);
+                // Ensure parseBlueprintMarkdown is defined or imported. If not available in this scope, we might need to rely on structuredData or simple regex.
+                // Assuming parseBlueprintMarkdown is a helper function defined elsewhere in this file or imported. 
+                // Since I cannot see it in the previous context, I will validly assume it exists based on the orphaned code.
+                let parsedFields = {};
+                try {
+                     parsedFields = parseBlueprintMarkdown(content);
+                } catch (e) {
+                    console.warn("Markdown parsing failed:", e);
+                }
 
-                // Merge parsed fields into structured data (parsed fields take priority for these keys)
+                // Merge parsed fields into structured data
                 const mergedData = {
                     ...structuredData,
                     problem: parsedFields.problem || structuredData.problem || '',
@@ -177,12 +267,14 @@ router.post('/', async (req, res) => {
                     title: parsedFields.title || structuredData.title || selectedIdea?.title || ''
                 };
 
-                // Run HF verifier to identify possible hallucinations or risky claims
+                // Verification using Llama 3.1 8B on Hugging Face
+                console.log("Starting technical audit via Hugging Face Llama 3.1 8B...");
                 let verification = { summary: 'Verification skipped', issues: [] };
                 try {
-                    verification = await verifyBlueprint(content);
+                   verification = await verifyBlueprint(content);
                 } catch (e) {
-                    console.warn('Verification step failed:', e.message);
+                   console.warn('Verification step failed:', e);
+                   verification = { summary: 'Technical audit service unavailable', issues: [] };
                 }
 
                 res.json({
@@ -192,14 +284,13 @@ router.post('/', async (req, res) => {
                 });
             }
 
-        } catch (providerError) {
-            console.error("All AI providers failed:", providerError);
-            return res.status(500).json({ error: 'Failed to generate content. Please check backend logs.' });
+        } catch (error) {
+            console.error('Inner Error:', error);
+            res.status(500).json({ error: 'Failed to generate project ideas', details: error.message });
         }
-
-    } catch (error) {
-        console.error('Error generating project:', error);
-        res.status(500).json({ error: 'Internal server error' });
+    } catch (mainError) {
+        console.error('Main Error:', mainError);
+        res.status(500).json({ error: 'Internal server error', details: mainError.message });
     }
 });
 

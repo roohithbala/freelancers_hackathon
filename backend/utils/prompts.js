@@ -25,7 +25,7 @@ Every idea must:
 Think like a VC-backed founder.`;
 };
 
-const getUserPrompt = (data, isPremium, previousProjects = [], role = 'Student') => {
+const getUserPrompt = (data, isPremium, previousProjects = [], role = 'Student', groundingContext = '') => {
    const { domain, skillLevel, techStack, goal, timeframe } = data;
 
    // Role-Based Customization
@@ -115,9 +115,11 @@ User Profile:
 - Timeframe: ${timeframe}
 - Role Mode: ${role}
 
+${groundingContext ? `GROUNDING CONTEXT (Use these real-world patterns for accuracy):\n${groundingContext}\n` : ''}
+
 Generate exactly ONE deeply developed project blueprint.
 
-Avoide these previous projects: ${previousProjects.join(', ')}
+Avoid these previous projects: ${previousProjects.join(', ')}
 
 Return structured output in the following Markdown format:
 
@@ -133,8 +135,12 @@ ${sections}
    - Provide a Mermaid.js 'graph TD' code block.
    - Start strictly with: \`\`\`mermaid
    - Content MUST start with: graph TD
-   - Use ONLY this node format: id["Node Label"]
-   - NO brackets () [] {} in text.
+   - CRITICAL: Every node MUST have a descriptive label using this exact format: nodeID["Descriptive Label"]
+   - Example node: user["Mobile App User"]
+   - Example edge: user --> api["API Gateway"]
+   - NO brackets (), [], {} inside the labels themselves.
+   - Use meaningful IDs (e.g., auth, db, ui) rather than generic ones like A, B, C or id1, id2.
+   - Grounding examples for technical accuracy:
 
 9. 🧪 Detailed Implementation Roadmap (Step-by-Step)
    - Week 1: Setup & Core
@@ -230,13 +236,16 @@ const getIdeasPrompt = (data, previousIdeas = []) => {
     The following ideas have ALREADY been generated for this user. You MUST NOT regenerate any of them or anything similar.
     ${previousIdeas.length > 0 ? `Previously generated ideas (DO NOT USE THESE TITLES OR SIMILAR CONCEPTS):\n${previousIdeas.map(t => `    - "${t}"`).join('\n')}` : 'No previous ideas yet.'}
 
-    Rules:
-    1. Ideas must be COMPLETELY DIFFERENT from the previously generated list above.
-    2. Ideas must be DISTINCT from each other.
-    3. Ideas must be practical but impressive.
-    4. Focus on solving real problems, not just "learning exercises".
+    Return ONLY a valid JSON array of objects.
+    
+    JSON INTEGRITY RULES:
+    1. DO NOT include any conversational text before or after the JSON.
+    2. USE DOUBLE QUOTES for all keys and string values.
+    3. ESCAPE all double quotes within strings using backslashes (e.g., "The \"Best\" App").
+    4. Ensure every object property is followed by a comma, except for the last one in an object.
+    5. Ensure every object in the array is followed by a comma, except for the last one.
+    6. Ensure the array is properly closed with a ].
 
-    Return ONLY a raw JSON array of objects (no markdown code blocks).
     Each object must have:
     - "title": A catchy, professional name.
     - "description": A 1-sentence value prop.

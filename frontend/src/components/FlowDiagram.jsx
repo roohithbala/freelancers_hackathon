@@ -28,39 +28,57 @@ function parseMermaid(mermaidCode) {
 
   const lines = mermaidCode.split('\n').map(l => l.trim()).filter(Boolean);
 
-  for (const line of lines) {
-    if (line.startsWith('graph') || line.startsWith('%%') || line.startsWith('subgraph') || line === 'end') continue;
+  const prettify = (str) => {
+    if (!str) return str;
+    // Handle camelCase, kebab-case, and underscores
+    return str
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/[_\-]/g, ' ')
+      .trim()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
 
-    // Match: A["Label"] -->|text| B["Label"]  or  A --> B  or  A["Label"] --> B["Label"]
+  for (const line of lines) {
+    if (line.startsWith('graph') || line.startsWith('%%') || line.startsWith('subgraph') || line === 'end' || line.startsWith('style') || line.startsWith('classDef') || line.startsWith('class')) continue;
+
+    // Match edge: A["Label"] -->|text| B["Label"] or A(Label) --- B{Label} etc.
     const edgeMatch = line.match(
-      /([A-Za-z0-9_]+)(?:\[["']?(.+?)["']?\])?\s*--+>?\s*(?:\|(.+?)\|\s*)?([A-Za-z0-9_]+)(?:\[["']?(.+?)["']?\])?/
+      /([A-Za-z0-9_\-]+)(?:[\(\[\{]+["']?(.+?)["']?[\)\]\}]+)?\s*[-=]+[->]*\s*(?:\|(.+?)\|\s*)?([A-Za-z0-9_\-]+)(?:[\(\[\{]+["']?(.+?)["']?[\)\]\}]+)?/
     );
 
     if (edgeMatch) {
       const [, srcId, srcLabel, edgeLabel, tgtId, tgtLabel] = edgeMatch;
       
       if (!nodes.has(srcId)) {
-        nodes.set(srcId, { id: srcId, label: srcLabel || srcId });
+        nodes.set(srcId, { id: srcId, label: srcLabel || prettify(srcId) });
       } else if (srcLabel) {
         nodes.get(srcId).label = srcLabel;
       }
 
       if (!nodes.has(tgtId)) {
-        nodes.set(tgtId, { id: tgtId, label: tgtLabel || tgtId });
+        nodes.set(tgtId, { id: tgtId, label: tgtLabel || prettify(tgtId) });
       } else if (tgtLabel) {
         nodes.get(tgtId).label = tgtLabel;
       }
 
       edges.push({ from: srcId, to: tgtId, label: edgeLabel || '' });
     } else {
-      // Standalone node definition: A["Label"]
-      const nodeMatch = line.match(/([A-Za-z0-9_]+)\[["']?(.+?)["']?\]/);
+      // Standalone node definition: A["Label"] or A(Label) or A{Label}
+      const nodeMatch = line.match(/([A-Za-z0-9_\-]+)[\(\[\{]+["']?(.+?)["']?[\)\]\}]+/);
       if (nodeMatch) {
         const [, id, label] = nodeMatch;
         if (!nodes.has(id)) {
           nodes.set(id, { id, label });
         } else {
           nodes.get(id).label = label;
+        }
+      } else if (line.match(/^[A-Za-z0-9_\-]+$/)) {
+        // Just a single ID on a line
+        const id = line.trim();
+        if (!nodes.has(id)) {
+          nodes.set(id, { id, label: prettify(id) });
         }
       }
     }
