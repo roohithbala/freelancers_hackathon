@@ -4,6 +4,7 @@ import { DATE_FORMATS, VALIDATION_RULES } from './constants';
 
 // String manipulation utilities
 export const capitalizeFirst = (str) => {
+  if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
@@ -158,6 +159,7 @@ export const slugify = (text) => {
 };
 
 export const capitalize = (text) => {
+  if (!text) return '';
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
 

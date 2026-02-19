@@ -226,13 +226,15 @@ const getIdeasPrompt = (data, previousIdeas = []) => {
     - Goal: ${goal}
     - Timeframe: ${timeframe}
 
-    AVOID these previously generated ideas:
-    ${previousIdeas.join(', ')}
+    CRITICAL INSTRUCTION - DO NOT REPEAT:
+    The following ideas have ALREADY been generated for this user. You MUST NOT regenerate any of them or anything similar.
+    ${previousIdeas.length > 0 ? `Previously generated ideas (DO NOT USE THESE TITLES OR SIMILAR CONCEPTS):\n${previousIdeas.map(t => `    - "${t}"`).join('\n')}` : 'No previous ideas yet.'}
 
     Rules:
-    1. Ideas must be DISTINCT from each other.
-    2. Ideas must be practical but impressive.
-    3. Focus on solving real problems, not just "learning exercises".
+    1. Ideas must be COMPLETELY DIFFERENT from the previously generated list above.
+    2. Ideas must be DISTINCT from each other.
+    3. Ideas must be practical but impressive.
+    4. Focus on solving real problems, not just "learning exercises".
 
     Return ONLY a raw JSON array of objects (no markdown code blocks).
     Each object must have:

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/authCore';
+import { useAuth } from '../context/AuthContext';
 import { X, Mail, Lock, LogIn, UserPlus, Check, AlertCircle, Sparkles } from 'lucide-react';
 import { db } from '../firebase';
 import { doc, setDoc } from 'firebase/firestore';
@@ -79,20 +79,22 @@ const AuthModal = ({ onClose }) => {
 
         try {
             if (isLogin) {
-                await loginEmail(email, password);
+                await login(email, password);
             } else {
-                const userCredential = await signupEmail(email, password);
-                const user = userCredential.user;
+                const result = await signup(email, password); // Logic inside signup handles profile update
+                const user = authService.getCurrentUser();
                 
-                // Save user role and data to Firestore
-                await setDoc(doc(db, 'users', user.uid), {
-                    uid: user.uid,
-                    email: user.email,
-                    role: role,
-                    usageCount: 0,
-                    isPremium: false,
-                    createdAt: new Date()
-                });
+                if (user) {
+                    // Save user role and data to Firestore
+                    await setDoc(doc(db, 'users', user.uid), {
+                        uid: user.uid,
+                        email: user.email,
+                        role: role,
+                        usageCount: 0,
+                        isPremium: false,
+                        createdAt: new Date()
+                    });
+                }
             }
             onClose();
         } catch (err) {

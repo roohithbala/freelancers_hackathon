@@ -14,53 +14,52 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const { error, success } = useToast();
 
-  // Check authentication status on mount
   useEffect(() => {
-    const initAuth = () => {
-      try {
-        const currentUser = authService.getCurrentUser();
-        const token = authService.getCurrentToken();
-        
-        if (currentUser && token) {
-          setUser(currentUser);
-          setIsAuthenticated(true);
-        }
-      } catch (err) {
-        console.error('Auth initialization error:', err);
-        // Clear invalid session
-        authService.clearSession();
-      } finally {
-        setLoading(false);
-      }
-    };
+    const unsubscribe = authService.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
 
-    initAuth();
+    return unsubscribe;
   }, []);
 
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const result = authService.login(email, password);
-      
+      const result = await authService.login(email, password);
       if (result.success) {
-        setUser(result.user);
-        setIsAuthenticated(true);
         success(SUCCESS_MESSAGES.LOGIN_SUCCESS);
         return { success: true };
       } else {
-        const message = result.error || ERROR_MESSAGES.INVALID_CREDENTIALS;
-        error(message);
-        return { success: false, error: message };
+        error(result.error);
+        return { success: false, error: result.error };
       }
     } catch (err) {
-      const message = err.message || ERROR_MESSAGES.INVALID_CREDENTIALS;
-      error(message);
-      return { success: false, error: message };
+      error(ERROR_MESSAGES.INVALID_CREDENTIALS);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginGoogle = async () => {
+    setLoading(true);
+    try {
+      const result = await authService.loginGoogle();
+      if (result.success) {
+        success(SUCCESS_MESSAGES.LOGIN_SUCCESS);
+        return { success: true };
+      } else {
+        error(result.error);
+        return { success: false, error: result.error };
+      }
+    } catch (err) {
+      error(ERROR_MESSAGES.GENERIC_ERROR);
+      return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
@@ -69,22 +68,17 @@ export const AuthProvider = ({ children }) => {
   const signup = async (name, email, password) => {
     setLoading(true);
     try {
-      const result = authService.signup(name, email, password);
-      
+      const result = await authService.signup(name, email, password);
       if (result.success) {
-        setUser(result.user);
-        setIsAuthenticated(true);
         success(SUCCESS_MESSAGES.SIGNUP_SUCCESS);
         return { success: true };
       } else {
-        const message = result.error || ERROR_MESSAGES.GENERIC_ERROR;
-        error(message);
-        return { success: false, error: message };
+        error(result.error);
+        return { success: false, error: result.error };
       }
     } catch (err) {
-      const message = err.message || ERROR_MESSAGES.GENERIC_ERROR;
-      error(message);
-      return { success: false, error: message };
+      error(ERROR_MESSAGES.GENERIC_ERROR);
+      return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
@@ -92,10 +86,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const result = authService.logout();
+      const result = await authService.logout();
       if (result.success) {
-        setUser(null);
-        setIsAuthenticated(false);
         success(SUCCESS_MESSAGES.LOGOUT_SUCCESS);
       } else {
         error(ERROR_MESSAGES.GENERIC_ERROR);
@@ -108,53 +100,47 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (updates) => {
     setLoading(true);
     try {
-      const result = authService.updateProfile(updates);
-      
+      const result = await authService.updateProfile(updates);
       if (result.success) {
-        setUser(result.user);
         success(SUCCESS_MESSAGES.PROFILE_UPDATED);
         return { success: true };
       } else {
-        const message = result.error || ERROR_MESSAGES.GENERIC_ERROR;
-        error(message);
-        return { success: false, error: message };
+        error(result.error);
+        return { success: false, error: result.error };
       }
     } catch (err) {
-      const message = err.message || ERROR_MESSAGES.GENERIC_ERROR;
-      error(message);
-      return { success: false, error: message };
+      error(ERROR_MESSAGES.GENERIC_ERROR);
+      return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
   };
 
-  const changePassword = async (currentPassword, newPassword) => {
+  const changePassword = async (newPassword) => {
     setLoading(true);
     try {
-      const result = authService.changePassword(currentPassword, newPassword);
-      
+      const result = await authService.updatePassword(newPassword);
       if (result.success) {
         success(SUCCESS_MESSAGES.PASSWORD_CHANGED);
         return { success: true };
       } else {
-        const message = result.error || ERROR_MESSAGES.GENERIC_ERROR;
-        error(message);
-        return { success: false, error: message };
+        error(result.error);
+        return { success: false, error: result.error };
       }
     } catch (err) {
-      const message = err.message || ERROR_MESSAGES.GENERIC_ERROR;
-      error(message);
-      return { success: false, error: message };
+      error(ERROR_MESSAGES.GENERIC_ERROR);
+      return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
   };
 
   const value = {
-    user,
-    isAuthenticated,
+    currentUser,
+    isAuthenticated: !!currentUser,
     loading,
     login,
+    loginGoogle,
     signup,
     logout,
     updateProfile,
@@ -163,7 +149,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

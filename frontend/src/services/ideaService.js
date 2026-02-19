@@ -1,449 +1,312 @@
-import { v4 as uuidv4 } from 'uuid';
-
-// Mock project idea templates based on domain and skill level
-const ideaTemplates = {
-  health: {
-    beginner: {
-      titles: [
-        'Personal Health Tracker App',
-        'Medication Reminder System',
-        'Simple Fitness Logger',
-        'Basic Nutrition Planner',
-        'Health Habit Tracker'
-      ],
-      problems: [
-        'People struggle to maintain consistent health habits and track their daily wellness activities.',
-        'Many individuals forget to take medications on time, leading to health complications.',
-        'Students and professionals find it difficult to maintain a healthy lifestyle while managing busy schedules.',
-        'Lack of simple tools to track basic health metrics and progress over time.'
-      ],
-      techStacks: [
-        ['HTML', 'CSS', 'JavaScript', 'Local Storage'],
-        ['React', 'Tailwind CSS', 'Firebase', 'Chart.js'],
-        ['Vue.js', 'Bootstrap', 'Node.js', 'MongoDB'],
-        ['Flutter', 'Dart', 'Firebase', 'Google Fit API']
-      ],
-      features: [
-        'User profile creation',
-        'Daily health metrics tracking',
-        'Simple data visualization',
-        'Progress reports',
-        'Mobile responsive design',
-        'Basic reminders system'
-      ],
-      roadmaps: [
-        'Week 1-2: Setup project structure and basic UI',
-        'Week 3-4: Implement user authentication',
-        'Week 5-6: Build core tracking features',
-        'Week 7-8: Add data visualization',
-        'Week 9-10: Testing and deployment'
-      ]
-    },
-    intermediate: {
-      titles: [
-        'AI-Powered Health Assistant',
-        'Telemedicine Platform',
-        'Mental Health Companion',
-        'Chronic Disease Management',
-        'Wellness Analytics Platform'
-      ],
-      problems: [
-        'Patients need better tools to manage chronic conditions and communicate with healthcare providers.',
-        'Mental health support is inaccessible and expensive for many people.',
-        'Healthcare data is fragmented across multiple platforms, making it hard to get insights.',
-        'Healthcare providers need efficient ways to monitor patient progress remotely.'
-      ],
-      techStacks: [
-        ['React', 'Node.js', 'Express', 'PostgreSQL', 'AWS'],
-        ['Vue.js', 'Python', 'Django', 'Redis', 'Docker'],
-        ['React Native', 'GraphQL', 'Apollo', 'MongoDB Atlas'],
-        ['Angular', 'Spring Boot', 'MySQL', 'Kubernetes']
-      ],
-      features: [
-        'AI-powered health recommendations',
-        'Real-time chat with healthcare providers',
-        'Advanced analytics dashboard',
-        'Integration with wearable devices',
-        'Secure data encryption',
-        'Multi-platform support'
-      ],
-      roadmaps: [
-        'Month 1: Architecture design and database setup',
-        'Month 2: Core platform development',
-        'Month 3: AI integration and testing',
-        'Month 4: Security implementation',
-        'Month 5: Beta testing and deployment'
-      ]
-    },
-    advanced: {
-      titles: [
-        'Predictive Health Analytics Engine',
-        'Blockchain-Based Medical Records',
-        'AI Diagnostic Assistant',
-        'Personalized Medicine Platform',
-        'IoT Health Monitoring System'
-      ],
-      problems: [
-        'Healthcare systems lack predictive capabilities to prevent diseases before they occur.',
-        'Medical records are siloed, leading to inefficient care and medical errors.',
-        'Doctors need AI assistance to analyze complex medical data and improve diagnosis accuracy.',
-        'Personalized treatment plans based on genetic and lifestyle data are not widely accessible.'
-      ],
-      techStacks: [
-        ['Python', 'TensorFlow', 'React', 'FastAPI', 'Kubernetes', 'AWS'],
-        ['React', 'Node.js', 'Blockchain', 'IPFS', 'PostgreSQL'],
-        ['Vue.js', 'Python', 'PyTorch', 'Docker', 'TensorFlow Serving'],
-        ['Angular', 'Java', 'Spring Boot', 'Apache Kafka', 'Elasticsearch']
-      ],
-      features: [
-        'Machine learning disease prediction',
-        'Blockchain-based medical records',
-        'Real-time IoT data processing',
-        'Advanced diagnostic algorithms',
-        'HIPAA compliance',
-        'Scalable microservices architecture'
-      ],
-      roadmaps: [
-        'Quarter 1: Research and prototyping',
-        'Quarter 2: Core ML model development',
-        'Quarter 3: Platform integration',
-        'Quarter 4: Clinical trials and validation',
-        'Quarter 5: Production deployment'
-      ]
-    }
-  },
-  fintech: {
-    beginner: {
-      titles: [
-        'Personal Budget Tracker',
-        'Expense Splitting App',
-        'Simple Investment Calculator',
-        'Bill Reminder System',
-        'Savings Goal Tracker'
-      ],
-      problems: [
-        'Young adults struggle to manage their finances and track spending habits effectively.',
-        'Roommates and friends find it difficult to split bills and track shared expenses.',
-        'People need simple tools to understand basic investment concepts and calculate returns.',
-        'Missing bill payments leads to late fees and affects credit scores.'
-      ],
-      techStacks: [
-        ['HTML', 'CSS', 'JavaScript', 'Chart.js', 'Local Storage'],
-        ['React', 'Material-UI', 'Firebase', 'Recharts'],
-        ['Vue.js', 'Tailwind CSS', 'Node.js', 'SQLite'],
-        ['Flutter', 'Dart', 'Firebase', 'Local Database']
-      ],
-      features: [
-        'Income and expense tracking',
-        'Budget categorization',
-        'Simple spending reports',
-        'Bill payment reminders',
-        'Savings goal tracking',
-        'Basic financial insights'
-      ],
-      roadmaps: [
-        'Week 1-2: UI design and basic structure',
-        'Week 3-4: Transaction management',
-        'Week 5-6: Budget and categorization',
-        'Week 7-8: Reports and analytics',
-        'Week 9-10: Testing and launch'
-      ]
-    },
-    intermediate: {
-      titles: [
-        'Personal Finance Dashboard',
-        'Investment Portfolio Manager',
-        'Peer-to-Peer Payment App',
-        'Credit Score Monitor',
-        'Automated Savings Platform'
-      ],
-      problems: [
-        'Investors need better tools to manage diverse portfolios and track performance across assets.',
-        'People want to understand and improve their credit scores but lack actionable insights.',
-        'Manual savings processes are inefficient and people struggle to maintain consistent saving habits.',
-        'Small businesses need simple payment processing solutions without high fees.'
-      ],
-      techStacks: [
-        ['React', 'Node.js', 'Express', 'PostgreSQL', 'Plaid API'],
-        ['Vue.js', 'Python', 'Django', 'Redis', 'Stripe API'],
-        ['React Native', 'GraphQL', 'Apollo', 'MongoDB Atlas'],
-        ['Angular', 'Spring Boot', 'MySQL', 'RabbitMQ']
-      ],
-      features: [
-        'Bank account integration',
-        'Real-time portfolio tracking',
-        'Credit score monitoring',
-        'Automated savings rules',
-        'Investment recommendations',
-        'Advanced analytics'
-      ],
-      roadmaps: [
-        'Month 1: Backend API development',
-        'Month 2: Frontend dashboard',
-        'Month 3: Third-party integrations',
-        'Month 4: Security and testing',
-        'Month 5: Deployment and scaling'
-      ]
-    },
-    advanced: {
-      titles: [
-        'AI-Powered Trading Platform',
-        'Decentralized Finance (DeFi) Dashboard',
-        'Algorithmic Trading Bot',
-        'Risk Management System',
-        'Blockchain Analytics Platform'
-      ],
-      problems: [
-        'Traders need AI-powered insights to make better investment decisions in volatile markets.',
-        'DeFi platforms are complex and users need better tools to manage decentralized assets.',
-        'Financial institutions need sophisticated risk management systems to prevent fraud.',
-        'Investors need tools to analyze blockchain data and identify emerging patterns.'
-      ],
-      techStacks: [
-        ['Python', 'TensorFlow', 'React', 'FastAPI', 'Kubernetes', 'AWS'],
-        ['React', 'Node.js', 'Web3.js', 'Solidity', 'IPFS'],
-        ['Vue.js', 'Python', 'PyTorch', 'Docker', 'TensorFlow Serving'],
-        ['Angular', 'Java', 'Spring Boot', 'Apache Kafka', 'Elasticsearch']
-      ],
-      features: [
-        'AI market predictions',
-        'Blockchain integration',
-        'Real-time trading algorithms',
-        'Advanced risk modeling',
-        'Multi-exchange integration',
-        'High-frequency trading support'
-      ],
-      roadmaps: [
-        'Quarter 1: Algorithm development',
-        'Quarter 2: Platform architecture',
-        'Quarter 3: AI model training',
-        'Quarter 4: Security and compliance',
-        'Quarter 5: Production deployment'
-      ]
-    }
-  },
-  education: {
-    beginner: {
-      titles: [
-        'Flashcard Study App',
-        'Simple Quiz Platform',
-        'Assignment Tracker',
-        'Study Timer App',
-        'Note-Taking Tool'
-      ],
-      problems: [
-        'Students need effective tools to memorize information and prepare for exams.',
-        'Teachers struggle to create engaging quizzes and track student progress.',
-        'Students often miss assignment deadlines due to poor time management.',
-        'Note-taking is disorganized across different subjects and platforms.'
-      ],
-      techStacks: [
-        ['HTML', 'CSS', 'JavaScript', 'Local Storage'],
-        ['React', 'Tailwind CSS', 'Firebase', 'Chart.js'],
-        ['Vue.js', 'Bootstrap', 'Node.js', 'MongoDB'],
-        ['Flutter', 'Dart', 'Firebase', 'Local Database']
-      ],
-      features: [
-        'Digital flashcard creation',
-        'Spaced repetition learning',
-        'Simple quiz generation',
-        'Study session tracking',
-        'Note organization',
-        'Progress visualization'
-      ],
-      roadmaps: [
-        'Week 1-2: Basic UI and navigation',
-        'Week 3-4: Flashcard system',
-        'Week 5-6: Quiz functionality',
-        'Week 7-8: Progress tracking',
-        'Week 9-10: Testing and polish'
-      ]
-    },
-    intermediate: {
-      titles: [
-        'Online Learning Platform',
-        'Collaborative Study Space',
-        'Adaptive Learning System',
-        'Virtual Classroom',
-        'Educational Analytics Dashboard'
-      ],
-      problems: [
-        'Online education lacks personalization and adaptation to individual learning styles.',
-        'Students need better collaboration tools for group projects and study sessions.',
-        'Teachers need analytics to understand student engagement and identify struggling learners.',
-        'Remote learning requires better tools for interaction and engagement.'
-      ],
-      techStacks: [
-        ['React', 'Node.js', 'Express', 'PostgreSQL', 'WebRTC'],
-        ['Vue.js', 'Python', 'Django', 'Redis', 'Socket.io'],
-        ['React Native', 'GraphQL', 'Apollo', 'MongoDB Atlas'],
-        ['Angular', 'Spring Boot', 'MySQL', 'Kafka']
-      ],
-      features: [
-        'Video conferencing',
-        'Real-time collaboration',
-        'Adaptive learning paths',
-        'Progress analytics',
-        'Interactive content',
-        'Peer-to-peer learning'
-      ],
-      roadmaps: [
-        'Month 1: Core platform development',
-        'Month 2: Video and collaboration',
-        'Month 3: Adaptive algorithms',
-        'Month 4: Analytics dashboard',
-        'Month 5: Testing and deployment'
-      ]
-    },
-    advanced: {
-      titles: [
-        'AI-Powered Tutoring System',
-        'Personalized Learning Platform',
-        'Educational Content Generator',
-        'Skill Assessment Engine',
-        'Immersive Learning Experience'
-      ],
-      problems: [
-        'Personalized education at scale is challenging with traditional teaching methods.',
-        'Creating educational content is time-consuming and often not personalized to learning styles.',
-        'Assessing practical skills automatically requires advanced AI and analytics.',
-        'Traditional education lacks immersive experiences that improve engagement and retention.'
-      ],
-      techStacks: [
-        ['Python', 'TensorFlow', 'React', 'FastAPI', 'Kubernetes', 'AWS'],
-        ['React', 'Node.js', 'OpenAI API', 'PostgreSQL', 'Redis'],
-        ['Vue.js', 'Python', 'PyTorch', 'Docker', 'TensorFlow Serving'],
-        ['Angular', 'Java', 'Spring Boot', 'Apache Kafka', 'Elasticsearch']
-      ],
-      features: [
-        'AI tutoring assistance',
-        'Personalized content generation',
-        'Advanced skill assessment',
-        'VR/AR integration',
-        'Natural language processing',
-        'Predictive learning analytics'
-      ],
-      roadmaps: [
-        'Quarter 1: AI model development',
-        'Quarter 2: Platform integration',
-        'Quarter 3: Content generation',
-        'Quarter 4: Immersive features',
-        'Quarter 5: Production deployment'
-      ]
-    }
-  }
-};
+import { db } from '../firebase';
+import { collection, addDoc, getDocs, query, where, doc, deleteDoc } from 'firebase/firestore';
 
 class IdeaService {
   constructor() {
-    this.storageKey = 'saved_ideas';
-    this.initializeStorage();
+    this.apiBase = 'http://localhost:5000/api';
   }
 
-  initializeStorage() {
-    if (!localStorage.getItem(this.storageKey)) {
-      localStorage.setItem(this.storageKey, JSON.stringify([]));
+  // Fetch ALL previous idea titles (both saved projects and generated content) to avoid duplicates
+  async getPreviousProjectTitles(currentUser) {
+    if (!currentUser) return [];
+    const allTitles = new Set();
+    try {
+      // 1. From saved projects
+      const savedQ = query(
+        collection(db, "projects"),
+        where("userId", "==", currentUser.uid)
+      );
+      const savedSnap = await getDocs(savedQ);
+      savedSnap.docs.forEach(d => {
+        const title = d.data().title;
+        if (title) allTitles.add(title);
+      });
+
+      // 2. From all generated content (ideas + blueprints)
+      const genQ = query(
+        collection(db, "generated_content"),
+        where("userId", "==", currentUser.uid)
+      );
+      const genSnap = await getDocs(genQ);
+      genSnap.docs.forEach(d => {
+        const data = d.data();
+        if (data.title) allTitles.add(data.title);
+        // Also extract titles from generated idea arrays
+        if (data.ideas && Array.isArray(data.ideas)) {
+          data.ideas.forEach(idea => {
+            if (idea.title) allTitles.add(idea.title);
+          });
+        }
+      });
+    } catch (e) {
+      console.warn('Could not fetch previous projects:', e);
+    }
+    return [...allTitles];
+  }
+
+  // Save user prompt/selection history to Firestore for learning
+  async savePromptHistory(currentUser, promptData) {
+    if (!currentUser) return;
+    try {
+      await addDoc(collection(db, "prompt_history"), {
+        userId: currentUser.uid,
+        ...promptData,
+        createdAt: new Date()
+      });
+    } catch (e) {
+      console.warn('Could not save prompt history:', e);
     }
   }
 
-  // Synchronous mock data generation
-  generateIdea(domain, skillLevel) {
+  // Fetch user's past prompt preferences
+  async getUserPreferences(currentUser) {
+    if (!currentUser) return { domains: [], techStacks: [], goals: [] };
     try {
-      const templates = ideaTemplates[domain]?.[skillLevel];
+      const q = query(
+        collection(db, "prompt_history"),
+        where("userId", "==", currentUser.uid),
+        orderBy("createdAt", "desc"),
+        limit(10)
+      );
+      const snapshot = await getDocs(q);
+      const history = snapshot.docs.map(doc => doc.data());
+      return {
+        domains: [...new Set(history.map(h => h.domain).filter(Boolean))],
+        techStacks: [...new Set(history.flatMap(h => (h.techStack || '').split(',').map(s => s.trim())).filter(Boolean))],
+        goals: [...new Set(history.map(h => h.goal).filter(Boolean))],
+        recentSelections: history.filter(h => h.type === 'idea_selected').map(h => h.selectedTitle)
+      };
+    } catch (e) {
+      console.warn('Could not fetch user preferences:', e);
+      return { domains: [], techStacks: [], goals: [] };
+    }
+  }
+
+  // Real AI generation calling our backend
+  async generateIdeas(formData, currentUser) {
+    try {
+      // Get previous projects to avoid duplicates
+      const previousProjects = currentUser ? await this.getPreviousProjectTitles(currentUser) : [];
+
+      // Save this prompt to history
+      await this.savePromptHistory(currentUser, {
+        type: 'generate_ideas',
+        domain: formData.domain,
+        skillLevel: formData.skillLevel,
+        techStack: formData.techStack,
+        goal: formData.goal,
+        timeframe: formData.timeframe
+      });
+
+      const res = await fetch(`${this.apiBase}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: formData.domain,
+          skillLevel: formData.skillLevel,
+          techStack: formData.techStack || 'Any',
+          goal: formData.goal || 'Startup MVP',
+          timeframe: formData.timeframe || '1 Month',
+          mode: 'ideas',
+          previousProjects: previousProjects,
+          role: 'Student',
+          isPremium: false
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate ideas');
+      }
       
-      if (!templates) {
-        throw new Error('Invalid domain or skill level');
+      const result = await res.json();
+
+      // Save all generated ideas to Firestore
+      if (currentUser && result.ideas?.length) {
+        try {
+          await addDoc(collection(db, "generated_content"), {
+            userId: currentUser.uid,
+            type: 'ideas',
+            ideas: result.ideas,
+            prompt: {
+              domain: formData.domain,
+              skillLevel: formData.skillLevel,
+              techStack: formData.techStack,
+              goal: formData.goal,
+              timeframe: formData.timeframe
+            },
+            createdAt: new Date()
+          });
+        } catch (e) {
+          console.warn('Could not save generated ideas:', e);
+        }
       }
 
-      // Randomly select from templates
-      const title = this.getRandomItem(templates.titles);
-      const problem = this.getRandomItem(templates.problems);
-      const techStack = this.getRandomItem(templates.techStacks);
-      const features = this.getRandomItems(templates.features, 4);
-      const roadmap = templates.roadmaps;
+      return { success: true, data: result.ideas };
+    } catch (error) {
+      console.error('Error generating ideas:', error);
+      return { success: false, error: error.message };
+    }
+  }
 
-      const idea = {
-        id: uuidv4(),
-        title,
-        domain,
-        skillLevel,
-        problem,
-        techStack,
-        features,
-        roadmap,
-        createdAt: new Date().toISOString(),
-        saved: false
+  async generateBlueprint(idea, formData, currentUser) {
+    try {
+      // Save this selection to history
+      await this.savePromptHistory(currentUser, {
+        type: 'idea_selected',
+        selectedTitle: idea.title,
+        domain: formData.domain,
+        skillLevel: formData.skillLevel
+      });
+
+      const res = await fetch(`${this.apiBase}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: formData.domain,
+          skillLevel: formData.skillLevel,
+          techStack: formData.techStack || 'Any',
+          goal: formData.goal || 'Startup MVP',
+          timeframe: formData.timeframe || '1 Month',
+          mode: 'blueprint',
+          selectedIdea: idea,
+          isPremium: false,
+          role: 'Student'
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate blueprint');
+      }
+      
+      const data = await res.json();
+      
+      const generatedIdea = {
+        ...idea,
+        blueprint: data.blueprint,
+        data: data.data,
+        problem: data.data?.problem || idea.description || '',
+        features: data.data?.features || idea.features || [],
+        roadmap: data.data?.roadmap || idea.roadmap || [],
+        techStack: Array.isArray(data.data?.techStack)
+          ? data.data.techStack.map(t => typeof t === 'string' ? t : t.name || t)
+          : idea.tech_stack || [],
+        title: data.data?.title || idea.title || '',
+        domain: formData.domain,
+        skillLevel: formData.skillLevel
       };
 
-      return { success: true, data: idea };
+      // Save the full blueprint to Firestore
+      if (currentUser) {
+        try {
+          await addDoc(collection(db, "generated_content"), {
+            userId: currentUser.uid,
+            type: 'blueprint',
+            title: idea.title,
+            blueprint: data.blueprint,
+            structuredData: data.data,
+            prompt: {
+              domain: formData.domain,
+              skillLevel: formData.skillLevel,
+              techStack: formData.techStack,
+              goal: formData.goal,
+              timeframe: formData.timeframe
+            },
+            createdAt: new Date()
+          });
+        } catch (e) {
+          console.warn('Could not save generated blueprint:', e);
+        }
+      }
+
+      return { success: true, data: generatedIdea };
+    } catch (error) {
+      console.error('Error generating blueprint:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async saveIdea(idea, currentUser) {
+    if (!currentUser) return { success: false, error: 'User not authenticated' };
+    try {
+      // Check for duplicate: don't save if title already exists for this user
+      const existingQ = query(
+        collection(db, "projects"),
+        where("userId", "==", currentUser.uid),
+        where("title", "==", idea.title || "Untitled Project")
+      );
+      const existingSnap = await getDocs(existingQ);
+      if (!existingSnap.empty) {
+        return { success: false, error: 'This project is already saved.' };
+      }
+
+      // Save the COMPLETE project data including all structured fields
+      const structuredData = idea.data || {};
+      const projectData = {
+        userId: currentUser.uid,
+        title: idea.title || "Untitled Project",
+        description: idea.description || '',
+        problem: idea.problem || '',
+        features: Array.isArray(idea.features) ? idea.features : [],
+        techStack: Array.isArray(idea.techStack) ? idea.techStack : [],
+        roadmap: Array.isArray(idea.roadmap) ? idea.roadmap : [],
+        blueprint: idea.blueprint || '',
+        domain: idea.domain || '',
+        skillLevel: idea.skillLevel || '',
+        goal: idea.goal || '',
+        timeframe: idea.timeframe || '',
+        // Full structured data from AI blueprint
+        pitchDeck: structuredData.pitchDeck || idea.pitchDeck || [],
+        scores: structuredData.scores || idea.scores || {},
+        costEstimate: structuredData.costEstimate || idea.costEstimate || {},
+        mockUI: structuredData.mockUI || idea.mockUI || {},
+        createdAt: new Date(),
+        saved: true
+      };
+
+      const docRef = await addDoc(collection(db, "projects"), projectData);
+
+      // Track this save in prompt history
+      await this.savePromptHistory(currentUser, {
+        type: 'idea_saved',
+        selectedTitle: idea.title,
+        domain: idea.domain
+      });
+
+      return { success: true, data: { ...projectData, id: docRef.id } };
     } catch (error) {
       return { success: false, error: error.message };
     }
   }
 
-  saveIdea(idea) {
+  async getSavedIdeas(currentUser) {
+    if (!currentUser) return [];
     try {
-      const savedIdeas = this.getSavedIdeas();
-      const ideaToSave = { ...idea, id: uuidv4(), saved: true, savedAt: new Date().toISOString() };
-      savedIdeas.push(ideaToSave);
-      localStorage.setItem(this.storageKey, JSON.stringify(savedIdeas));
-      return { success: true, data: ideaToSave };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  getSavedIdeas() {
-    try {
-      return JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+      const q = query(collection(db, "projects"), where("userId", "==", currentUser.uid));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
       console.error('Error reading saved ideas:', error);
       return [];
     }
   }
 
-  deleteIdea(ideaId) {
+  async deleteIdea(ideaId) {
     try {
-      const savedIdeas = this.getSavedIdeas();
-      const filteredIdeas = savedIdeas.filter(idea => idea.id !== ideaId);
-      localStorage.setItem(this.storageKey, JSON.stringify(filteredIdeas));
+      await deleteDoc(doc(db, "projects", ideaId));
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
     }
   }
 
-  bookmarkIdea(ideaId) {
-    try {
-      const savedIdeas = this.getSavedIdeas();
-      const idea = savedIdeas.find(i => i.id === ideaId);
-      if (idea) {
-        idea.bookmarked = !idea.bookmarked;
-        localStorage.setItem(this.storageKey, JSON.stringify(savedIdeas));
-        return { success: true, bookmarked: idea.bookmarked };
-      } else {
-        return { success: false, error: 'Idea not found' };
-      }
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  getRandomItem(array) {
-    return array[Math.floor(Math.random() * array.length)];
-  }
-
-  getRandomItems(array, count) {
-    const shuffled = [...array].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-  }
-
   getDomains() {
-    return Object.keys(ideaTemplates);
+    return ['health', 'fintech', 'education', 'ecommerce', 'streaming', 'social', 'security'];
   }
 
   getSkillLevels() {
-    return ['beginner', 'intermediate', 'advanced'];
+    return ['novice', 'beginner', 'intermediate', 'advanced'];
   }
 }
 

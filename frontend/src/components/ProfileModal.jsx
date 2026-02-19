@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/authCore';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { X, User, Save, LogOut, Key, ChevronDown, ChevronUp, Shield, Zap } from 'lucide-react';
+import { X, User, Save, LogOut, Key, ChevronDown, ChevronUp, Shield, Zap, Mail, Edit3, Check } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 const ProfileModal = ({ onClose }) => {
-    const { currentUser, logout, updateUserPassword } = useAuth();
+    const { currentUser, logout, changePassword, updateProfile } = useAuth();
+    const { isDarkMode } = useTheme();
     const [role, setRole] = useState('Student');
     
+    // Display name editing
+    const [displayName, setDisplayName] = useState('');
+    const [editingName, setEditingName] = useState(false);
+
     // Password Change State
     const [showPasswordChange, setShowPasswordChange] = useState(false);
     const [newPassword, setNewPassword] = useState('');
@@ -18,19 +24,23 @@ const ProfileModal = ({ onClose }) => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
 
     useEffect(() => {
         const fetchUserData = async () => {
             if (!currentUser) return;
+            setDisplayName(currentUser.displayName || currentUser.email?.split('@')[0] || '');
             try {
                 const docRef = doc(db, "users", currentUser.uid);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setRole(docSnap.data().role || 'Student');
+                    if (docSnap.data().displayName) {
+                        setDisplayName(docSnap.data().displayName);
+                    }
                 }
             } catch (err) {
                 console.error("Error fetching user data:", err);
-                setError("Failed to load profile.");
             } finally {
                 setLoading(false);
             }
@@ -41,10 +51,24 @@ const ProfileModal = ({ onClose }) => {
     const handleSave = async () => {
         setSaving(true);
         setError('');
+        setSuccessMsg('');
         try {
             const docRef = doc(db, "users", currentUser.uid);
-            await setDoc(docRef, { role: role }, { merge: true });
-            onClose();
+            await setDoc(docRef, { 
+                role, 
+                displayName,
+                email: currentUser.email,
+                updatedAt: new Date()
+            }, { merge: true });
+
+            // Update Firebase Auth profile
+            if (updateProfile && displayName !== currentUser.displayName) {
+                await updateProfile({ displayName });
+            }
+
+            setSuccessMsg('Profile saved successfully!');
+            setEditingName(false);
+            setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) {
             console.error("Error updating profile:", err);
             setError("Failed to update profile.");
@@ -78,7 +102,7 @@ const ProfileModal = ({ onClose }) => {
 
         setSaving(true);
         try {
-            await updateUserPassword(newPassword);
+            await changePassword(newPassword);
             setPasswordMessage({ type: 'success', text: 'Password updated successfully!' });
             setNewPassword('');
             setConfirmNewPassword('');
@@ -103,7 +127,8 @@ const ProfileModal = ({ onClose }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-[#0B0B15]/80 z-50 flex items-center justify-center p-4 backdrop-blur-md"
+                className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-md"
+                onClick={(e) => e.target === e.currentTarget && onClose()}
             >
                 <Motion.div 
                     initial={{ scale: 0.95, opacity: 0, y: 30 }}
@@ -112,170 +137,206 @@ const ProfileModal = ({ onClose }) => {
                     transition={{ type: "spring", stiffness: 350, damping: 25 }}
                     className="relative w-full max-w-md flex flex-col max-h-[90vh]"
                 >
-                    {/* Glass Card */}
-                    <div className="glass-panel p-1 rounded-3xl overflow-hidden relative shadow-2xl flex flex-col max-h-full">
-                         {/* Gradient Glow */}
-                         <div className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
-                         <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div className="bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-full">
+                        
+                        {/* Close Button */}
+                        <button 
+                            onClick={onClose}
+                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 text-gray-400 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white transition-all z-20"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
 
-                        <div className="bg-[#0f1016]/95 backdrop-blur-xl rounded-[20px] relative flex flex-col overflow-hidden max-h-full">
-                            
-                            {/* Close Button */}
-                            <button 
-                                onClick={onClose}
-                                className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/5 text-slate-400 hover:text-white transition-all z-20"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-
-                            {/* Header */}
-                            <div className="p-8 pb-6 text-center border-b border-white/5 relative z-10 flex-shrink-0">
-                                <div className="relative inline-block mb-4 group">
-                                    <div className="absolute inset-0 bg-blue-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                                    <img 
-                                        src={currentUser.photoURL || `https://ui-avatars.com/api/?name=${currentUser.email}&background=0D8ABC&color=fff`} 
-                                        alt="User" 
-                                        className="h-20 w-20 rounded-full border-2 border-white/20 shadow-xl relative z-10" 
-                                    />
-                                    <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1.5 border-4 border-[#0f1016] z-20">
-                                        <User className="h-3 w-3 text-white" />
-                                    </div>
-                                </div>
-                                <h2 className="text-xl font-bold text-white mb-1 font-display tracking-tight">{currentUser.email}</h2>
-                                <div className="flex items-center justify-center space-x-2">
-                                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-wider">
-                                        {role} Account
-                                    </span>
+                        {/* Header with Avatar */}
+                        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-8 pb-14 text-center relative">
+                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
+                                <div className="w-20 h-20 rounded-2xl bg-white dark:bg-slate-900 p-1 shadow-xl border-4 border-white dark:border-slate-900">
+                                    {currentUser.photoURL ? (
+                                        <img src={currentUser.photoURL} alt="User" className="w-full h-full rounded-xl object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                                            <User className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+                            <h2 className="text-lg font-black text-white uppercase tracking-wider">My Profile</h2>
+                        </div>
 
-                            {/* Body - Scrollable */}
-                            <div className="p-8 space-y-6 relative z-10 overflow-y-auto custom-scrollbar">
-                                {error && (
-                                    <div className="bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-3 rounded-xl text-sm flex items-center">
-                                        <Shield className="w-4 h-4 mr-2" />
-                                        {error}
-                                    </div>
-                                )}
+                        {/* Body - Scrollable */}
+                        <div className="p-8 pt-14 space-y-6 overflow-y-auto">
+                            {/* Messages */}
+                            {error && (
+                                <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm font-medium">
+                                    {error}
+                                </div>
+                            )}
+                            {successMsg && (
+                                <div className="bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2">
+                                    <Check className="w-4 h-4" /> {successMsg}
+                                </div>
+                            )}
 
-                                {loading ? (
-                                    <div className="text-center text-slate-400 py-8 flex items-center justify-center space-x-2">
-                                        <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce"></div>
-                                        <div className="w-4 h-4 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                        <div className="w-4 h-4 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                    </div>
-                                ) : (
+                            {loading ? (
+                                <div className="text-center py-8">
+                                    <div className="w-6 h-6 border-2 border-indigo-200 dark:border-indigo-800 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Display Name */}
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-1">Configuration Profile</label>
+                                        <label className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Display Name</label>
+                                        <div className="flex items-center gap-2">
+                                            {editingName ? (
+                                                <input
+                                                    type="text"
+                                                    value={displayName}
+                                                    onChange={(e) => setDisplayName(e.target.value)}
+                                                    className="flex-1 px-4 py-3 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                                                    autoFocus
+                                                />
+                                            ) : (
+                                                <div className="flex-1 px-4 py-3 bg-gray-50 dark:bg-slate-800 border-2 border-gray-100 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white text-sm font-semibold">
+                                                    {displayName || 'Not set'}
+                                                </div>
+                                            )}
+                                            <button
+                                                onClick={() => setEditingName(!editingName)}
+                                                className="p-3 rounded-xl bg-gray-50 dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all"
+                                            >
+                                                <Edit3 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Email (read-only) */}
+                                    <div>
+                                        <label className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Email Address</label>
+                                        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-slate-800 border-2 border-gray-100 dark:border-slate-700 rounded-xl">
+                                            <Mail className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                                            <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{currentUser.email}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Role Selection */}
+                                    <div>
+                                        <label className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Account Role</label>
                                         <div className="grid grid-cols-2 gap-3">
                                             <button
                                                 type="button"
                                                 onClick={() => setRole('Student')}
-                                                className={`p-4 rounded-xl border text-center transition-all duration-300 group ${
+                                                className={`p-4 rounded-xl border-2 text-center transition-all duration-300 ${
                                                     role === 'Student' 
-                                                    ? 'bg-blue-600/20 border-blue-500/50 text-white shadow-[0_0_20px_-5px_rgba(59,130,246,0.3)]' 
-                                                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:border-white/20'
+                                                    ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 shadow-md' 
+                                                    : 'bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
                                                 }`}
                                             >
-                                                <div className="font-bold mb-1 flex justify-center"><Zap className={`w-5 h-5 mb-2 ${role === 'Student' ? 'text-blue-400' : 'text-slate-500'}`} /></div>
-                                                <div className="font-bold text-sm mb-0.5">Student</div>
-                                                <div className="text-[10px] opacity-70">Explore & Learn</div>
+                                                <Zap className={`w-5 h-5 mx-auto mb-2 ${role === 'Student' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                                                <div className={`font-bold text-sm ${role === 'Student' ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-600 dark:text-gray-400'}`}>Student</div>
+                                                <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Explore & Learn</div>
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setRole('Startup')}
-                                                className={`p-4 rounded-xl border text-center transition-all duration-300 group ${
+                                                className={`p-4 rounded-xl border-2 text-center transition-all duration-300 ${
                                                     role === 'Startup' 
-                                                    ? 'bg-purple-600/20 border-purple-500/50 text-white shadow-[0_0_20px_-5px_rgba(168,85,247,0.3)]' 
-                                                    : 'bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:border-white/20'
+                                                    ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700 shadow-md' 
+                                                    : 'bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
                                                 }`}
                                             >
-                                                <div className="font-bold mb-1 flex justify-center"><Shield className={`w-5 h-5 mb-2 ${role === 'Startup' ? 'text-purple-400' : 'text-slate-500'}`} /></div>
-                                                <div className="font-bold text-sm mb-0.5">Startup</div>
-                                                <div className="text-[10px] opacity-70">Build & Launch</div>
+                                                <Shield className={`w-5 h-5 mx-auto mb-2 ${role === 'Startup' ? 'text-purple-600 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                                                <div className={`font-bold text-sm ${role === 'Startup' ? 'text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400'}`}>Startup</div>
+                                                <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">Build & Launch</div>
                                             </button>
                                         </div>
                                     </div>
-                                )}
 
-                                <div className="border-t border-white/5 pt-4">
-                                    <button 
-                                        onClick={() => setShowPasswordChange(!showPasswordChange)}
-                                        className="flex items-center justify-between w-full text-left text-slate-300 hover:text-white transition-colors p-3 rounded-xl hover:bg-white/5 group border border-transparent hover:border-white/10"
-                                    >
-                                        <span className="flex items-center font-medium text-sm">
-                                            <Key className="w-4 h-4 mr-3 text-slate-500 group-hover:text-blue-400 transition-colors" /> Change Password
-                                        </span>
-                                        {showPasswordChange ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                    </button>
+                                    {/* Change Password Section */}
+                                    <div className="border-t-2 border-gray-100 dark:border-slate-800 pt-4">
+                                        <button 
+                                            onClick={() => setShowPasswordChange(!showPasswordChange)}
+                                            className="flex items-center justify-between w-full text-left text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white transition-colors p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 group border-2 border-transparent hover:border-gray-200 dark:hover:border-slate-700"
+                                        >
+                                            <span className="flex items-center font-bold text-sm">
+                                                <Key className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500 group-hover:text-indigo-500 transition-colors" /> Change Password
+                                            </span>
+                                            {showPasswordChange ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                        </button>
 
-                                    <AnimatePresence>
-                                        {showPasswordChange && (
-                                            <Motion.form 
-                                                initial={{ height: 0, opacity: 0 }}
-                                                animate={{ height: "auto", opacity: 1 }}
-                                                exit={{ height: 0, opacity: 0 }}
-                                                onSubmit={handleChangePassword} 
-                                                className="mt-3 space-y-3 overflow-hidden"
-                                            >
-                                                {passwordMessage && (
-                                                    <div className={`text-xs p-3 rounded-lg border ${
-                                                        passwordMessage.type === 'error' 
-                                                        ? 'bg-red-500/10 border-red-500/20 text-red-200' 
-                                                        : 'bg-green-500/10 border-green-500/20 text-green-200'
-                                                    }`}>
-                                                        {passwordMessage.text}
-                                                    </div>
-                                                )}
-                                                
-                                                <input
-                                                    type="password"
-                                                    value={newPassword}
-                                                    onChange={(e) => setNewPassword(e.target.value)}
-                                                    placeholder="New Password"
-                                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:bg-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
-                                                    required
-                                                />
-                                                <input
-                                                    type="password"
-                                                    value={confirmNewPassword}
-                                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                                                    placeholder="Confirm New Password"
-                                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:bg-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 outline-none transition-all placeholder:text-slate-600"
-                                                    required
-                                                />
-                                                <button
-                                                    type="submit"
-                                                    disabled={saving}
-                                                    className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-xl transition-colors font-medium border border-slate-600 hover:border-slate-500"
+                                        <AnimatePresence>
+                                            {showPasswordChange && (
+                                                <Motion.form 
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    onSubmit={handleChangePassword} 
+                                                    className="mt-3 space-y-3 overflow-hidden"
                                                 >
-                                                    Update Password
-                                                </button>
-                                            </Motion.form>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
+                                                    {passwordMessage && (
+                                                        <div className={`text-xs p-3 rounded-xl border-2 font-medium ${
+                                                            passwordMessage.type === 'error' 
+                                                            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300' 
+                                                            : 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+                                                        }`}>
+                                                            {passwordMessage.text}
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <input
+                                                        type="password"
+                                                        value={newPassword}
+                                                        onChange={(e) => setNewPassword(e.target.value)}
+                                                        placeholder="New Password (min. 8 chars)"
+                                                        className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                                                        required
+                                                    />
+                                                    <input
+                                                        type="password"
+                                                        value={confirmNewPassword}
+                                                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                                        placeholder="Confirm New Password"
+                                                        className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600"
+                                                        required
+                                                    />
+                                                    <button
+                                                        type="submit"
+                                                        disabled={saving}
+                                                        className="w-full py-3 bg-gray-800 dark:bg-slate-700 hover:bg-gray-700 dark:hover:bg-slate-600 text-white text-sm rounded-xl transition-colors font-bold border-2 border-gray-700 dark:border-slate-600 disabled:opacity-50"
+                                                    >
+                                                        {saving ? 'Updating...' : 'Update Password'}
+                                                    </button>
+                                                </Motion.form>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                </>
+                            )}
 
-                                <div className="pt-2 flex flex-col gap-3">
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={loading || saving}
-                                        className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all flex justify-center items-center shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {saving ? 'Saving...' : (
-                                            <>
-                                                <Save className="mr-2 h-4 w-4" /> Save Profile
-                                            </>
-                                        )}
-                                    </button>
+                            {/* Action Buttons */}
+                            <div className="pt-2 flex flex-col gap-3">
+                                <button
+                                    onClick={handleSave}
+                                    disabled={loading || saving}
+                                    className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all flex justify-center items-center shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm"
+                                >
+                                    {saving ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            Saving...
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Save className="mr-2 h-4 w-4" /> Save Profile
+                                        </>
+                                    )}
+                                </button>
 
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full py-3 bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 text-slate-300 hover:text-red-400 font-medium rounded-xl transition-colors flex justify-center items-center group"
-                                    >
-                                        <LogOut className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" /> Sign Out
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full py-3.5 bg-gray-50 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/20 border-2 border-gray-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-800 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 font-bold rounded-xl transition-all flex justify-center items-center group uppercase tracking-wider text-sm"
+                                >
+                                    <LogOut className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" /> Sign Out
+                                </button>
                             </div>
                         </div>
                     </div>

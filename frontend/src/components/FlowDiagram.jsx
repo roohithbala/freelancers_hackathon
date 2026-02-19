@@ -1,227 +1,274 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { 
-  User, 
-  Database, 
-  Shield, 
-  ArrowRight, 
-  ArrowDown, 
-  ArrowLeft, 
-  ArrowUp,
+  ArrowRight,
+  User,
+  Database,
+  Shield,
   Globe,
-  Lock,
   Code,
-  Zap,
   Server,
   Cloud,
   Smartphone,
   Monitor,
-  CheckCircle,
-  AlertCircle,
-  Info
+  Zap,
+  Cpu,
+  HardDrive,
+  Layers,
+  Lock,
+  Wifi
 } from 'lucide-react';
 
+// Parse a Mermaid "graph TD" or "graph LR" block into nodes and edges
+function parseMermaid(mermaidCode) {
+  const nodes = new Map();
+  const edges = [];
+
+  if (!mermaidCode) return { nodes: [], edges: [] };
+
+  const lines = mermaidCode.split('\n').map(l => l.trim()).filter(Boolean);
+
+  for (const line of lines) {
+    if (line.startsWith('graph') || line.startsWith('%%') || line.startsWith('subgraph') || line === 'end') continue;
+
+    // Match: A["Label"] -->|text| B["Label"]  or  A --> B  or  A["Label"] --> B["Label"]
+    const edgeMatch = line.match(
+      /([A-Za-z0-9_]+)(?:\[["']?(.+?)["']?\])?\s*--+>?\s*(?:\|(.+?)\|\s*)?([A-Za-z0-9_]+)(?:\[["']?(.+?)["']?\])?/
+    );
+
+    if (edgeMatch) {
+      const [, srcId, srcLabel, edgeLabel, tgtId, tgtLabel] = edgeMatch;
+      
+      if (!nodes.has(srcId)) {
+        nodes.set(srcId, { id: srcId, label: srcLabel || srcId });
+      } else if (srcLabel) {
+        nodes.get(srcId).label = srcLabel;
+      }
+
+      if (!nodes.has(tgtId)) {
+        nodes.set(tgtId, { id: tgtId, label: tgtLabel || tgtId });
+      } else if (tgtLabel) {
+        nodes.get(tgtId).label = tgtLabel;
+      }
+
+      edges.push({ from: srcId, to: tgtId, label: edgeLabel || '' });
+    } else {
+      // Standalone node definition: A["Label"]
+      const nodeMatch = line.match(/([A-Za-z0-9_]+)\[["']?(.+?)["']?\]/);
+      if (nodeMatch) {
+        const [, id, label] = nodeMatch;
+        if (!nodes.has(id)) {
+          nodes.set(id, { id, label });
+        } else {
+          nodes.get(id).label = label;
+        }
+      }
+    }
+  }
+
+  return { nodes: [...nodes.values()], edges };
+}
+
+// Guess an icon and color based on node label
+function getNodeStyle(label) {
+  const l = label.toLowerCase();
+  if (l.includes('user') || l.includes('client') || l.includes('mobile') || l.includes('app'))
+    return { icon: <Smartphone className="w-5 h-5" />, color: 'from-blue-500 to-indigo-600' };
+  if (l.includes('auth') || l.includes('login') || l.includes('security'))
+    return { icon: <Shield className="w-5 h-5" />, color: 'from-emerald-500 to-green-600' };
+  if (l.includes('db') || l.includes('database') || l.includes('mongo') || l.includes('postgres') || l.includes('sql') || l.includes('firebase') || l.includes('supabase'))
+    return { icon: <Database className="w-5 h-5" />, color: 'from-purple-500 to-pink-600' };
+  if (l.includes('api') || l.includes('gateway') || l.includes('endpoint') || l.includes('rest') || l.includes('graphql'))
+    return { icon: <Code className="w-5 h-5" />, color: 'from-orange-500 to-red-500' };
+  if (l.includes('server') || l.includes('backend') || l.includes('service') || l.includes('engine'))
+    return { icon: <Server className="w-5 h-5" />, color: 'from-cyan-500 to-blue-600' };
+  if (l.includes('cloud') || l.includes('cdn') || l.includes('aws') || l.includes('deploy'))
+    return { icon: <Cloud className="w-5 h-5" />, color: 'from-indigo-500 to-purple-600' };
+  if (l.includes('web') || l.includes('frontend') || l.includes('react') || l.includes('ui'))
+    return { icon: <Monitor className="w-5 h-5" />, color: 'from-teal-500 to-cyan-600' };
+  if (l.includes('ai') || l.includes('ml') || l.includes('model') || l.includes('llm') || l.includes('analysis'))
+    return { icon: <Cpu className="w-5 h-5" />, color: 'from-violet-500 to-purple-600' };
+  if (l.includes('cache') || l.includes('redis') || l.includes('queue'))
+    return { icon: <HardDrive className="w-5 h-5" />, color: 'from-amber-500 to-orange-600' };
+  if (l.includes('state') || l.includes('sync') || l.includes('layer'))
+    return { icon: <Layers className="w-5 h-5" />, color: 'from-rose-500 to-pink-600' };
+  if (l.includes('socket') || l.includes('realtime') || l.includes('stream'))
+    return { icon: <Wifi className="w-5 h-5" />, color: 'from-green-500 to-emerald-600' };
+  if (l.includes('lock') || l.includes('encrypt') || l.includes('token'))
+    return { icon: <Lock className="w-5 h-5" />, color: 'from-red-500 to-rose-600' };
+  return { icon: <Zap className="w-5 h-5" />, color: 'from-gray-500 to-slate-600' };
+}
+
 const FlowDiagram = ({ projectData }) => {
-  const [activeFlow, setActiveFlow] = useState('user');
-
-  const getNodeIcon = (nodeType) => {
-    switch (nodeType) {
-      case 'user': return <User className="w-5 h-5" />;
-      case 'auth': return <Shield className="w-5 h-5" />;
-      case 'database': return <Database className="w-5 h-5" />;
-      case 'api': return <Code className="w-5 h-5" />;
-      case 'server': return <Server className="w-5 h-5" />;
-      case 'cloud': return <Cloud className="w-5 h-5" />;
-      case 'mobile': return <Smartphone className="w-5 h-5" />;
-      case 'web': return <Monitor className="w-5 h-5" />;
-      case 'lock': return <Lock className="w-5 h-5" />;
-      case 'globe': return <Globe className="w-5 h-5" />;
-      default: return <Zap className="w-5 h-5" />;
-    }
-  };
-
-  const getNodeColor = (nodeType) => {
-    switch (nodeType) {
-      case 'user': return 'from-blue-400 to-indigo-500';
-      case 'auth': return 'from-green-400 to-emerald-500';
-      case 'database': return 'from-purple-400 to-pink-500';
-      case 'api': return 'from-orange-400 to-red-500';
-      case 'server': return 'from-cyan-400 to-blue-500';
-      case 'cloud': return 'from-indigo-400 to-purple-500';
-      default: return 'from-gray-400 to-gray-500';
-    }
-  };
-
-  const userFlow = [
-    { id: 1, type: 'user', label: 'User Access', description: 'User opens the application' },
-    { id: 2, type: 'auth', label: 'Authentication', description: 'Login or signup process' },
-    { id: 3, type: 'web', label: 'Dashboard', description: 'View project ideas' },
-    { id: 4, type: 'user', label: 'Generate Idea', description: 'Select domain and skill level' },
-    { id: 5, type: 'api', label: 'AI Processing', description: 'Generate project blueprint' },
-    { id: 6, type: 'user', label: 'Review & Save', description: 'Review generated content' },
-    { id: 7, type: 'database', label: 'Storage', description: 'Save to localStorage' }
-  ];
-
-  const pageFlow = [
-    { id: 1, type: 'web', label: 'Landing Page', description: 'Entry point of application' },
-    { id: 2, type: 'auth', label: 'Login/Signup', description: 'User authentication' },
-    { id: 3, type: 'web', label: 'Generate Page', description: 'Main generation interface' },
-    { id: 4, type: 'web', label: 'Results Display', description: 'Show generated project' },
-    { id: 5, type: 'web', label: 'Saved Ideas', description: 'Manage saved projects' },
-    { id: 6, type: 'web', label: 'Project Details', description: 'Full project view' }
-  ];
-
-  const systemFlow = [
-    { id: 1, type: 'user', label: 'Frontend', description: 'React application' },
-    { id: 2, type: 'api', label: 'Service Layer', description: 'Mock data generation' },
-    { id: 3, type: 'database', label: 'Local Storage', description: 'Data persistence' },
-    { id: 4, type: 'server', label: 'State Management', description: 'React Context' },
-    { id: 5, type: 'cloud', label: 'UI Components', description: 'Reusable components' }
-  ];
-
-  const authFlow = [
-    { id: 1, type: 'user', label: 'User Input', description: 'Email and password' },
-    { id: 2, type: 'lock', label: 'Validation', description: 'Input validation' },
-    { id: 3, type: 'auth', label: 'Auth Service', description: 'Mock authentication' },
-    { id: 4, type: 'database', label: 'Storage', description: 'User data storage' },
-    { id: 5, type: 'user', label: 'Session', description: 'User session active' }
-  ];
-
-  const dataFlow = [
-    { id: 1, type: 'user', label: 'User Action', description: 'Generate request' },
-    { id: 2, type: 'api', label: 'Service Call', description: 'ideaService.generateIdea()' },
-    { id: 3, type: 'server', label: 'Data Processing', description: 'Mock data generation' },
-    { id: 4, type: 'database', label: 'Local Storage', description: 'Save project data' },
-    { id: 5, type: 'user', label: 'UI Update', description: 'Display results' }
-  ];
-
-  const flows = {
-    user: { title: 'User Flow', data: userFlow, icon: <User className="w-5 h-5" /> },
-    page: { title: 'Page Flow', data: pageFlow, icon: <Globe className="w-5 h-5" /> },
-    system: { title: 'System Flow', data: systemFlow, icon: <Server className="w-5 h-5" /> },
-    auth: { title: 'Authentication Flow', data: authFlow, icon: <Shield className="w-5 h-5" /> },
-    data: { title: 'Data Flow', data: dataFlow, icon: <Database className="w-5 h-5" /> }
-  };
-
-  const renderFlowDiagram = (flowData) => {
-    const isVertical = activeFlow === 'user' || activeFlow === 'auth' || activeFlow === 'data';
+  // Extract Mermaid code from the blueprint markdown
+  const { nodes, edges } = useMemo(() => {
+    if (!projectData?.blueprint) return { nodes: [], edges: [] };
     
+    const mermaidMatch = projectData.blueprint.match(/```mermaid\s*([\s\S]*?)```/);
+    if (mermaidMatch) {
+      return parseMermaid(mermaidMatch[1]);
+    }
+    return { nodes: [], edges: [] };
+  }, [projectData?.blueprint]);
+
+  // Build adjacency for grouping into rows (BFS-style top-sort)
+  const rows = useMemo(() => {
+    if (nodes.length === 0) return [];
+    
+    // Simple: if few nodes, just show them in a single horizontal row
+    if (nodes.length <= 6) return [nodes];
+
+    // Otherwise split into rows of ~4
+    const result = [];
+    for (let i = 0; i < nodes.length; i += 4) {
+      result.push(nodes.slice(i, i + 4));
+    }
+    return result;
+  }, [nodes]);
+
+  // Fallback: build a flow from tech stack + features if no Mermaid found
+  const fallbackNodes = useMemo(() => {
+    if (nodes.length > 0) return [];
+    if (!projectData) return [];
+
+    const fb = [];
+    // Use tech stack to build a basic architecture flow
+    if (projectData.techStack?.length) {
+      fb.push({ id: 'user', label: 'User / Client' });
+      
+      const frontend = projectData.techStack.find(t => /react|vue|angular|next|flutter|swift/i.test(t));
+      if (frontend) fb.push({ id: 'frontend', label: `Frontend (${frontend})` });
+      
+      const backend = projectData.techStack.find(t => /node|express|fastapi|django|flask|spring|go/i.test(t));
+      if (backend) fb.push({ id: 'backend', label: `Backend (${backend})` });
+      
+      const ai = projectData.techStack.find(t => /tensorflow|pytorch|openai|llm|ai|ml|groq|gemini/i.test(t));
+      if (ai) fb.push({ id: 'ai', label: `AI Engine (${ai})` });
+
+      const db = projectData.techStack.find(t => /mongo|postgres|mysql|firebase|supabase|dynamo|redis/i.test(t));
+      if (db) fb.push({ id: 'db', label: `Database (${db})` });
+      
+      const cloud = projectData.techStack.find(t => /aws|gcp|azure|vercel|netlify|docker/i.test(t));
+      if (cloud) fb.push({ id: 'cloud', label: `Deploy (${cloud})` });
+    }
+
+    return fb.length > 1 ? fb : [];
+  }, [nodes, projectData]);
+
+  const displayNodes = nodes.length > 0 ? nodes : fallbackNodes;
+
+  if (!displayNodes.length) {
     return (
-      <div className={`flex ${isVertical ? 'flex-col space-y-6' : 'flex-row space-x-6'} items-center justify-center p-8`}>
-        {flowData.map((node, index) => (
-          <React.Fragment key={node.id}>
-            <Motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="relative"
-            >
-              <div className={`w-32 h-32 bg-gradient-to-br ${getNodeColor(node.type)} rounded-2xl flex flex-col items-center justify-center text-white shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer group`}>
-                <div className="mb-2 group-hover:scale-110 transition-transform">
-                  {getNodeIcon(node.type)}
-                </div>
-                <div className="text-xs font-semibold text-center px-2">
-                  {node.label}
-                </div>
-              </div>
-              <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-40 text-center">
-                <p className="text-xs text-gray-600 bg-white/80 backdrop-blur-sm rounded-lg px-2 py-1 shadow-sm">
-                  {node.description}
-                </p>
-              </div>
-            </Motion.div>
-            
-            {index < flowData.length - 1 && (
-              <Motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: index * 0.1 + 0.2 }}
-                className="flex items-center justify-center"
-              >
-                {isVertical ? (
-                  <ArrowDown className="w-8 h-8 text-indigo-400" />
-                ) : (
-                  <ArrowRight className="w-8 h-8 text-indigo-400" />
-                )}
-              </Motion.div>
-            )}
-          </React.Fragment>
-        ))}
+      <div className="bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-3xl p-12 text-center shadow-lg">
+        <Globe className="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+        <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">No architecture diagram available for this blueprint.</p>
       </div>
     );
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Project Flow Diagram
-          </h2>
-          <p className="text-gray-600">
-            Visual representation of the complete project architecture and user journey
-          </p>
-        </div>
-
-        {/* Flow Type Selector */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white/70 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl p-2">
-            <div className="flex space-x-2">
-              {Object.entries(flows).map(([key, flow]) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveFlow(key)}
-                  className={`px-4 py-3 rounded-xl flex items-center space-x-2 transition-all duration-200 ${
-                    activeFlow === key
-                      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  {flow.icon}
-                  <span className="font-medium">{flow.title}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Flow Diagram */}
-        <div className="bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6">
-            <h3 className="text-2xl font-bold text-white text-center">
-              {flows[activeFlow].title}
-            </h3>
-          </div>
-          <div className="min-h-[400px] relative">
-            {renderFlowDiagram(flows[activeFlow].data)}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="mt-8 bg-white/70 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl p-6">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Legend</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              { type: 'user', label: 'User Action' },
-              { type: 'auth', label: 'Authentication' },
-              { type: 'database', label: 'Data Storage' },
-              { type: 'api', label: 'API/Service' },
-              { type: 'server', label: 'System' },
-              { type: 'web', label: 'Web Page' },
-              { type: 'cloud', label: 'Cloud Service' },
-              { type: 'lock', label: 'Security' }
-            ].map((item) => (
-              <div key={item.type} className="flex items-center space-x-2">
-                <div className={`w-8 h-8 bg-gradient-to-br ${getNodeColor(item.type)} rounded-lg flex items-center justify-center text-white`}>
-                  {getNodeIcon(item.type)}
-                </div>
-                <span className="text-sm text-gray-600">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+    <div className="bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-3xl shadow-xl overflow-hidden">
+      {/* Header */}
+      <div className="bg-indigo-600 px-8 py-5 flex items-center gap-3">
+        <Globe className="w-6 h-6 text-white" />
+        <h3 className="text-xl font-black text-white uppercase tracking-wider">System Architecture</h3>
       </div>
+
+      {/* Flow Diagram — Horizontal */}
+      <div className="p-8 overflow-x-auto">
+        {rows.length > 0 ? (
+          // Mermaid-parsed rows
+          rows.map((row, rowIdx) => (
+            <div key={rowIdx} className="flex items-center justify-center gap-4 mb-6 last:mb-0 flex-wrap lg:flex-nowrap">
+              {row.map((node, idx) => {
+                const style = getNodeStyle(node.label);
+                return (
+                  <React.Fragment key={node.id}>
+                    <Motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: (rowIdx * row.length + idx) * 0.08 }}
+                      className="flex-shrink-0"
+                    >
+                      <div className={`w-40 h-28 bg-gradient-to-br ${style.color} rounded-2xl flex flex-col items-center justify-center text-white shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 p-3`}>
+                        <div className="mb-2">{style.icon}</div>
+                        <div className="text-[11px] font-bold text-center leading-tight px-1 line-clamp-2">
+                          {node.label}
+                        </div>
+                      </div>
+                    </Motion.div>
+                    {idx < row.length - 1 && (
+                      <Motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: (rowIdx * row.length + idx) * 0.08 + 0.05 }}
+                        className="flex-shrink-0"
+                      >
+                        <ArrowRight className="w-6 h-6 text-indigo-400 dark:text-indigo-500" />
+                      </Motion.div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          ))
+        ) : (
+          // Fallback horizontal flow
+          <div className="flex items-center justify-center gap-4 flex-wrap lg:flex-nowrap">
+            {displayNodes.map((node, idx) => {
+              const style = getNodeStyle(node.label);
+              return (
+                <React.Fragment key={node.id}>
+                  <Motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex-shrink-0"
+                  >
+                    <div className={`w-40 h-28 bg-gradient-to-br ${style.color} rounded-2xl flex flex-col items-center justify-center text-white shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 p-3`}>
+                      <div className="mb-2">{style.icon}</div>
+                      <div className="text-[11px] font-bold text-center leading-tight px-1 line-clamp-2">
+                        {node.label}
+                      </div>
+                    </div>
+                  </Motion.div>
+                  {idx < displayNodes.length - 1 && (
+                    <Motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: idx * 0.1 + 0.05 }}
+                      className="flex-shrink-0"
+                    >
+                      <ArrowRight className="w-6 h-6 text-indigo-400 dark:text-indigo-500" />
+                    </Motion.div>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Edge Labels / Connections Legend */}
+      {edges.length > 0 && (
+        <div className="px-8 pb-6 border-t-2 border-gray-100 dark:border-slate-800 pt-6">
+          <h4 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">Connections</h4>
+          <div className="flex flex-wrap gap-3">
+            {edges.map((edge, idx) => {
+              const fromNode = displayNodes.find(n => n.id === edge.from);
+              const toNode = displayNodes.find(n => n.id === edge.to);
+              return (
+                <div key={idx} className="flex items-center gap-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-2 text-xs">
+                  <span className="font-bold text-gray-700 dark:text-gray-300">{fromNode?.label || edge.from}</span>
+                  <ArrowRight className="w-4 h-4 text-indigo-500" />
+                  <span className="font-bold text-gray-700 dark:text-gray-300">{toNode?.label || edge.to}</span>
+                  {edge.label && <span className="text-gray-400 ml-1">({edge.label})</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

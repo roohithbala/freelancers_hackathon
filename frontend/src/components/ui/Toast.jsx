@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
-import { Check, AlertCircle, X, Info, AlertTriangle } from 'lucide-react';
+import { Check, AlertCircle, X, Info, AlertTriangle, Sparkles } from 'lucide-react';
 
 const ToastContext = createContext();
 
@@ -64,7 +64,7 @@ export const ToastProvider = ({ children }) => {
 
 const ToastContainer = ({ toasts, onRemove }) => {
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed bottom-8 right-8 z-[100] space-y-4">
       <AnimatePresence>
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
@@ -78,43 +78,35 @@ const ToastItem = ({ toast, onRemove }) => {
   const getIcon = () => {
     switch (toast.type) {
       case 'success':
-        return <Check className="w-5 h-5 text-green-400" />;
+        return <Check className="w-5 h-5 text-emerald-500" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-400" />;
+        return <AlertCircle className="w-5 h-5 text-rose-500" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
+        return <AlertTriangle className="w-5 h-5 text-amber-500" />;
       default:
-        return <Info className="w-5 h-5 text-blue-400" />;
+        return <Sparkles className="w-5 h-5 text-indigo-500" />;
     }
   };
 
   const getBackgroundClass = () => {
-    switch (toast.type) {
-      case 'success':
-        return 'bg-green-500/10 border-green-500/30';
-      case 'error':
-        return 'bg-red-500/10 border-red-500/30';
-      case 'warning':
-        return 'bg-yellow-500/10 border-yellow-500/30';
-      default:
-        return 'bg-blue-500/10 border-blue-500/30';
-    }
+    return 'bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]';
   };
 
   return (
     <Motion.div
-      initial={{ opacity: 0, x: 100, scale: 0.8 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 100, scale: 0.8 }}
-      transition={{ duration: 0.2 }}
-      className={`flex items-center space-x-3 p-4 rounded-xl border backdrop-blur-sm min-w-[300px] max-w-md ${getBackgroundClass()}`}
+      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+      className={`flex items-center space-x-4 p-5 rounded-2xl backdrop-blur-xl min-w-[320px] max-w-md ${getBackgroundClass()}`}
     >
-      {getIcon()}
-      <p className="flex-1 text-sm text-gray-300">{toast.message}</p>
+      <div className="flex-shrink-0">
+         {getIcon()}
+      </div>
+      <p className="flex-1 text-sm font-bold text-gray-900 dark:text-white leading-tight">{toast.message}</p>
       {!toast.persistent && (
         <button
           onClick={() => onRemove(toast.id)}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1"
         >
           <X className="w-4 h-4" />
         </button>

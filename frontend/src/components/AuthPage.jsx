@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, LogIn, UserPlus } from 'lucide-react';
-import { useAuth } from '../context/authCore';
+import { useAuth } from '../context/AuthContext';
 
 const AuthPage = ({ mode = 'login', onBack }) => {
   const isLogin = mode === 'login';
-  const { loginEmail, signupEmail } = useAuth();
+  const { login, signup } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -17,9 +17,9 @@ const AuthPage = ({ mode = 'login', onBack }) => {
     setLoading(true);
     try {
       if (isLogin) {
-        await loginEmail(email, password);
+        await login(email, password);
       } else {
-        await signupEmail(email, password);
+        await signup(name, email, password);
       }
       onBack();
     } catch (err) {

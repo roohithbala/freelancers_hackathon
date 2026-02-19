@@ -5,18 +5,18 @@ const Card = ({
   children,
   className = '',
   padding = 'md',
-  shadow = 'lg',
+  shadow = 'xl',
   hover = false,
   ...props
 }) => {
-  const baseClasses = 'bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl';
+  const baseClasses = 'bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-gray-100 dark:border-slate-800 rounded-[2rem] transition-all duration-500';
   
   const paddings = {
     none: '',
     sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
-    xl: 'p-10'
+    md: 'p-8',
+    lg: 'p-12',
+    xl: 'p-16'
   };
 
   const shadows = {
@@ -27,7 +27,7 @@ const Card = ({
     xl: 'shadow-2xl'
   };
 
-  const hoverClasses = hover ? 'hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300' : '';
+  const hoverClasses = hover ? 'hover:shadow-3xl hover:-translate-y-2' : '';
 
   const classes = `
     ${baseClasses}
@@ -38,32 +38,29 @@ const Card = ({
   `.trim().replace(/\s+/g, ' ');
 
   return (
-    <Motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+    <div
       className={classes}
       {...props}
     >
       {children}
-    </Motion.div>
+    </div>
   );
 };
 
 const CardHeader = ({ children, className = '', ...props }) => (
-  <div className={`mb-4 ${className}`} {...props}>
+  <div className={`mb-8 ${className}`} {...props}>
     {children}
   </div>
 );
 
 const CardTitle = ({ children, className = '', ...props }) => (
-  <h3 className={`text-lg font-semibold text-white ${className}`} {...props}>
+  <h3 className={`text-2xl font-black text-gray-900 dark:text-white tracking-tight ${className}`} {...props}>
     {children}
   </h3>
 );
 
 const CardDescription = ({ children, className = '', ...props }) => (
-  <p className={`text-sm text-gray-400 ${className}`} {...props}>
+  <p className={`text-gray-500 dark:text-gray-400 font-medium leading-relaxed ${className}`} {...props}>
     {children}
   </p>
 );
@@ -75,7 +72,7 @@ const CardContent = ({ children, className = '', ...props }) => (
 );
 
 const CardFooter = ({ children, className = '', ...props }) => (
-  <div className={`mt-4 pt-4 border-t border-slate-700 ${className}`} {...props}>
+  <div className={`mt-8 pt-8 border-t border-gray-100 dark:border-slate-800 ${className}`} {...props}>
     {children}
   </div>
 );

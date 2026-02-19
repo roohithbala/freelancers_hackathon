@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
 import { 
@@ -27,15 +28,16 @@ import { formatDate, capitalizeFirst } from '../utils/helpers';
 const ProjectFlowPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const { success, error } = useToast();
   const [projectData, setProjectData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState('overview');
 
   React.useEffect(() => {
-    const loadProject = () => {
+    const loadProject = async () => {
       try {
-        const savedIdeas = ideaService.getSavedIdeas();
+        const savedIdeas = await ideaService.getSavedIdeas(currentUser);
         const project = savedIdeas.find(idea => idea.id === id);
         
         if (project) {
@@ -45,6 +47,7 @@ const ProjectFlowPage = () => {
           navigate('/saved');
         }
       } catch (err) {
+        console.error('Failed to load project:', err);
         error('Failed to load project');
         navigate('/saved');
       } finally {
@@ -52,8 +55,12 @@ const ProjectFlowPage = () => {
       }
     };
 
-    loadProject();
-  }, [id, navigate, error]);
+    if (currentUser) {
+      loadProject();
+    } else {
+      setLoading(false);
+    }
+  }, [id, navigate, error, currentUser]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -280,7 +287,7 @@ const ProjectFlowPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-3">
-                    {projectData.techStack.map((tech, index) => (
+                    {(projectData.techStack || []).map((tech, index) => (
                       <Motion.div
                         key={index}
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -307,7 +314,7 @@ const ProjectFlowPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {projectData.features.map((feature, index) => (
+                    {(projectData.features || []).map((feature, index) => (
                       <Motion.div
                         key={index}
                         initial={{ opacity: 0, x: -20 }}
@@ -335,7 +342,7 @@ const ProjectFlowPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {projectData.roadmap.map((step, index) => (
+                    {(projectData.roadmap || []).map((step, index) => (
                       <Motion.div
                         key={index}
                         initial={{ opacity: 0, y: 20 }}
