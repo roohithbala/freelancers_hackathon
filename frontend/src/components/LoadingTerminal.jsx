@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Cpu, Database, Cloud, Shield, CheckCircle } from 'lucide-react';
 
 const steps = [
@@ -12,7 +12,6 @@ const steps = [
 ];
 
 const LoadingTerminal = () => {
-    const [currentStep, setCurrentStep] = useState(0);
     const [logs, setLogs] = useState([]);
 
     useEffect(() => {
@@ -20,7 +19,6 @@ const LoadingTerminal = () => {
         const interval = setInterval(() => {
             if (stepIndex < steps.length) {
                 setLogs(prev => [...prev, steps[stepIndex]]);
-                setCurrentStep(stepIndex);
                 stepIndex++;
             } else {
                 clearInterval(interval);
@@ -49,7 +47,7 @@ const LoadingTerminal = () => {
 
                     <AnimatePresence>
                         {logs.map((log, index) => (
-                            <motion.div
+                            <Motion.div
                                 key={index}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -62,20 +60,20 @@ const LoadingTerminal = () => {
                                     {log.text}
                                 </span>
                                 {index === logs.length - 1 && (
-                                    <motion.span
+                                    <Motion.span
                                         animate={{ opacity: [0, 1] }}
                                         transition={{ repeat: Infinity, duration: 0.8 }}
                                         className="ml-2 w-2 h-4 bg-cyan-500/50 inline-block align-middle"
                                     />
                                 )}
-                            </motion.div>
+                            </Motion.div>
                         ))}
                     </AnimatePresence>
                 </div>
 
                 {/* Progress Bar */}
                 <div className="h-1 bg-slate-800 w-full">
-                    <motion.div
+                    <Motion.div
                         className="h-full bg-gradient-to-r from-cyan-500 to-blue-600"
                         initial={{ width: "0%" }}
                         animate={{ width: "100%" }}

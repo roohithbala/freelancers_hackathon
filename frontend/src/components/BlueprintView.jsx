@@ -1,70 +1,50 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import mermaid from 'mermaid';
 import { Download, Share2, Edit, ExternalLink, Box, Layers, Code, Zap, Save, ChevronRight, FileText, Globe } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import DeepDiveStats from './DeepDiveStats';
 import ExportTools from './ExportTools';
 
 const BlueprintView = ({ blueprint, onSave, isSaving }) => {
     const blueprintRef = useRef(null);
-    const [parsedStats, setParsedStats] = useState(null);
-    const [cleanMarkdown, setCleanMarkdown] = useState('');
-    const [mermaidCode, setMermaidCode] = useState('');
+    const { parsedStats, cleanMarkdown, mermaidCode } = useMemo(() => {
+        if (!blueprint) return { parsedStats: null, cleanMarkdown: '', mermaidCode: null };
+        const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
+        const mermaidRegex = /```mermaid([\s\S]*?)```/;
+        let stats = null;
+        let markdownContent = blueprint;
+        let mCode = null;
+        const jsonMatch = blueprint.match(jsonRegex);
+        if (jsonMatch) {
+            try {
+                stats = JSON.parse(jsonMatch[1]);
+                markdownContent = blueprint.replace(jsonRegex, '');
+            } catch {
+                stats = null;
+            }
+        }
+        const mermaidMatch = markdownContent.match(mermaidRegex);
+        if (mermaidMatch) {
+            mCode = mermaidMatch[1].trim().replace(/^mermaid\s*/i, '');
+            const graphStart = mCode.indexOf('graph');
+            if (graphStart !== -1) mCode = mCode.substring(graphStart);
+            markdownContent = markdownContent.replace(mermaidRegex, '');
+        }
+        return { parsedStats: stats, cleanMarkdown: markdownContent, mermaidCode: mCode };
+    }, [blueprint]);
 
     useEffect(() => {
         if (!blueprint) return;
-
-        // Initialize Mermaid
         mermaid.initialize({
             startOnLoad: true,
             theme: 'dark',
             securityLevel: 'loose',
             fontFamily: 'Inter, sans-serif'
         });
-
-        // 1. Extract JSON Stats Block
-        const jsonRegex = /```json\s*([\s\S]*?)\s*```/;
-        const jsonMatch = blueprint.match(jsonRegex);
-
-        let stats = null;
-        let markdownContent = blueprint;
-
-        if (jsonMatch) {
-            try {
-                stats = JSON.parse(jsonMatch[1]);
-                setParsedStats(stats);
-                markdownContent = blueprint.replace(jsonRegex, '');
-            } catch (e) {
-                console.warn("Could not parse Deep Dive JSON stats:", e);
-            }
-        }
-
-        // 2. Extract Mermaid Diagram
-        const mermaidRegex = /```mermaid([\s\S]*?)```/;
-        const mermaidMatch = markdownContent.match(mermaidRegex);
-        let mCode = null;
-
-        if (mermaidMatch) {
-            mCode = mermaidMatch[1].trim();
-            mCode = mCode.replace(/^mermaid\s*/i, '');
-            const graphStart = mCode.indexOf('graph');
-            if (graphStart !== -1) {
-                mCode = mCode.substring(graphStart);
-            }
-            setMermaidCode(mCode);
-            markdownContent = markdownContent.replace(mermaidRegex, '');
-        } else {
-            setMermaidCode(null);
-        }
-
-        setCleanMarkdown(markdownContent);
-
-        setTimeout(() => {
-            mermaid.contentLoaded();
-        }, 500);
-
-    }, [blueprint]);
+        const id = setTimeout(() => mermaid.contentLoaded(), 300);
+        return () => clearTimeout(id);
+    }, [blueprint, mermaidCode]);
 
     if (!blueprint) return null;
 
@@ -123,7 +103,7 @@ const BlueprintView = ({ blueprint, onSave, isSaving }) => {
                     <div className="p-8 md:p-12 md:px-20">
                         {/* Mermaid Diagram Section */}
                         {mermaidCode && (
-                            <motion.div
+                            <Motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
@@ -150,7 +130,7 @@ const BlueprintView = ({ blueprint, onSave, isSaving }) => {
                                         <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase">Interactive Schema v1.0</span>
                                     </div>
                                 </div>
-                            </motion.div>
+                            </Motion.div>
                         )}
 
                         {/* Markdown Content */}
@@ -166,14 +146,14 @@ const BlueprintView = ({ blueprint, onSave, isSaving }) => {
                             prose-blockquote:border-l-2 prose-blockquote:border-primary/50 prose-blockquote:bg-primary/5 prose-blockquote:py-4 prose-blockquote:px-8 prose-blockquote:rounded-r-2xl prose-blockquote:text-slate-400 prose-blockquote:font-light prose-blockquote:italic
                         ">
                             <ReactMarkdown components={{
-                                h1: ({ node, ...props }) => <h1 className="text-5xl font-bold tracking-tighter" {...props} />,
-                                h2: ({ node, ...props }) => (
+                                h1: (props) => <h1 className="text-5xl font-bold tracking-tighter" {...props} />,
+                                h2: (props) => (
                                     <div className="flex flex-col mb-8 group/h2">
                                         <div className="h-px w-full bg-gradient-to-r from-primary/30 via-primary/10 to-transparent mb-12"></div>
                                         <h2 className="text-3xl font-bold m-0" {...props} />
                                     </div>
                                 ),
-                                li: ({ node, ...props }) => (
+                                li: (props) => (
                                     <li className="flex items-start my-4 group/li" {...props}>
                                         <div className="mr-4 mt-2 p-1 bg-primary/20 rounded-lg group-hover/li:bg-primary transition-colors">
                                             <ChevronRight className="w-3 h-3 text-primary group-hover/li:text-white transition-colors" />
@@ -181,8 +161,8 @@ const BlueprintView = ({ blueprint, onSave, isSaving }) => {
                                         <span className="text-slate-400 group-hover/li:text-slate-200 transition-colors">{props.children}</span>
                                     </li>
                                 ),
-                                ul: ({ node, ...props }) => <ul className="space-y-2 mb-10" {...props} />,
-                                p: ({ node, ...props }) => <p className="mb-8 last:mb-0" {...props} />
+                                ul: (props) => <ul className="space-y-2 mb-10" {...props} />,
+                                p: (props) => <p className="mb-8 last:mb-0" {...props} />
                             }}>
                                 {cleanMarkdown}
                             </ReactMarkdown>
@@ -209,7 +189,7 @@ const BlueprintView = ({ blueprint, onSave, isSaving }) => {
 
             {/* Deep Dive Modules */}
             {parsedStats && (
-                <motion.div
+                <Motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5, duration: 0.8 }}
@@ -219,7 +199,7 @@ const BlueprintView = ({ blueprint, onSave, isSaving }) => {
                         <div className="h-24 w-px bg-gradient-to-b from-primary/50 to-transparent"></div>
                     </div>
                     <DeepDiveStats stats={parsedStats} />
-                </motion.div>
+                </Motion.div>
             )}
 
         </div>

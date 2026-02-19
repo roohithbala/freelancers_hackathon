@@ -1,6 +1,6 @@
 import React from 'react';
 import { Rocket, Zap, Layers, Users, ArrowRight, CheckCircle, Sparkles, Box, Layout, Cpu, Globe } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 const LandingPage = ({ onGetStarted }) => {
     return (
@@ -14,44 +14,31 @@ const LandingPage = ({ onGetStarted }) => {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
 
                 {/* Badge */}
-                <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                <Motion.div 
                     className="inline-flex items-center space-x-2 bg-secondary/50 border border-white/10 rounded-full py-1.5 px-4 mb-10 backdrop-blur-xl shadow-inner group cursor-default"
                 >
                     <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                     <span className="text-sm text-slate-300 font-medium tracking-wide">Enterprise Intelligence Powered by AI</span>
-                </motion.div>
+                </Motion.div>
 
                 {/* Main Heading */}
-                <motion.h1 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.1 }}
+                <Motion.h1 
                     className="text-6xl md:text-8xl font-bold text-white mb-8 tracking-tighter leading-[1.05] font-display"
                 >
                     Build the future <br className="hidden md:block" />
                     <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-blue-400 text-glow">
                         at the speed of thought
                     </span>
-                </motion.h1>
+                </Motion.h1>
 
-                <motion.p 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.2 }}
+                <Motion.p 
                     className="max-w-2xl text-xl text-slate-400 mb-12 leading-relaxed font-light"
                 >
                     Transform your sketches into scalable systems. AI Architect generates <span className="text-white">full-scale blueprints</span>, infrastructure maps, and development roadmaps in seconds.
-                </motion.p>
+                </Motion.p>
 
                 {/* CTA Button */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.3 }}
-                >
+                <Motion.div>
                     <button 
                         onClick={onGetStarted}
                         className="group relative px-10 py-5 bg-white text-black font-bold rounded-2xl hover:bg-white/90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] overflow-hidden"
@@ -61,13 +48,10 @@ const LandingPage = ({ onGetStarted }) => {
                             Create a Blueprint <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </span>
                     </button>
-                </motion.div>
+                </Motion.div>
             
                 {/* 3D Visual Preview */}
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.9, y: 40 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                <Motion.div 
                     className="mt-32 relative w-full max-w-6xl px-4"
                 >
                     {/* Floating Decorative Elements */}
@@ -145,7 +129,7 @@ const LandingPage = ({ onGetStarted }) => {
                         {/* Decorative Background Glow for Mockup */}
                         <div className="absolute -inset-10 bg-primary/20 blur-[100px] -z-10 group-hover:opacity-100 transition-opacity opacity-50"></div>
                     </div>
-                </motion.div>
+                </Motion.div>
             </div>
 
             {/* Features Section */}
@@ -154,15 +138,15 @@ const LandingPage = ({ onGetStarted }) => {
                 
                 <div className="max-w-7xl mx-auto px-6 relative">
                     <div className="text-center mb-24">
-                        <motion.span 
+                        <Motion.span 
                             initial={{ opacity: 0 }}
                             whileInView={{ opacity: 1 }}
                             viewport={{ once: true }}
                             className="text-primary font-bold tracking-[0.3em] text-[10px] uppercase mb-4 block"
                         >
                             Infrastructure Optimization
-                        </motion.span>
-                        <motion.h2 
+                        </Motion.span>
+                        <Motion.h2 
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -170,8 +154,8 @@ const LandingPage = ({ onGetStarted }) => {
                             className="text-5xl md:text-6xl font-bold text-white mb-8 font-display tracking-tight"
                         >
                             Architectural Excellence. <br /> Automated.
-                        </motion.h2>
-                        <motion.p 
+                        </Motion.h2>
+                        <Motion.p 
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -179,7 +163,7 @@ const LandingPage = ({ onGetStarted }) => {
                             className="text-slate-400 max-w-2xl mx-auto text-xl font-light leading-relaxed"
                         >
                             Professional-grade tools combined with adaptive AI to build systems that scale effortlessly.
-                        </motion.p>
+                        </Motion.p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-10">

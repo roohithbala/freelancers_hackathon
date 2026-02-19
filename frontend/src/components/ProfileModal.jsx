@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/authCore';
 import { db } from '../firebase';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { X, User, Save, LogOut, Key, ChevronDown, ChevronUp, Shield, Zap } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 const ProfileModal = ({ onClose }) => {
     const { currentUser, logout, updateUserPassword } = useAuth();
@@ -99,13 +99,13 @@ const ProfileModal = ({ onClose }) => {
 
     return (
         <AnimatePresence>
-            <motion.div 
+            <Motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-[#0B0B15]/80 z-50 flex items-center justify-center p-4 backdrop-blur-md"
             >
-                <motion.div 
+                <Motion.div 
                     initial={{ scale: 0.95, opacity: 0, y: 30 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.95, opacity: 0, y: 30 }}
@@ -211,7 +211,7 @@ const ProfileModal = ({ onClose }) => {
 
                                     <AnimatePresence>
                                         {showPasswordChange && (
-                                            <motion.form 
+                                            <Motion.form 
                                                 initial={{ height: 0, opacity: 0 }}
                                                 animate={{ height: "auto", opacity: 1 }}
                                                 exit={{ height: 0, opacity: 0 }}
@@ -251,7 +251,7 @@ const ProfileModal = ({ onClose }) => {
                                                 >
                                                     Update Password
                                                 </button>
-                                            </motion.form>
+                                            </Motion.form>
                                         )}
                                     </AnimatePresence>
                                 </div>
@@ -279,8 +279,8 @@ const ProfileModal = ({ onClose }) => {
                             </div>
                         </div>
                     </div>
-                </motion.div>
-            </motion.div>
+                </Motion.div>
+            </Motion.div>
         </AnimatePresence>
     );
 };

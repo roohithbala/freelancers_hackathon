@@ -1,7 +1,6 @@
 import React from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, YAxis, CartesianGrid } from 'recharts';
 import { DollarSign, Shield, Cpu, Activity, Zap, BarChart3, PieChart, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const DeepDiveStats = ({ stats }) => {
     if (!stats) return null;
