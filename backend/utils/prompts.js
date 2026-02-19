@@ -54,6 +54,39 @@ Return structured output in the following format:
    - What makes this 10x better?
    - Technical differentiation`;
 
+
+   // Common instructions for JSON output
+   const jsonInstruction = `
+   
+   ---
+   IMPORTANT: After the markdown content, you MUST append a single JSON block strictly in this format:
+   \`\`\`json
+   {
+      "costEstimate": {
+         "monthlyTotal": "$X.XX",
+         "breakdown": [
+            {"service": "Service Name", "cost": "$X.XX"},
+            {"service": "Service Name", "cost": "$X.XX"}
+         ]
+      },
+      "scores": {
+         "scalability": 85,
+         "security": 90,
+         "costEfficiency": 75,
+         "innovation": 95,
+         "completeness": 80
+      },
+      "pitchDeck": [
+         {"title": "Problem", "content": "Short blurb about the problem"},
+         {"title": "Solution", "content": "Short blurb about the solution"},
+         {"title": "Secret Sauce", "content": "The unique tech insight"},
+         {"title": "Business Model", "content": "How it makes money"},
+         {"title": "Ask", "content": "What is needed (e.g. Seed Round)"}
+      ]
+   }
+   \`\`\`
+   `;
+
    // Premium Sections
    if (isPremium) {
       prompt += `
@@ -94,7 +127,9 @@ Return structured output in the following format:
 Be highly specific.
 Be bold.
 Be technically detailed.
-Avoid fluff.`;
+Avoid fluff.
+${jsonInstruction}
+`;
    } else {
       // Free Tier (Concise)
       prompt += `
@@ -120,6 +155,7 @@ Avoid fluff.`;
          
     KEEP IT CONCISE. This is a Free Tier generation.
     Do NOT include monetization or expansion plans.
+    ${jsonInstruction}
 `;
    }
 

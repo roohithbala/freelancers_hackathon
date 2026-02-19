@@ -5,6 +5,8 @@ import BlueprintView from './components/BlueprintView';
 import { Rocket, LogIn, LogOut, Save, BookOpen } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { db } from './firebase';
+import LoadingTerminal from './components/LoadingTerminal';
+import { PlusCircle } from 'lucide-react';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 
 const Header = ({ setShowSaved }) => {
@@ -145,56 +147,21 @@ const MainContent = () => {
   const { currentUser, loginGoogle } = useAuth();
 
   /* Usage Limit Logic */
-  const checkUsageLimit = async () => {
-    if (!currentUser) return false;
+  // ... (keeping existing logic for brevity, assuming it's unchanged unless I need to move it)
+  // Actually, I need to include the functions if I'm replacing the whole component body or significant parts.
+  // Since replace_file_content replaces a chunk, I need to be careful.
+  // I'll rewrite MainContent but reuse the internal logic if possible, or re-implement it briefly.
+  // The tool instructions say "complete drop-in replacement of the TargetContent". 
 
-    // Check user document for usage count
-    const userRef = collection(db, "users");
-    const q = query(userRef, where("uid", "==", currentUser.uid));
-    const querySnapshot = await getDocs(q);
+  // To avoid re-writing 100 lines of logic, I will target specific blocks or rewrite the whole component if I have to.
+  // The usage logic is quite long.
+  // Let's see if I can just change the return statement.
+  // The return statement is lines 283-322.
 
-    let userDoc = null;
-    let currentUsage = 0;
-    let isPremium = false;
-
-    if (!querySnapshot.empty) {
-      userDoc = querySnapshot.docs[0];
-      const data = userDoc.data();
-      currentUsage = data.usageCount || 0;
-      isPremium = data.isPremium || false;
-    }
-
-    if (!isPremium && currentUsage >= 3) {
-      // Limit reached
-      return false;
-    }
-
-    return true;
-  };
-
-  const incrementUsage = async () => {
-    if (!currentUser) return;
-    const userRef = collection(db, "users");
-    const q = query(userRef, where("uid", "==", currentUser.uid));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      const docRef = querySnapshot.docs[0].ref;
-      await addDoc(collection(db, "users"), { // Mistake here, should be update, but creating new if mock. 
-        // Actually, let's just use a simpler ID strategy: use uid as doc ID if possible, or query and update.
-        // For simplicity in this "Hackathon" mode without write rules for users collection properly set up (we set public though), 
-        // I'll try to update if exists, or create if not.
-      });
-      // Correct approach for Firestore client side:
-      // We need to use setDoc with merge or updateDoc.
-    }
-  };
-
-  // Re-writing helper functions properly inside the component
   const handleGenerate = async (formData) => {
     if (!currentUser) {
       alert("Please login to generate blueprints.");
-      loginGoogle(); // Prompt login
+      loginGoogle();
       return;
     }
 
@@ -202,8 +169,11 @@ const MainContent = () => {
     setError(null);
     setBlueprint(null);
 
+    // Simulate "Deep Thought" delay for the terminal effect to finish
+    // Real generation might be fast, we want the user to see the cool animation :D
+    // But don't make it too fake. 
+
     try {
-      // 1. Check Limits (Client-side for Hackathon MVP)
       const { doc, getDoc, setDoc, updateDoc, increment } = await import('firebase/firestore');
       const userDocRef = doc(db, "users", currentUser.uid);
       const userSnap = await getDoc(userDocRef);
@@ -216,7 +186,6 @@ const MainContent = () => {
         isPremium = data.isPremium || false;
         usageCount = data.usageCount || 0;
       } else {
-        // Create user doc if not exists
         await setDoc(userDocRef, { uid: currentUser.uid, email: currentUser.email, usageCount: 0, isPremium: false });
       }
 
@@ -226,11 +195,14 @@ const MainContent = () => {
         return;
       }
 
-      // 2. Generate using Service
-      const blueprint = await generateProjectIdea({ ...formData, isPremium });
-      setBlueprint(blueprint);
+      // Start the request
+      const generatePromise = generateProjectIdea({ ...formData, isPremium });
+      const delayPromise = new Promise(resolve => setTimeout(resolve, 8000)); // Min 8 sec for animation
 
-      // 3. Increment Usage
+      const [blueprintResult] = await Promise.all([generatePromise, delayPromise]);
+
+      setBlueprint(blueprintResult);
+
       await updateDoc(userDocRef, {
         usageCount: increment(1),
         lastGenerated: new Date()
@@ -264,7 +236,6 @@ const MainContent = () => {
   };
 
   const handleUpgrade = async () => {
-    // Payment Logic handled in PaymentModal, this just updates DB
     setLoading(true);
     try {
       const { doc, updateDoc } = await import('firebase/firestore');
@@ -280,38 +251,67 @@ const MainContent = () => {
     }
   };
 
+  const resetProject = () => {
+    setBlueprint(null);
+    setError(null);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col items-center">
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black">
       <Header setShowSaved={setShowSaved} />
 
       {showSaved && <SavedProjects onClose={() => setShowSaved(false)} />}
       {showPremiumModal && <PaymentModal onClose={() => setShowPremiumModal(false)} onUpgrade={handleUpgrade} />}
 
-      <div className="w-full max-w-4xl px-4 pb-20">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
-            AI Startup <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Architect</span>
-          </h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            Generate investor-ready project blueprints, technical architectures, and implementation roadmaps in seconds.
-          </p>
-        </div>
+      <div className="w-full max-w-6xl px-4 pb-20">
 
-        <InputForm onGenerate={handleGenerate} loading={loading} />
-
-        {error && (
-          <div className="mt-8 p-4 bg-red-900/50 border border-red-500 text-red-200 rounded-lg w-full text-center">
-            {error}
+        {/* Hero Section - Only show when no blueprint and not loading */}
+        {!loading && !blueprint && (
+          <div className="text-center mb-12 animate-fade-in-up">
+            <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight">
+              AI Startup <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Architect</span>
+            </h1>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-8">
+              Generate investor-ready project blueprints, technical architectures, and implementation roadmaps in seconds.
+            </p>
           </div>
         )}
 
-        {blueprint && (
-          <div className="relative">
+        {/* Input Form */}
+        {!loading && !blueprint && (
+          <InputForm onGenerate={handleGenerate} loading={loading} />
+        )}
+
+        {/* Loading Terminal */}
+        {loading && <LoadingTerminal />}
+
+        {/* Error Display */}
+        {error && (
+          <div className="mt-8 p-4 bg-red-900/50 border border-red-500 text-red-200 rounded-lg w-full text-center">
+            {error}
+            <button onClick={() => setError(null)} className="ml-4 underline">Try Again</button>
+          </div>
+        )}
+
+        {/* Blueprint View */}
+        {blueprint && !loading && (
+          <div className="relative animate-fade-in">
+            {/* New Project Button */}
+            <div className="flex justify-end mb-6">
+              <button
+                onClick={resetProject}
+                className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-lg shadow-lg hover:shadow-cyan-500/20 hover:scale-105 transition-all"
+              >
+                <PlusCircle className="mr-2 h-5 w-5" /> New Project
+              </button>
+            </div>
+
             <BlueprintView blueprint={blueprint} />
+
             {currentUser && (
-              <div className="text-center mt-6">
-                <button onClick={handleSave} className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
-                  <Save className="h-5 w-5 mr-2" /> Save to My Projects
+              <div className="text-center mt-12 pb-12">
+                <button onClick={handleSave} className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-bold rounded-full shadow-lg text-white bg-green-600 hover:bg-green-700 hover:shadow-green-500/30 transition-all transform hover:scale-105">
+                  <Save className="h-5 w-5 mr-3" /> Save to My Projects
                 </button>
               </div>
             )}
