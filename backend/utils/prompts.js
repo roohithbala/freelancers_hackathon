@@ -25,7 +25,7 @@ Every idea must:
 Think like a VC-backed founder.`;
 };
 
-const getUserPrompt = (data, isPremium) => {
+const getUserPrompt = (data, isPremium, avoidList = []) => {
    const { domain, skillLevel, techStack, goal, timeframe } = data;
 
    // Base Prompt
@@ -39,7 +39,13 @@ User Profile:
 - Timeframe: ${timeframe}
 
 Generate exactly ONE deeply developed project idea.
+`;
 
+   if (avoidList && avoidList.length > 0) {
+      prompt += `\nCRITICAL: You must AVOID generating ideas similar to the following titles/concepts:\n- ${avoidList.join('\n- ')}\n\nGenerate something completely different.\n`;
+   }
+
+   prompt += `
 Return structured output in the following format:
 
 1. 🔥 Project Title (unique and brandable)

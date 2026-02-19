@@ -196,7 +196,17 @@ const MainContent = () => {
       }
 
       // Start the request
-      const generatePromise = generateProjectIdea({ ...formData, isPremium });
+      // Fetch previous projects to avoid repetition
+      let previousProjects = [];
+      try {
+        const q = query(collection(db, "projects"), where("userId", "==", currentUser.uid));
+        const historySnap = await getDocs(q);
+        previousProjects = historySnap.docs.map(doc => doc.data().title).filter(t => t);
+      } catch (e) {
+        console.warn("Failed to fetch history for avoidance:", e);
+      }
+
+      const generatePromise = generateProjectIdea({ ...formData, isPremium, previousProjects });
       const delayPromise = new Promise(resolve => setTimeout(resolve, 8000)); // Min 8 sec for animation
 
       const [blueprintResult] = await Promise.all([generatePromise, delayPromise]);

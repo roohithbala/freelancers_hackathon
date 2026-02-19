@@ -6,14 +6,14 @@ const { generateCompletion } = require('../utils/aiProvider');
 
 router.post('/', async (req, res) => {
     try {
-        const { domain, skillLevel, techStack, goal, timeframe, isPremium } = req.body;
+        const { domain, skillLevel, techStack, goal, timeframe, isPremium, previousProjects } = req.body;
 
         if (!domain || !skillLevel || !techStack || !goal || !timeframe) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
         const systemPrompt = getSystemPrompt();
-        const userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal, timeframe }, isPremium);
+        const userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal, timeframe }, isPremium, previousProjects);
 
         // Legacy check removed. aiProvider handles keys and fallbacks.
 
@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
                 { role: "user", content: userPrompt }
             ];
 
-            const data = await generateCompletion(messages);
+            const data = await generateCompletion(messages, previousProjects);
             // AI Provider returns the full structure, we need the content
             // OpenAI/AIML structure: data.choices[0].message.content
             const blueprint = data.choices[0].message.content;

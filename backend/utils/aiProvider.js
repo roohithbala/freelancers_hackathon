@@ -67,7 +67,7 @@ async function callGeminiDirect(messages, apiKey) {
     };
 }
 
-async function generateCompletion(messages) {
+async function generateCompletion(messages, avoidList = []) {
     // 1. Try Groq (Primary)
     if (process.env.GROQ_API_KEY) {
         try {
@@ -87,11 +87,10 @@ async function generateCompletion(messages) {
     }
 
     // 3. Fallback: Mock Data
-    console.warn("All APIs failed. Switching to DEMO MODE.");
-    return {
-        choices: [{
-            message: {
-                content: `
+    console.warn("All APIs failed. Switching to DEMO MODE with random blueprint.");
+
+    const mockBlueprints = [
+        `
 # 🚀 Project: SmartHarvest AI (Demo)
 
 ## 🎯 Core Problem
@@ -124,16 +123,98 @@ graph TD
     C --> D[MongoDB]
     A -->|Image Analysis| E[TFLite Model]
 \`\`\`
+`,
+        `
+# 🚀 Project: FinWiz AI (Demo)
 
-## 💰 Monetization Strategy
-*   **Freemium**: Basic disease detection is free.
-*   **Premium**: $5/mo for advanced weather patterns and market connectivity.
+## 🎯 Core Problem
+Gen Z lacks financial literacy and struggles with basic budgeting, often falling into debt traps with credit cards.
 
-## 🧪 Implementation Roadmap
-*   **Week 1**: Train TFLite model on 'PlantVillage' dataset.
-*   **Week 2**: Build React Native Shell.
-*   **Week 3**: Integrate Offline Sync.
+## 🧠 Why Existing Solutions Fail
+*   **Boring UI**: Spreadsheets and traditional banking apps are unengaging.
+*   **No Personalization**: Generic advice doesn't apply to gig-economy income.
+
+## 🚀 Unique Innovation Layer
+*   **Gamified Learning**: Earn crypto tokens for saving money.
+*   **AI Financial Coach**: Chat with a persona that analyzes your spending in real-time.
+
+## 🏗 Technical Architecture
+*   **Frontend**: Flutter (Cross-platform)
+*   **Backend**: Python FastAPI
+*   **AI**: OpenAI GPT-4o Mini
+*   **Database**: PostgreSQL + Redis
+
+## 🧩 Core Features (MVP)
+1.  **Expense Tracker**: Auto-categorize SMS transaction alerts.
+2.  **Goal Setter**: Visual saving jars with progress bars.
+3.  **Learn & Earn**: Short quizzes on finance to earn rewards.
+
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[User App] --> B[API Gateway]
+    B --> C[Auth Service]
+    B --> D[Finance Service]
+    D --> E[AI Analysis Engine]
+    E --> F[Vector DB]
+\`\`\`
+`,
+        `
+# 🚀 Project: MediConnect VR (Demo)
+
+## 🎯 Core Problem
+Medical students lack realistic surgical practice without risking patient safety or using expensive cadavers.
+
+## 🧠 Why Existing Solutions Fail
+*   **Lack of Haptics**: Textbooks and videos are 2D.
+*   **High Cost**: VR simulators cost $50k+.
+
+## 🚀 Unique Innovation Layer
+*   **WebXR Support**: Runs in browser on Meta Quest 3 without app install.
+*   **Multiplayer**: Senior surgeons can guide students remotely.
+
+## 🏗 Technical Architecture
+*   **Frontend**: Three.js + React Three Fiber
+*   **Backend**: Supabase (Realtime)
+*   **AI**: Stable Diffusion (Texture Generation)
+*   **Database**: Supabase PostgreSQL
+
+## 🧩 Core Features (MVP)
+1.  **Virtual OR**: Interactive 3D operating room.
+2.  **Procedure Guide**: Step-by-step AI voice guidance.
+3.  **Global Leaderboard**: Score based on precision and time.
+
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[VR Headset] -->|WebSockets| B[Realtime Server]
+    B --> C[State Sync]
+    C --> D[Database]
+    A -->|Assets| E[CDN]
+\`\`\`
 `
+    ];
+
+    // Filter out avoidList if provided
+    let available = mockBlueprints;
+    if (avoidList && avoidList.length > 0) {
+        available = mockBlueprints.filter(bp => {
+            const titleMatch = bp.match(/# 🚀 Project: (.*?) \(/);
+            const title = titleMatch ? titleMatch[1] : "";
+            // If the title is in avoidList (partial match), exclude it
+            return !avoidList.some(avoid => title.includes(avoid) || avoid.includes(title));
+        });
+    }
+
+    // If all filtered out, fallback to random from original
+    if (available.length === 0) available = mockBlueprints;
+
+    const randomBlueprint = available[Math.floor(Math.random() * available.length)];
+
+    return {
+        choices: [{
+            message: {
+                content: randomBlueprint
             }
         }]
     };
