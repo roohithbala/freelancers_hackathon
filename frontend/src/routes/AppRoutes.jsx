@@ -9,6 +9,7 @@ import SignupPage from '../pages/SignupPage';
 import GenerateIdeaPage from '../pages/GenerateIdeaPage';
 import SavedIdeasPage from '../pages/SavedIdeasPage';
 import ProjectFlowPage from '../pages/ProjectFlowPage';
+import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 
 const AppRoutes = () => {
   const { loading } = useAuth();
@@ -28,6 +29,7 @@ const AppRoutes = () => {
         <Route index element={<LandingPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
       </Route>
 
       {/* Protected Routes */}

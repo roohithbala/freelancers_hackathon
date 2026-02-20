@@ -299,6 +299,14 @@ const LoginPage = () => {
                       className="py-4 text-lg bg-gray-50 dark:bg-slate-900 border-gray-100 dark:border-slate-800 focus:ring-indigo-500 rounded-2xl"
                       required
                     />
+                    <div className="flex justify-end pr-1">
+                      <Link 
+                        to="/forgot-password" 
+                        className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
+                      >
+                        Forgot Password?
+                      </Link>
+                    </div>
                   </div>
 
                   <Button

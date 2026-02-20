@@ -5,7 +5,8 @@ import {
   updateProfile as firebaseUpdateProfile,
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -75,6 +76,18 @@ class AuthService {
       return { success: true };
     } catch (error) {
       console.error('Update password error:', error);
+      return { success: false, error: this.getFriendlyErrorMessage(error.code) };
+    }
+  }
+
+  // Send password reset email
+  async resetPassword(email) {
+    try {
+      if (!email) throw new Error('Email is required');
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error) {
+      console.error('Reset password error:', error);
       return { success: false, error: this.getFriendlyErrorMessage(error.code) };
     }
   }

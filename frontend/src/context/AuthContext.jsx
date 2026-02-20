@@ -101,6 +101,16 @@ export const AuthProvider = ({ children }) => {
     return result;
   };
 
+  const forgotPassword = async (email) => {
+    const result = await authService.resetPassword(email);
+    if (result.success) {
+      success('Password reset email sent! Please check your inbox.');
+    } else {
+      error(result.error);
+    }
+    return result;
+  };
+
   const value = {
     currentUser,
     isAuthenticated: !!currentUser,
@@ -112,7 +122,8 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     updateProfile,
-    changePassword
+    changePassword,
+    forgotPassword
   };
 
   return (

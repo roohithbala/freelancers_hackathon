@@ -41,7 +41,7 @@ function isRateLimited(email) {
 
 // POST /api/otp/send
 router.post('/send', async (req, res) => {
-  const { email } = req.body;
+  const { email, mode = 'login' } = req.body;
 
   if (!email) {
     return res.status(400).json({ error: 'Email is required' });
@@ -69,12 +69,21 @@ router.post('/send', async (req, res) => {
     rateLimitStore.set(email, { count: 1, resetAt: Date.now() + RATE_LIMIT_WINDOW_MS });
   }
 
+  const isReset = mode === 'reset';
+  const subject = isReset 
+    ? '🔐 Reset Your IdeaForge Password' 
+    : '🔐 Your IdeaForge Login Verification Code';
+  const title = isReset ? 'Password Recovery' : 'Login Verification';
+  const actionText = isReset 
+    ? 'Use the following code to verify your identity and reset your password.' 
+    : 'Use the following code to complete your login.';
+
   // Send email
   try {
     await transporter.sendMail({
       from: `"IdeaForge Security" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: '🔐 Your IdeaForge Login Verification Code',
+      subject: subject,
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 30px; background: #0f172a; border-radius: 24px; color: white;">
           <div style="text-align: center; margin-bottom: 30px;">
@@ -82,11 +91,11 @@ router.post('/send', async (req, res) => {
               <span style="font-size: 28px;">🔐</span>
             </div>
             <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">IdeaForge</h1>
-            <p style="color: #94a3b8; margin-top: 4px; font-size: 13px;">Login Verification</p>
+            <p style="color: #94a3b8; margin-top: 4px; font-size: 13px;">${title}</p>
           </div>
           
           <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
-            Use the following code to complete your login. This code expires in <strong style="color: white;">5 minutes</strong>.
+            ${actionText} This code expires in <strong style="color: white;">5 minutes</strong>.
           </p>
           
           <div style="background: #1e293b; border: 2px solid #334155; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
@@ -103,7 +112,7 @@ router.post('/send', async (req, res) => {
       `
     });
 
-    console.log(`OTP sent to ${email}`);
+    console.log(`OTP (${mode}) sent to ${email}`);
     res.json({ success: true, message: 'OTP sent successfully' });
   } catch (err) {
     console.error('Failed to send OTP email:', err);
