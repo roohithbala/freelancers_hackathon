@@ -134,96 +134,6 @@ router.post('/', async (req, res) => {
             const data = await generateCompletion(messages, previousProjects, genOptions);
             const content = data.choices[0].message.content;
 
-            // Robust JSON extraction helper
-            const extractAndParseJSON = (text) => {
-                console.log("Raw AI Text Length:", text.length);
-                if (text.length < 500) console.log("Raw AI Text Snippet:", text);
-                
-                // 1. Try extracting from markdown code blocks
-                const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
-                if (jsonMatch) {
-                    try { return JSON.parse(jsonMatch[1].trim()); } catch (e) { console.warn("Markdown JSON parse failed, trying raw..."); }
-                }
-
-                // 2. Try finding the first '{' or '[' and the last '}' or ']'
-                const firstOpen = text.indexOf('{');
-                const firstArray = text.indexOf('[');
-                
-                let start = -1;
-                let end = -1;
-
-                // Determine if we are looking for an object or array
-                if (firstOpen !== -1 && (firstArray === -1 || firstOpen < firstArray)) {
-                    start = firstOpen;
-                    end = text.lastIndexOf('}');
-                } else if (firstArray !== -1) {
-                    start = firstArray;
-                    end = text.lastIndexOf(']');
-                }
-
-                if (start !== -1) {
-                    let jsonStr = end !== -1 ? text.substring(start, end + 1) : text.substring(start).trim();
-                    
-                    const tryParse = (str) => {
-                        try { return JSON.parse(str); } catch (e) { return null; }
-                    };
-
-                    // 1. Direct try
-                    let result = tryParse(jsonStr);
-                    if (result) return result;
-
-                    // 2. Surgical Repair
-                    console.warn("Direct parse failed, attempting surgical repair...");
-                    
-                    // Fix A: AI often forgets to escape literal newlines inside strings.
-                    // We only escape newlines that are NOT followed by a potential JSON structural character (", }, ], {)
-                    let fixed = jsonStr.replace(/\n(?!\s*["\{\}\[\]])/g, '\\n');
-                    
-                    result = tryParse(fixed);
-                    if (result) return result;
-
-                    // Fix B: Handle Truncation (Backtracking)
-                    // We look for the last potentially complete object boundary
-                    console.warn("Attempting to rescue truncated JSON via backtracking...");
-                    for (let i = fixed.length - 1; i > 0; i--) {
-                        // We only stop at characters that could close a structure
-                        if (fixed[i] === '}' || fixed[i] === ']' || fixed[i] === '"') {
-                            let temp = fixed.substring(0, i + 1);
-                            
-                            // If it ends with a quote, it might be a truncated string value
-                            if (temp.endsWith('"') && (temp.match(/(?<!\\)"/g) || []).length % 2 !== 0) {
-                                // Close the string
-                            } else if (temp.endsWith('"')) {
-                                // String is balanced, but maybe the object isn't
-                            }
-
-                            // Robust matching of open/close counts
-                            const count = (str, char) => (str.match(new RegExp('\\' + char, 'g')) || []).length;
-                            const openB = count(temp, '{');
-                            const closeB = count(temp, '}');
-                            const openBr = count(temp, '[');
-                            const closeBr = count(temp, ']');
-
-                            let closer = "";
-                            if (openB > closeB) closer += '}'.repeat(openB - closeB);
-                            if (openBr > closeBr) closer += ']'.repeat(openBr - closeBr);
-                            
-                            let attempt = temp + closer;
-                            // Final cleanup of trailing commas before closing
-                            attempt = attempt.replace(/,\s*([\]\}])/g, '$1');
-                            
-                            result = tryParse(attempt);
-                            if (result) return result;
-                        }
-                    }
-                    
-                    console.error("DEBUG - All repair attempts failed for current AI response.");
-                    throw new Error("JSON parse failed after all surgical recovery attempts.");
-                }
-                
-                throw new Error("No JSON found in response");
-            };
-
             if (mode === 'ideas') {
                 let ideas = [];
                 try {
@@ -247,9 +157,6 @@ router.post('/', async (req, res) => {
                 }
 
                 // Parse markdown to extract problem, features, techStack, roadmap
-                // Ensure parseBlueprintMarkdown is defined or imported. If not available in this scope, we might need to rely on structuredData or simple regex.
-                // Assuming parseBlueprintMarkdown is a helper function defined elsewhere in this file or imported. 
-                // Since I cannot see it in the previous context, I will validly assume it exists based on the orphaned code.
                 let parsedFields = {};
                 try {
                      parsedFields = parseBlueprintMarkdown(content);
@@ -293,5 +200,94 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: 'Internal server error', details: mainError.message });
     }
 });
+
+// Robust JSON extraction helper
+function extractAndParseJSON(text) {
+    console.log("Raw AI Text Length:", text.length);
+    if (text.length < 500) console.log("Raw AI Text Snippet:", text);
+    
+    // 1. Try extracting from markdown code blocks
+    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+        try { return JSON.parse(jsonMatch[1].trim()); } catch (e) { console.warn("Markdown JSON parse failed, trying raw..."); }
+    }
+
+    // 2. Try finding the first '{' or '[' and the last '}' or ']'
+    const firstOpen = text.indexOf('{');
+    const firstArray = text.indexOf('[');
+    
+    let start = -1;
+    let end = -1;
+
+    // Determine if we are looking for an object or array
+    if (firstOpen !== -1 && (firstArray === -1 || firstOpen < firstArray)) {
+        start = firstOpen;
+        end = text.lastIndexOf('}');
+    } else if (firstArray !== -1) {
+        start = firstArray;
+        end = text.lastIndexOf(']');
+    }
+
+    if (start !== -1) {
+        let jsonStr = end !== -1 ? text.substring(start, end + 1) : text.substring(start).trim();
+        
+        const tryParse = (str) => {
+            try { return JSON.parse(str); } catch (e) { return null; }
+        };
+
+        // 1. Direct try
+        let result = tryParse(jsonStr);
+        if (result) return result;
+
+        // 2. Surgical Repair
+        console.warn("Direct parse failed, attempting surgical repair...");
+        
+        // Fix A: AI often forgets to escape literal newlines inside strings.
+        // We only escape newlines that are NOT followed by a potential JSON structural character (", }, ], {)
+        let fixed = jsonStr.replace(/\n(?!\s*["\{\}\[\]])/g, '\\n');
+        
+        result = tryParse(fixed);
+        if (result) return result;
+
+        // Fix B: Handle Truncation (Backtracking)
+        // We look for the last potentially complete object boundary
+        console.warn("Attempting to rescue truncated JSON via backtracking...");
+        for (let i = fixed.length - 1; i > 0; i--) {
+            // We only stop at characters that could close a structure
+            if (fixed[i] === '}' || fixed[i] === ']' || fixed[i] === '"') {
+                let temp = fixed.substring(0, i + 1);
+                
+                // If it ends with a quote, it might be a truncated string value
+                if (temp.endsWith('"') && (temp.match(/(?<!\\)"/g) || []).length % 2 !== 0) {
+                    // Close the string
+                } else if (temp.endsWith('"')) {
+                    // String is balanced, but maybe the object isn't
+                }
+
+                // Robust matching of open/close counts
+                const count = (str, char) => (str.match(new RegExp('\\' + char, 'g')) || []).length;
+                const openB = count(temp, '{');
+                const closeB = count(temp, '}');
+                const openBr = count(temp, '[');
+                const closeBr = count(temp, ']');
+
+                let closer = "";
+                if (openB > closeB) closer += '}'.repeat(openB - closeB);
+                if (openBr > closeBr) closer += ']'.repeat(openBr - closeBr);
+                
+                let attempt = temp + closer;
+                // Final cleanup of trailing commas before closing
+                attempt = attempt.replace(/,\s*([\]\}])/g, '$1');
+                
+                result = tryParse(attempt);
+                if (result) return result;
+            }
+        }
+        
+        throw new Error("JSON parse failed after all surgical recovery attempts.");
+    }
+    
+    throw new Error("No JSON found in response");
+}
 
 module.exports = router;
