@@ -39,6 +39,7 @@ spec:
   - port: 5000
     targetPort: 5000
     nodePort: 30050
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
