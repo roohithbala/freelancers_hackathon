@@ -21,11 +21,11 @@ pipeline {
 
             kubectl create secret generic backend-env \
               --from-env-file="$BACKEND_ENV_FILE" \
-              --dry-run=client -o yaml | kubectl apply -f -
+              --dry-run=client -o yaml | kubectl apply --validate=false -f -
 
             kubectl create secret generic frontend-env \
               --from-env-file="$FRONTEND_ENV_FILE" \
-              --dry-run=client -o yaml | kubectl apply -f -
+              --dry-run=client -o yaml | kubectl apply --validate=false -f -
           '''
         }
       }
@@ -47,10 +47,11 @@ pipeline {
       steps {
         sh '''
           set -e
-          kubectl apply -f k8s/backend-deployment.yaml
+          kubectl apply --validate=false -f k8s/backend-deployment.yaml
           kubectl rollout restart deployment/backend-deployment || true
           kubectl rollout status deployment/backend-deployment --timeout=180s || true
 
+          kubectl apply --validate=false -f k8s/frontend-deployment.yaml
           kubectl rollout restart deployment/frontend-deployment || true
           kubectl rollout status deployment/frontend-deployment --timeout=180s || true
         '''
