@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    KUBECONFIG = '/var/jenkins_home/kubeconfig'
     FRONTEND_IMAGE = 'freelancers-frontend:latest'
     BACKEND_IMAGE  = 'freelancers-backend:latest'
   }
@@ -15,12 +16,13 @@ pipeline {
         ]) {
           sh '''
             set -e
+            echo "Using KUBECONFIG=$KUBECONFIG"
+            kubectl config current-context || true
 
             kubectl create secret generic backend-env \
               --from-env-file="$BACKEND_ENV_FILE" \
               --dry-run=client -o yaml | kubectl apply -f -
 
-            # Only keep this if your frontend actually reads runtime env vars.
             kubectl create secret generic frontend-env \
               --from-env-file="$FRONTEND_ENV_FILE" \
               --dry-run=client -o yaml | kubectl apply -f -
