@@ -10,10 +10,25 @@ pipeline {
         stage('Clone Code') {
             steps {
                 // If checking out from Git, uncomment and set the URL
-                // git url: 'https://github.com/roohithbala/freelancers_hackathon.git', branch: 'main'
+                git url: 'https://github.com/roohithbala/freelancers_hackathon.git', branch: 'main'
                 
                 // If using GitHub Webhooks that automatically clone the repo:
                 echo "Code checked out by Jenkins"
+            }
+        }
+
+        stage('Inject Env Files') {
+            steps {
+                // Fetch the environment variables from Jenkins Credentials (type: Secret file)
+                // You must create two Secret File credentials in Jenkins with IDs:
+                // 'frontend-env' and 'backend-env'
+                withCredentials([
+                    file(credentialsId: 'frontend-env', variable: 'FRONTEND_ENV_FILE'),
+                    file(credentialsId: 'backend-env', variable: 'BACKEND_ENV_FILE')
+                ]) {
+                    sh 'cp $FRONTEND_ENV_FILE frontend/.env'
+                    sh 'cp $BACKEND_ENV_FILE backend/.env'
+                }
             }
         }
 
@@ -35,6 +50,9 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
+                // Dynamically create or update Kubernetes Secret for the backend from its .env file
+                sh 'kubectl create secret generic backend-env --from-env-file=backend/.env --dry-run=client -o yaml | kubectl apply -f - || true'
+                
                 sh 'kubectl apply -f k8s/backend-deployment.yaml'
                 sh 'kubectl apply -f k8s/frontend-deployment.yaml'
                 

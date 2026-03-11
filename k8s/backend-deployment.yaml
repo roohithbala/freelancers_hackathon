@@ -13,6 +13,9 @@ spec:
     metadata:
       labels:
         app: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5000"
     spec:
       containers:
       - name: backend
@@ -20,13 +23,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000
-        env:
-        - name: PORT
-          value: "5000"
-        - name: HF_API_KEY
-          value: "YOUR_HUGGINGFACE_API_KEY_HERE"
-        - name: HF_MODEL
-          value: "google/flan-t5-large"
+        envFrom:
+        - secretRef:
+            name: backend-env
 ---
 apiVersion: v1
 kind: Service
