@@ -106,9 +106,11 @@ jobs:
 
       - name: Configure kubeconfig
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+          kubectl config get-contexts
+          kubectl cluster-info
 
       - name: Create monitoring namespace
         run: |
