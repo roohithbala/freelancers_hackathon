@@ -31,9 +31,6 @@ spec:
           limits:
             cpu: "500m"
             memory: "512Mi"
-        envFrom:
-        - secretRef:
-            name: backend-env
 ---
 apiVersion: v1
 kind: Service

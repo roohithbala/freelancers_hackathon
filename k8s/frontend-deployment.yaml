@@ -31,9 +31,6 @@ spec:
           limits:
             cpu: "200m"
             memory: "256Mi"
-        envFrom:
-        - secretRef:
-            name: frontend-env
 ---
 apiVersion: v1
 kind: Service

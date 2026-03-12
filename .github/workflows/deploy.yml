@@ -39,14 +39,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 🔹 Decode frontend env file
-      - name: Decode frontend env for Docker build args
-        id: frontend-env
-        run: |
-          echo "${{ env.FRONTEND_ENV_B64 }}" | base64 -d > /tmp/frontend.env
-          echo "build_args=$(grep -E '^VITE_' /tmp/frontend.env | tr '\n' ',' | sed 's/,$//')" >> "$GITHUB_OUTPUT"
-          rm -f /tmp/frontend.env
-
       # 🔹 Build frontend image with env variables
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -57,17 +49,9 @@ jobs:
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           build-args: |
-            ${{ steps.frontend-env.outputs.build_args }}
+            ENV_B64=${{ env.FRONTEND_ENV_B64 }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      # 🔹 Decode backend env file
-      - name: Decode backend env for Docker build args
-        id: backend-env
-        run: |
-          echo "${{ env.BACKEND_ENV_B64 }}" | base64 -d > /tmp/backend.env
-          echo "build_args=$(cat /tmp/backend.env | tr '\n' ',' | sed 's/,$//')" >> "$GITHUB_OUTPUT"
-          rm -f /tmp/backend.env
 
       # 🔹 Build backend image
       - name: Build and push backend image
@@ -78,7 +62,8 @@ jobs:
           tags: |
             ${{ env.BACKEND_IMAGE }}:latest
             ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
-          build-args: ${{ steps.backend-env.outputs.build_args }}
+          build-args: |
+            ENV_B64=${{ env.BACKEND_ENV_B64 }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -117,24 +102,6 @@ jobs:
           kubectl config get-contexts
           kubectl cluster-info
 
-
-      # 🔹 Backend env secret
-      - name: Create backend secret
-        run: |
-          echo "${{ env.BACKEND_ENV_B64 }}" | base64 -d > /tmp/backend.env
-          kubectl create secret generic backend-env \
-            --from-env-file=/tmp/backend.env \
-            --dry-run=client -o yaml | kubectl apply -f -
-          rm -f /tmp/backend.env
-
-      # 🔹 Frontend env secret
-      - name: Create frontend secret
-        run: |
-          echo "${{ env.FRONTEND_ENV_B64 }}" | base64 -d > /tmp/frontend.env
-          kubectl create secret generic frontend-env \
-            --from-env-file=/tmp/frontend.env \
-            --dry-run=client -o yaml | kubectl apply -f -
-          rm -f /tmp/frontend.env
 
       - name: Deploy backend
         run: |
