@@ -75,20 +75,12 @@ jobs:
       - name: Configure kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "Checking KUBECONFIG_B64 length: ${#KUBECONFIG_B64}"
-          if [ -z "$KUBECONFIG_B64" ] || [ "${#KUBECONFIG_B64}" -lt 50 ]; then
-            echo "Error: KUBECONFIG_DATA secret is empty or too short. Length: ${#KUBECONFIG_B64}"
-            exit 1
-          fi
-          echo "$KUBECONFIG_B64" | tr -d '[:space:]' | base64 -d > ~/.kube/config
+          echo "${{ env.KUBECONFIG_B64 }}" | tr -d '[:space:]' | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-          echo "Kubeconfig file size: $(stat -c%s ~/.kube/config) bytes"
-          echo "Kubeconfig loaded:"
-          kubectl config view
-          kubectl config get-contexts
-          kubectl cluster-info
-
+      - name: Cleanup old services (Avoid NodePort conflict)
+        run: |
+          kubectl delete service backend-service frontend-service --ignore-not-found=true
 
       - name: Deploy application
         run: |
