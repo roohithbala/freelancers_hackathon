@@ -36,6 +36,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 🔹 Decode frontend env file
+      - name: Decode frontend env for Docker build args
+        id: frontend-env
+        run: |
+          echo "${{ secrets.FRONTEND_ENV_B64 }}" | base64 -d > /tmp/frontend.env
+          {
+            echo 'build_args<<EOF'
+            grep -E '^VITE_' /tmp/frontend.env || true
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          rm -f /tmp/frontend.env
+
+      # 🔹 Build frontend image with env variables
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
         with:
@@ -44,9 +57,23 @@ jobs:
           tags: |
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          build-args: ${{ steps.frontend-env.outputs.build_args }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # 🔹 Decode backend env file
+      - name: Decode backend env for Docker build args
+        id: backend-env
+        run: |
+          echo "${{ secrets.BACKEND_ENV_B64 }}" | base64 -d > /tmp/backend.env
+          {
+            echo 'build_args<<EOF'
+            cat /tmp/backend.env || true
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          rm -f /tmp/backend.env
+
+      # 🔹 Build backend image
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
@@ -55,6 +82,7 @@ jobs:
           tags: |
             ${{ env.BACKEND_IMAGE }}:latest
             ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          build-args: ${{ steps.backend-env.outputs.build_args }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -85,6 +113,7 @@ jobs:
         run: |
           kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
 
+      # 🔹 Backend env secret
       - name: Create backend secret
         run: |
           echo "${{ secrets.BACKEND_ENV_B64 }}" | base64 -d > /tmp/backend.env
@@ -93,31 +122,34 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
           rm -f /tmp/backend.env
 
+      # 🔹 ngrok token secret
       - name: Create ngrok secret
         run: |
           kubectl create secret generic ngrok-secret \
             --from-literal=authtoken=${{ secrets.NGROK_AUTHTOKEN }} \
             --dry-run=client -o yaml | kubectl apply -f -
 
+      # 🔹 Deploy backend
       - name: Deploy backend
         run: |
           sed "s|IMAGE_PLACEHOLDER_BACKEND|${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" \
             k8s/backend-deployment.yaml | kubectl apply --validate=false -f -
-          kubectl rollout restart deployment/backend-deployment
           kubectl rollout status deployment/backend-deployment --timeout=180s
 
+      # 🔹 Deploy frontend
       - name: Deploy frontend
         run: |
           sed "s|IMAGE_PLACEHOLDER_FRONTEND|${{ env.FRONTEND_IMAGE }}:${{ github.sha }}|g" \
             k8s/frontend-deployment.yaml | kubectl apply --validate=false -f -
-          kubectl rollout restart deployment/frontend-deployment
           kubectl rollout status deployment/frontend-deployment --timeout=180s
 
+      # 🔹 ngrok tunnel
       - name: Deploy ngrok tunnel
         run: |
           kubectl apply --validate=false -f k8s/ngrok.yaml
           kubectl rollout status deployment/ngrok --timeout=120s
 
+      # 🔹 Monitoring
       - name: Install Prometheus + Grafana via Helm
         run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -132,41 +164,3 @@ jobs:
             --set grafana.service.nodePort=32000 \
             --timeout=300s \
             --wait
-
-      - name: Get ngrok public URL
-        id: ngrok-url
-        run: |
-          NGROK_POD=$(kubectl get pods -l app=ngrok -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-          if [ -z "$NGROK_POD" ]; then
-            echo "ngrok_url=not-available" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "Polling ngrok API for tunnel URL (up to 60s)..."
-          NGROK_URL=""
-          for i in $(seq 1 12); do
-            NGROK_URL=$(kubectl exec "$NGROK_POD" -- \
-              wget -qO- http://localhost:4040/api/tunnels 2>/dev/null \
-              | grep -o '"public_url":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
-            if [ -n "$NGROK_URL" ]; then
-              break
-            fi
-            echo "  attempt $i/12 — tunnel not ready yet, retrying in 5s..."
-            sleep 5
-          done
-          echo "ngrok_url=${NGROK_URL:-not-available}" >> "$GITHUB_OUTPUT"
-          echo "🌐 Public URL: ${NGROK_URL:-not-available}"
-
-      - name: Print deployment summary
-        run: |
-          echo "=============================="
-          echo "  Deployment Summary"
-          echo "=============================="
-          echo ""
-          kubectl get pods -o wide
-          echo ""
-          kubectl get services
-          echo ""
-          echo "📊 Grafana:  http://<node-ip>:32000  (admin / \$GRAFANA_ADMIN_PASSWORD)"
-          echo "🌐 Website:  ${{ steps.ngrok-url.outputs.ngrok_url }}"
-          echo ""
-          echo "=============================="
