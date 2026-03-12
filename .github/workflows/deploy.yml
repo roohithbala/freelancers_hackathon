@@ -84,15 +84,21 @@ jobs:
 
       - name: Deploy application
         run: |
+          echo "🚀 Applying new deployment..."
           sed "s|IMAGE_PLACEHOLDER_APP|${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" \
             k8s/app-deployment.yaml | kubectl apply --validate=false -f -
           
           # Wait for rollout and show status on failure
           if ! kubectl rollout status deployment/app-deployment --timeout=180s; then
-            echo "::error::Rollout failed! Diagnostic info follows:"
+            echo "::error::Rollout failed! Attempting automatic rollback..."
             kubectl get pods
             kubectl describe deployment app-deployment
             kubectl logs -l app=freelancers-app --tail=50
+            
+            # 🛡️ ROLLBACK
+            kubectl rollout undo deployment/app-deployment
+            kubectl rollout status deployment/app-deployment --timeout=120s
+            echo "::notice::Successfully rolled back to the previous stable version."
             exit 1
           fi
 
@@ -100,6 +106,20 @@ jobs:
         run: |
           kubectl apply --validate=false -f k8s/nginx-proxy.yaml
           kubectl rollout status deployment/nginx-proxy --timeout=120s
+
+      - name: Final Health Check
+        run: |
+          echo "🔍 Verifying application health..."
+          # Wait a few seconds for Nginx to pick up the new service
+          sleep 10
+          URL="http://${{ secrets.EC2_PUBLIC_IP }}/health"
+          echo "Testing $URL"
+          if curl --fail --silent --show-error "$URL"; then
+            echo "✅ Application is healthy!"
+          else
+            echo "❌ Application health check failed!"
+            exit 1
+          fi
 
 
       - name: Print deployment summary
