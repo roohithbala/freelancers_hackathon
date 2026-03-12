@@ -162,6 +162,8 @@ push → Build Docker images → Push to GHCR → Deploy to K8s → Install Prom
 | `EC2_PUBLIC_IP` | Public IP (or DNS hostname) of the EC2 instance |
 | `GRAFANA_ADMIN_PASSWORD` | Grafana admin password |
 
+> **Note:** The kubeconfig must include a client certificate with **Client Authentication** (clientAuth) extended key usage. If you see `x509: invalid key usage`, regenerate the kubeconfig from your cluster's admin config (for k3s, `/etc/rancher/k3s/k3s.yaml`) and re-encode it.
+
 **How to create the base64-encoded env secrets:**
 ```bash
 # Linux (GNU coreutils)
