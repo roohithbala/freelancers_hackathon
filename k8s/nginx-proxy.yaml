@@ -19,19 +19,21 @@ data:
       server app-service:5000;
     }
 
-    server {
+        server {
       listen 80;
       server_name _;
 
-      # Health-check endpoint
+      # Lazy DNS resolution: Nginx won't fail if app-service is missing at start
+      resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+      set $upstream_app app-service;
+
       location /healthz {
-        return 200 "ok\n";
-        add_header Content-Type text/plain;
+        return 200 "ok
+";
       }
 
-      # Route everything to the bundled application
       location / {
-        proxy_pass         http://app;
+        proxy_pass         http://$upstream_app:5000;
         proxy_http_version 1.1;
         proxy_set_header   Host              $host;
         proxy_set_header   X-Real-IP         $remote_addr;
@@ -66,6 +68,7 @@ spec:
         image: nginx:alpine
         ports:
         - containerPort: 80
+          hostPort: 80
           protocol: TCP
         resources:
           requests:

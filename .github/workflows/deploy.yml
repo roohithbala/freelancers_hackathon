@@ -114,15 +114,22 @@ jobs:
           echo "🧹 Force cleaning old proxy..."
           kubectl delete deployment nginx-proxy --ignore-not-found=true
           kubectl delete service nginx-proxy-service --ignore-not-found=true
+          sleep 10
           
           echo "🚀 Applying nginx reverse proxy..."
           kubectl apply --validate=false -f k8s/nginx-proxy.yaml
           
+          echo "⌛ Waiting for rollout (300s)..."
           if ! kubectl rollout status deployment/nginx-proxy --timeout=300s; then
             echo "::error::Nginx Proxy rollout failed!"
-            kubectl get pods -l app=nginx-proxy
+            echo "--- PODS ---"
+            kubectl get pods -A
+            echo "--- EVENTS ---"
+            kubectl get events --sort-by='.lastTimestamp' | tail -n 20
+            echo "--- DESCRIBE ---"
             kubectl describe pods -l app=nginx-proxy
-            kubectl logs -l app=nginx-proxy --tail=100
+            echo "--- LOGS ---"
+            kubectl logs -l app=nginx-proxy --all-containers=true --tail=100
             exit 1
           fi
 
