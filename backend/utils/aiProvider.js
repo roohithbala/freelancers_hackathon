@@ -2,8 +2,37 @@ const OpenAI = require("openai");
 const fetch = require('node-fetch');
 
 // Configuration
+const GPT_MODEL = "gpt-4o-mini";
 const GEMINI_DIRECT_MODEL_NAME = "gemini-1.5-flash";
 const GEMINI_DIRECT_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_DIRECT_MODEL_NAME}:generateContent`;
+
+// Helper for OpenAI GPT (Primary)
+async function callOpenAI(messages, apiKey, options = {}) {
+    console.log(`Attempting OpenAI GPT API (${GPT_MODEL})...`);
+
+    const client = new OpenAI({ apiKey });
+
+    try {
+        const payload = {
+            messages,
+            model: GPT_MODEL,
+            temperature: typeof options.temperature === 'number' ? options.temperature : 0.2,
+        };
+        if (options.maxTokens) payload.max_tokens = options.maxTokens;
+
+        const completion = await client.chat.completions.create(payload);
+
+        return {
+            choices: [{
+                message: {
+                    content: completion.choices[0]?.message?.content
+                }
+            }]
+        };
+    } catch (error) {
+        throw new Error(`OpenAI GPT failed: ${error.message}`);
+    }
+}
 
 // Helper for Groq via OpenAI SDK
 async function callGroq(messages, apiKey, options = {}) {
@@ -130,7 +159,16 @@ async function callHuggingFace(messages, apiKey, options = {}) {
 }
 
 async function generateCompletion(messages, avoidList = [], options = {}) {
-    // 1. Try Hugging Face (New Primary)
+    // 1. Try OpenAI GPT (Primary)
+    if (process.env.OPENAI_API_KEY) {
+        try {
+            return await callOpenAI(messages, process.env.OPENAI_API_KEY, options);
+        } catch (e) {
+            console.error(`OpenAI GPT Attempt Failed: ${e.message}`);
+        }
+    }
+
+    // 2. Try Hugging Face (Secondary)
     if (process.env.HF_API_KEY) {
         try {
             return await callHuggingFace(messages, process.env.HF_API_KEY, options);
@@ -139,7 +177,7 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
         }
     }
 
-    // 2. Try Groq (Secondary)
+    // 3. Try Groq (Tertiary)
     if (process.env.GROQ_API_KEY) {
         try {
             return await callGroq(messages, process.env.GROQ_API_KEY, options);
@@ -148,7 +186,7 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
         }
     }
 
-    // 3. Try Google Gemini Direct (Tertiary)
+    // 4. Try Google Gemini Direct (Quaternary)
     if (process.env.GOOGLE_API_KEY) {
         try {
             return await callGeminiDirect(messages, process.env.GOOGLE_API_KEY, options);
