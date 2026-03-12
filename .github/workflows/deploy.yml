@@ -116,9 +116,6 @@ jobs:
           kubectl config get-contexts
           kubectl cluster-info
 
-      - name: Create monitoring namespace
-        run: |
-          kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
 
       # 🔹 Backend env secret
       - name: Create backend secret
@@ -156,24 +153,6 @@ jobs:
           kubectl apply --validate=false -f k8s/nginx-proxy.yaml
           kubectl rollout status deployment/nginx-proxy --timeout=120s
 
-      - name: Install Prometheus + Grafana via Helm
-        run: |
-          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-          helm repo update
-          helm upgrade --install kube-prometheus-stack \
-            prometheus-community/kube-prometheus-stack \
-            --namespace monitoring \
-            --create-namespace \
-            --set grafana.adminPassword="${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
-            --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
-            --set grafana.service.type=NodePort \
-            --set grafana.service.nodePort=32000 \
-            --timeout=300s \
-            --wait
-
-      - name: Deploy monitoring resources
-        run: |
-          kubectl apply --validate=false -f k8s/monitoring.yaml
 
       - name: Print deployment summary
         run: |
@@ -185,7 +164,6 @@ jobs:
           echo ""
           kubectl get services
           echo ""
-          echo "📊 Grafana:  http://${{ secrets.EC2_PUBLIC_IP }}:32000  (admin / \$GRAFANA_ADMIN_PASSWORD)"
           echo "🌐 Website:  http://${{ secrets.EC2_PUBLIC_IP }}"
           echo ""
           echo "=============================="
