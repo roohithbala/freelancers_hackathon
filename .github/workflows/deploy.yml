@@ -105,13 +105,15 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: Configure kubeconfig
+        env:
+          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_DATA }}
         run: |
           mkdir -p ~/.kube
-          if [ -z "${{ secrets.KUBECONFIG_DATA }}" ]; then
-            echo "Error: KUBECONFIG_DATA secret is empty!"
+          if [ -z "$KUBECONFIG_B64" ]; then
+            echo "Error: KUBECONFIG_DATA secret is empty or not passed to the job!"
             exit 1
           fi
-          echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > ~/.kube/config
+          echo "$KUBECONFIG_B64" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
           echo "Kubeconfig file size: $(stat -c%s ~/.kube/config) bytes"
