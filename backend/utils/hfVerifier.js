@@ -1,7 +1,25 @@
+const OpenAI = require('openai');
 const fetch = require('node-fetch');
 
+const GPT_MODEL = 'gpt-4o-mini';
 const HF_API = process.env.HF_API_KEY;
-const HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct'; // Upgraded to user-requested model
+const HF_MODEL = 'meta-llama/Llama-3.1-8B-Instruct';
+
+async function callGptVerifier(prompt) {
+  if (!process.env.OPENAI_API_KEY) throw new Error('OpenAI API key not configured (OPENAI_API_KEY).');
+
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const completion = await client.chat.completions.create({
+    model: GPT_MODEL,
+    messages: [
+      { role: 'system', content: 'You are a meticulous technical reviewer.' },
+      { role: 'user', content: prompt }
+    ],
+    temperature: 0.1,
+    max_tokens: 1024,
+  });
+  return completion.choices[0]?.message?.content || '';
+}
 
 async function callHfInference(prompt) {
   if (!HF_API) throw new Error('HuggingFace API key not configured (HF_API_KEY).');
@@ -61,7 +79,14 @@ Blueprint:
 ${markdown}`;
 
   try {
-    const raw = await callHfInference(prompt);
+    // Try GPT first, fall back to HuggingFace
+    let raw;
+    try {
+      raw = await callGptVerifier(prompt);
+    } catch (gptErr) {
+      console.warn('GPT verifier failed, falling back to HuggingFace:', gptErr.message);
+      raw = await callHfInference(prompt);
+    }
     // Extract JSON
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return { summary: 'Audit failed: No JSON in response', issues: [] };
