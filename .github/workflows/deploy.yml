@@ -106,12 +106,6 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
           rm -f /tmp/backend.env
 
-      - name: Create ngrok secret
-        run: |
-          kubectl create secret generic ngrok-secret \
-            --from-literal=authtoken=${{ secrets.NGROK_AUTHTOKEN }} \
-            --dry-run=client -o yaml | kubectl apply -f -
-
       - name: Deploy backend
         run: |
           sed "s|IMAGE_PLACEHOLDER_BACKEND|${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" \
@@ -126,10 +120,10 @@ jobs:
           kubectl rollout restart deployment/frontend-deployment
           kubectl rollout status deployment/frontend-deployment --timeout=180s
 
-      - name: Deploy ngrok tunnel
+      - name: Deploy nginx reverse proxy
         run: |
-          kubectl apply --validate=false -f k8s/ngrok.yaml
-          kubectl rollout status deployment/ngrok --timeout=120s
+          kubectl apply --validate=false -f k8s/nginx-proxy.yaml
+          kubectl rollout status deployment/nginx-proxy --timeout=120s
 
       - name: Apply Prometheus monitoring resources
         run: |
@@ -150,29 +144,6 @@ jobs:
             --timeout=300s \
             --wait
 
-      - name: Get ngrok public URL
-        id: ngrok-url
-        run: |
-          NGROK_POD=$(kubectl get pods -l app=ngrok -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-          if [ -z "$NGROK_POD" ]; then
-            echo "ngrok_url=not-available" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "Polling ngrok API for tunnel URL (up to 60s)..."
-          NGROK_URL=""
-          for i in $(seq 1 12); do
-            NGROK_URL=$(kubectl exec "$NGROK_POD" -- \
-              wget -qO- http://localhost:4040/api/tunnels 2>/dev/null \
-              | grep -o '"public_url":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
-            if [ -n "$NGROK_URL" ]; then
-              break
-            fi
-            echo "  attempt $i/12 — tunnel not ready yet, retrying in 5s..."
-            sleep 5
-          done
-          echo "ngrok_url=${NGROK_URL:-not-available}" >> "$GITHUB_OUTPUT"
-          echo "🌐 Public URL: ${NGROK_URL:-not-available}"
-
       - name: Print deployment summary
         run: |
           echo "=============================="
@@ -183,8 +154,8 @@ jobs:
           echo ""
           kubectl get services
           echo ""
-          echo "📊 Grafana:  http://<node-ip>:32000  (admin / \$GRAFANA_ADMIN_PASSWORD)"
-          echo "🌐 Website:  ${{ steps.ngrok-url.outputs.ngrok_url }}"
+          echo "📊 Grafana:  http://${{ secrets.EC2_PUBLIC_IP }}:32000  (admin / \$GRAFANA_ADMIN_PASSWORD)"
+          echo "🌐 Website:  http://${{ secrets.EC2_PUBLIC_IP }}"
           echo ""
           echo "=============================="
 

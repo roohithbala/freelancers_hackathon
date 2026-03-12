@@ -36,6 +36,7 @@ A powerful AI-driven tool that generates investor-ready project blueprints, tech
 -   **Database & Auth**: Firebase Firestore & Authentication
 -   **Containerisation**: Docker
 -   **Orchestration**: Kubernetes (K8s)
+-   **Reverse Proxy**: nginx (on EC2 — routes public traffic to frontend & backend)
 -   **Monitoring**: Prometheus + Grafana (via `kube-prometheus-stack` Helm chart)
 -   **CI/CD**: GitHub Actions (no Jenkins required)
 
@@ -126,8 +127,20 @@ Manifests are in the `k8s/` directory:
 |---|---|
 | `k8s/backend-deployment.yaml` | Backend `Deployment` + `Service` |
 | `k8s/frontend-deployment.yaml` | Frontend `Deployment` + `Service` |
-| `k8s/ngrok.yaml` | ngrok tunnel to expose the frontend publicly |
+| `k8s/nginx-proxy.yaml` | nginx reverse proxy — routes port 80 on the EC2 host to the frontend and backend K8s services |
 | `k8s/monitoring.yaml` | Prometheus `ServiceMonitor`s + Grafana dashboard `ConfigMap` |
+
+### Traffic routing via nginx on EC2
+
+The nginx reverse proxy pod uses `hostPort: 80`, which binds directly to port 80 on the EC2 instance's network interface — no extra iptables rules or load balancer are needed:
+
+```
+Internet → EC2 :80 → nginx-proxy pod
+                          ├─ /api/* → backend-service:5000 (Express API)
+                          └─ /      → frontend-service:80  (React SPA)
+```
+
+Make sure your EC2 Security Group allows **inbound TCP port 80** (and optionally 443) from `0.0.0.0/0`.
 
 ---
 
@@ -146,7 +159,7 @@ push → Build Docker images → Push to GHCR → Deploy to K8s → Install Prom
 | `FRONTEND_ENV_B64` | Base64-encoded `frontend/.env` file (all `VITE_*` vars) |
 | `BACKEND_ENV_B64` | Base64-encoded `backend/.env` file |
 | `KUBECONFIG_DATA` | Base64-encoded kubeconfig for your cluster |
-| `NGROK_AUTHTOKEN` | ngrok authentication token |
+| `EC2_PUBLIC_IP` | Public IP (or DNS hostname) of the EC2 instance |
 | `GRAFANA_ADMIN_PASSWORD` | Grafana admin password |
 
 **How to create the base64-encoded env secrets:**
@@ -167,7 +180,7 @@ base64 -i backend/.env      # copy the output → BACKEND_ENV_B64 secret
 The pipeline deploys the `kube-prometheus-stack` Helm chart into the `monitoring` namespace:
 
 - **Prometheus** scrapes metrics from all pods and via `ServiceMonitor` resources.
-- **Grafana** is exposed on `NodePort 32000`. Access at `http://<node-ip>:32000` with username `admin` and the password set in the `GRAFANA_ADMIN_PASSWORD` secret.
+- **Grafana** is exposed on `NodePort 32000`. Access at `http://<EC2_PUBLIC_IP>:32000` with username `admin` and the password set in the `GRAFANA_ADMIN_PASSWORD` secret.
 - A pre-built **Application Overview** dashboard (`k8s/monitoring.yaml`) is automatically imported into Grafana, showing pod counts, CPU, and memory usage.
 
 ---
