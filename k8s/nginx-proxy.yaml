@@ -19,7 +19,7 @@ data:
       server app-service:5000;
     }
 
-        server {
+    server {
       listen 80;
       server_name _;
 
@@ -28,8 +28,7 @@ data:
       set $upstream_app app-service;
 
       location /healthz {
-        return 200 "ok
-";
+        return 200 "ok\n";
       }
 
       location / {
