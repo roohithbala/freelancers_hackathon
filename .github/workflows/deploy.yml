@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     env:
-      KUBECONFIG_B64: ${{ secrets.KUBECONFIG_DATA }}
+      KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64 }}
     permissions:
       contents: read
 
