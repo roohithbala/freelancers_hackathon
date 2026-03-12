@@ -56,7 +56,8 @@ jobs:
           tags: |
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          build-args: ${{ steps.frontend-env.outputs.build_args }}
+          build-args: |
+            ${{ steps.frontend-env.outputs.build_args }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
