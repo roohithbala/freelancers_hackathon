@@ -86,7 +86,15 @@ jobs:
         run: |
           sed "s|IMAGE_PLACEHOLDER_APP|${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" \
             k8s/app-deployment.yaml | kubectl apply --validate=false -f -
-          kubectl rollout status deployment/app-deployment --timeout=180s
+          
+          # Wait for rollout and show status on failure
+          if ! kubectl rollout status deployment/app-deployment --timeout=180s; then
+            echo "::error::Rollout failed! Diagnostic info follows:"
+            kubectl get pods
+            kubectl describe deployment app-deployment
+            kubectl logs -l app=freelancers-app --tail=50
+            exit 1
+          fi
 
       - name: Deploy nginx reverse proxy
         run: |
