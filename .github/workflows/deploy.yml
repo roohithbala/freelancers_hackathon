@@ -114,7 +114,7 @@ jobs:
             echo "Error: KUBECONFIG_DATA secret is empty or too short. Length: ${#KUBECONFIG_B64}"
             exit 1
           fi
-          echo "$KUBECONFIG_B64" | base64 -d > ~/.kube/config
+          echo "$KUBECONFIG_B64" | tr -d '[:space:]' | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
           echo "Kubeconfig file size: $(stat -c%s ~/.kube/config) bytes"
