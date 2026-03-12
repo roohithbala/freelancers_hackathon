@@ -87,7 +87,7 @@ jobs:
     needs: build-and-push
     permissions:
       contents: read
-    if: ${{ env.KUBECONFIG_B64 != '' }}
+
 
     steps:
       - name: Checkout repository
