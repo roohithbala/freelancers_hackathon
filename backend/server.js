@@ -23,8 +23,8 @@ app.use('/api/generate', generateRoutes);
 app.use('/api/otp', otpRoutes);
 app.use('/api/payment', paymentRoutes);
 
-// Catch-all route to serve index.html for SPA
-app.get('*', (req, res) => {
+// Catch-all route to serve index.html for SPA (Express 5 compatibility)
+app.get('(.*)', (req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     }
