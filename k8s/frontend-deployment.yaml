@@ -26,11 +26,14 @@ spec:
         - containerPort: 80
         resources:
           requests:
-            cpu: "50m"
-            memory: "64Mi"
+            cpu: "100m"
+            memory: "128Mi"
           limits:
             cpu: "200m"
-            memory: "128Mi"
+            memory: "256Mi"
+        envFrom:
+        - secretRef:
+            name: frontend-env
 ---
 apiVersion: v1
 kind: Service
