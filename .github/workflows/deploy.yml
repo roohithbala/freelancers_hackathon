@@ -59,6 +59,7 @@ jobs:
     needs: build-and-push
     permissions:
       contents: read
+      packages: write
 
 
     steps:
