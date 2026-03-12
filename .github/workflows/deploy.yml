@@ -36,6 +36,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Decode frontend env for Docker build args
+        id: frontend-env
+        run: |
+          echo "${{ secrets.FRONTEND_ENV_B64 }}" | base64 -d > /tmp/frontend.env
+          # Export each VITE_ variable as a GitHub Actions output (multiline safe)
+          {
+            echo 'build_args<<EOF'
+            grep -E '^VITE_' /tmp/frontend.env || true
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+          rm -f /tmp/frontend.env
+
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
         with:
@@ -44,6 +56,7 @@ jobs:
           tags: |
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          build-args: ${{ steps.frontend-env.outputs.build_args }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -118,6 +131,10 @@ jobs:
           kubectl apply --validate=false -f k8s/ngrok.yaml
           kubectl rollout status deployment/ngrok --timeout=120s
 
+      - name: Apply Prometheus monitoring resources
+        run: |
+          kubectl apply --validate=false -f k8s/monitoring.yaml
+
       - name: Install Prometheus + Grafana via Helm
         run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -170,3 +187,4 @@ jobs:
           echo "🌐 Website:  ${{ steps.ngrok-url.outputs.ngrok_url }}"
           echo ""
           echo "=============================="
+
