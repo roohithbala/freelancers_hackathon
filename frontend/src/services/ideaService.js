@@ -16,7 +16,7 @@ function cyrb53(str, seed = 0) {
 
 class IdeaService {
   constructor() {
-    this.apiBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000') + '/api';
+    this.apiBase = (import.meta.env.VITE_API_BASE_URL || '') + '/api';
   }
 
   // Fetch ALL previous idea titles (both saved projects and generated content) to avoid duplicates

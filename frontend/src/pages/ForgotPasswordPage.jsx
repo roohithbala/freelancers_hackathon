@@ -41,7 +41,7 @@ const ForgotPasswordPage = () => {
 
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/otp/send', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/otp/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, mode: 'reset' })
@@ -68,7 +68,7 @@ const ForgotPasswordPage = () => {
   const verifyOtpAndReset = async (otp) => {
     setOtpVerifying(true);
     try {
-      const res = await fetch('http://localhost:5000/api/otp/verify', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/otp/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp })

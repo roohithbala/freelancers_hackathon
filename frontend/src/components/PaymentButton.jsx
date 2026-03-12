@@ -29,7 +29,7 @@ const PaymentButton = ({ amount = 499, plan = 'pro', onSuccess }) => {
         }
 
         try {
-            const orderResponse = await fetch('http://localhost:5000/api/payment/order', {
+            const orderResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/payment/order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount, currency: 'INR' })
@@ -46,7 +46,7 @@ const PaymentButton = ({ amount = 499, plan = 'pro', onSuccess }) => {
                 description: `Upgrade to ${plan.toUpperCase()}`,
                 order_id: order.id,
                 handler: async (response) => {
-                    const verifyRes = await fetch('http://localhost:5000/api/payment/verify', {
+                    const verifyRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/payment/verify`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(response)
