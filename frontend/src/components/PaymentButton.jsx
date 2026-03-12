@@ -39,7 +39,7 @@ const PaymentButton = ({ amount = 499, plan = 'pro', onSuccess }) => {
             const { order } = orderData;
 
             const options = {
-                key: 'rzp_test_SI9HMhDsvUPR1o',
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
                 currency: order.currency,
                 name: "IdeaForge Premium",
