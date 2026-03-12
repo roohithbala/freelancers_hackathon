@@ -1,8 +1,0 @@
-- name: Trigger Jenkins webhook
-  run: |
-    set -euo pipefail
-    echo "JENKINS_WEBHOOK_URL length: ${#JENKINS_WEBHOOK_URL}"
-    echo "JENKINS_WEBHOOK_URL: $JENKINS_WEBHOOK_URL"
-    curl -sS -X POST "$JENKINS_WEBHOOK_URL"
-  env:
-    JENKINS_WEBHOOK_URL: ${{ secrets.JENKINS_WEBHOOK_URL }}
