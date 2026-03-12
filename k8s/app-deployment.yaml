@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  labels:
+    app: freelancers-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: freelancers-app
+  template:
+    metadata:
+      labels:
+        app: freelancers-app
+    spec:
+      containers:
+      - name: app
+        image: IMAGE_PLACEHOLDER_APP
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+spec:
+  type: NodePort
+  selector:
+    app: freelancers-app
+  ports:
+  - name: http
+    port: 5000
+    targetPort: 5000
+    nodePort: 30050

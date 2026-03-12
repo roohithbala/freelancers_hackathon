@@ -39,31 +39,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 🔹 Build frontend image with env variables
-      - name: Build and push frontend image
+      # 🔹 Build consolidated application image
+      - name: Build and push application image
         uses: docker/build-push-action@v6
         with:
-          context: ./frontend
-          push: true
-          tags: |
-            ${{ env.FRONTEND_IMAGE }}:latest
-            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          build-args: |
-            ENV_B64=${{ env.FRONTEND_ENV_B64 }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # 🔹 Build backend image
-      - name: Build and push backend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend
+          context: .
           push: true
           tags: |
             ${{ env.BACKEND_IMAGE }}:latest
             ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           build-args: |
-            ENV_B64=${{ env.BACKEND_ENV_B64 }}
+            FRONTEND_ENV_B64=${{ env.FRONTEND_ENV_B64 }}
+            BACKEND_ENV_B64=${{ env.BACKEND_ENV_B64 }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -103,18 +90,11 @@ jobs:
           kubectl cluster-info
 
 
-      - name: Deploy backend
+      - name: Deploy application
         run: |
-          sed "s|IMAGE_PLACEHOLDER_BACKEND|${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" \
-            k8s/backend-deployment.yaml | kubectl apply --validate=false -f -
-          kubectl rollout status deployment/backend-deployment --timeout=180s
-
-      # 🔹 Deploy frontend
-      - name: Deploy frontend
-        run: |
-          sed "s|IMAGE_PLACEHOLDER_FRONTEND|${{ env.FRONTEND_IMAGE }}:${{ github.sha }}|g" \
-            k8s/frontend-deployment.yaml | kubectl apply --validate=false -f -
-          kubectl rollout status deployment/frontend-deployment --timeout=180s
+          sed "s|IMAGE_PLACEHOLDER_APP|${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" \
+            k8s/app-deployment.yaml | kubectl apply --validate=false -f -
+          kubectl rollout status deployment/app-deployment --timeout=180s
 
       - name: Deploy nginx reverse proxy
         run: |
