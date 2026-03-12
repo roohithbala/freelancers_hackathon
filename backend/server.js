@@ -23,15 +23,18 @@ app.use('/api/generate', generateRoutes);
 app.use('/api/otp', otpRoutes);
 app.use('/api/payment', paymentRoutes);
 
-// Catch-all route to serve index.html for SPA (Express 5 compatible named parameter)
-app.get('/:any*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    }
-});
-
 app.get('/health', (req, res) => {
     res.send('AI Project Idea Generator API is running');
+});
+
+// Final catch-all for SPA routing (Express 5 safe)
+app.use((req, res, next) => {
+    // If it's an API request that wasn't handled, return 404
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: 'API route not found' });
+    }
+    // Otherwise serve index.html for the frontend SPA
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {

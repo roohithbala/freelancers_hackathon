@@ -38,14 +38,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 🔹 Build consolidated application image
+      # 🔹 Build consolidated application image (Internal Tag Only)
       - name: Build and push application image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ${{ env.APP_IMAGE }}:latest
             ${{ env.APP_IMAGE }}:${{ github.sha }}
           build-args: |
             FRONTEND_ENV_B64=${{ env.FRONTEND_ENV_B64 }}
@@ -77,9 +76,10 @@ jobs:
           echo "${{ env.KUBECONFIG_B64 }}" | tr -d '[:space:]' | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Cleanup old services (Avoid NodePort conflict)
+      - name: Cleanup old resources (Avoid NodePort and Resource conflicts)
         run: |
           kubectl delete service backend-service frontend-service --ignore-not-found=true
+          kubectl delete deployment backend-deployment frontend-deployment --ignore-not-found=true
 
       - name: Deploy application
         run: |
@@ -121,6 +121,14 @@ jobs:
             kubectl rollout status deployment/app-deployment --timeout=120s
             exit 1
           fi
+
+      - name: Promote to latest
+        run: |
+          echo "🏷️ Tagging image as latest..."
+          docker pull ${{ env.APP_IMAGE }}:${{ github.sha }}
+          docker tag ${{ env.APP_IMAGE }}:${{ github.sha }} ${{ env.APP_IMAGE }}:latest
+          docker push ${{ env.APP_IMAGE }}:latest
+          echo "✅ Successfully promoted to latest!"
 
 
       - name: Print deployment summary
