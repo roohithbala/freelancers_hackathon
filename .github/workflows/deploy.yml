@@ -41,6 +41,7 @@ jobs:
         id: frontend-env
         run: |
           echo "${{ secrets.FRONTEND_ENV_B64 }}" | base64 -d > /tmp/frontend.env
+          # Export each VITE_ variable as a GitHub Actions output (multiline safe)
           {
             echo 'build_args<<EOF'
             grep -E '^VITE_' /tmp/frontend.env || true
@@ -122,14 +123,6 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
           rm -f /tmp/backend.env
 
-      # 🔹 ngrok token secret
-      - name: Create ngrok secret
-        run: |
-          kubectl create secret generic ngrok-secret \
-            --from-literal=authtoken=${{ secrets.NGROK_AUTHTOKEN }} \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-      # 🔹 Deploy backend
       - name: Deploy backend
         run: |
           sed "s|IMAGE_PLACEHOLDER_BACKEND|${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" \
@@ -143,11 +136,14 @@ jobs:
             k8s/frontend-deployment.yaml | kubectl apply --validate=false -f -
           kubectl rollout status deployment/frontend-deployment --timeout=180s
 
-      # 🔹 ngrok tunnel
-      - name: Deploy ngrok tunnel
+      - name: Deploy nginx reverse proxy
         run: |
-          kubectl apply --validate=false -f k8s/ngrok.yaml
-          kubectl rollout status deployment/ngrok --timeout=120s
+          kubectl apply --validate=false -f k8s/nginx-proxy.yaml
+          kubectl rollout status deployment/nginx-proxy --timeout=120s
+
+      - name: Apply Prometheus monitoring resources
+        run: |
+          kubectl apply --validate=false -f k8s/monitoring.yaml
 
       # 🔹 Monitoring
       - name: Install Prometheus + Grafana via Helm
@@ -164,3 +160,19 @@ jobs:
             --set grafana.service.nodePort=32000 \
             --timeout=300s \
             --wait
+
+      - name: Print deployment summary
+        run: |
+          echo "=============================="
+          echo "  Deployment Summary"
+          echo "=============================="
+          echo ""
+          kubectl get pods -o wide
+          echo ""
+          kubectl get services
+          echo ""
+          echo "📊 Grafana:  http://${{ secrets.EC2_PUBLIC_IP }}:32000  (admin / \$GRAFANA_ADMIN_PASSWORD)"
+          echo "🌐 Website:  http://${{ secrets.EC2_PUBLIC_IP }}"
+          echo ""
+          echo "=============================="
+
