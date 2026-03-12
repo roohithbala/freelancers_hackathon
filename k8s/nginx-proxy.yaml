@@ -55,9 +55,9 @@ spec:
     metadata:
       labels:
         app: nginx-proxy
-    hostNetwork: true
+    spec:
+      hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
-      spec:
       containers:
       - name: nginx-proxy
         image: nginx:alpine
