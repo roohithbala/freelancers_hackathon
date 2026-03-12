@@ -107,9 +107,14 @@ jobs:
       - name: Configure kubeconfig
         run: |
           mkdir -p ~/.kube
+          if [ -z "${{ secrets.KUBECONFIG_DATA }}" ]; then
+            echo "Error: KUBECONFIG_DATA secret is empty!"
+            exit 1
+          fi
           echo "${{ secrets.KUBECONFIG_DATA }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
+          echo "Kubeconfig file size: $(stat -c%s ~/.kube/config) bytes"
           echo "Kubeconfig loaded:"
           kubectl config view
           kubectl config get-contexts
