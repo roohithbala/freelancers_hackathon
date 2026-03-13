@@ -87,10 +87,6 @@ jobs:
           chmod 600 ~/.kube/config
 
 
-      - name: Cleanup old resources (Avoid NodePort and Resource conflicts)
-        run: |
-          kubectl delete service backend-service frontend-service --ignore-not-found=true
-          kubectl delete deployment backend-deployment frontend-deployment --ignore-not-found=true
 
       - name: Deploy application
         run: |
