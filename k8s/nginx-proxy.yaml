@@ -23,15 +23,30 @@ data:
       listen 80;
       server_name _;
 
-      # Health-check endpoint
+      # Lazy DNS resolution: Nginx won't fail if app-service is missing at start
+      resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+      set $upstream_app app-service;
+
       location /healthz {
         return 200 "ok\n";
-        add_header Content-Type text/plain;
       }
 
-      # Route everything to the bundled application
       location / {
-        proxy_pass         http://app;
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+        if ($request_method = 'OPTIONS') {
+           add_header 'Access-Control-Allow-Origin' '*' always;
+           add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
+           add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+           add_header 'Access-Control-Max-Age' 1728000;
+           add_header 'Content-Type' 'text/plain; charset=utf-8';
+           add_header 'Content-Length' 0;
+           return 204;
+        }
+
+        proxy_pass         http://$upstream_app:5000;
         proxy_http_version 1.1;
         proxy_set_header   Host              $host;
         proxy_set_header   X-Real-IP         $remote_addr;
@@ -48,6 +63,8 @@ metadata:
     app: nginx-proxy
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: nginx-proxy
@@ -56,11 +73,15 @@ spec:
       labels:
         app: nginx-proxy
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      terminationGracePeriodSeconds: 2
       containers:
       - name: nginx-proxy
         image: nginx:alpine
         ports:
         - containerPort: 80
+          hostPort: 80
           protocol: TCP
         resources:
           requests:
@@ -73,18 +94,6 @@ spec:
         - name: nginx-config
           mountPath: /etc/nginx/conf.d
           readOnly: true
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 30
       volumes:
       - name: nginx-config
         configMap:
