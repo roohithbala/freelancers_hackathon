@@ -110,11 +110,6 @@ jobs:
 
       - name: Deploy nginx reverse proxy
         run: |
-          echo "🧹 Force cleaning old proxy..."
-          kubectl delete deployment nginx-proxy --ignore-not-found=true
-          kubectl delete service nginx-proxy-service --ignore-not-found=true
-          sleep 10
-          
           echo "🚀 Applying nginx reverse proxy..."
           kubectl apply --validate=false -f k8s/nginx-proxy.yaml
           
