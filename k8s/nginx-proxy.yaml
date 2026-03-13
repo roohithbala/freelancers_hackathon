@@ -64,8 +64,10 @@ kind: Service
 metadata:
   name: nginx-proxy-service
 spec:
+  type: NodePort
   ports:
   - port: 80
     targetPort: 80
+    nodePort: 30081
   selector:
     app: nginx-proxy
