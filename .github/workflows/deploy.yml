@@ -105,8 +105,9 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy Ingress (Port 80 routing)
+      - name: Deploy Nginx Proxy and Ingress (Port 80 routing)
         run: |
+          kubectl apply --request-timeout=120s --validate=false -f k8s/nginx-proxy.yaml
           kubectl apply --request-timeout=120s --validate=false -f k8s/ingress.yaml
 
       - name: Promote to latest
