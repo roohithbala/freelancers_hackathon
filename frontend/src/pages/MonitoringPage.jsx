@@ -24,7 +24,7 @@ const MonitoringPage = () => {
               Visual dashboards for CPU, Memory, and Application metrics.
             </p>
             <a 
-              href={`http://${publicIp}/grafana`} 
+              href={`http://${publicIp}:3000`} 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-6 py-3 bg-orange-600 hover:bg-orange-500 transition-colors rounded-xl font-medium text-white"
@@ -46,7 +46,7 @@ const MonitoringPage = () => {
               Query raw time-series data and inspect scraping targets.
             </p>
             <a 
-              href={`http://${publicIp}/prometheus`} 
+              href={`http://${publicIp}:9090`} 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-6 py-3 bg-red-600 hover:bg-red-500 transition-colors rounded-xl font-medium text-white"
