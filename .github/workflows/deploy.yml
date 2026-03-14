@@ -105,18 +105,7 @@ jobs:
             k8s/app-deployment.yaml | kubectl apply --request-timeout=300s --validate=false -f -
           
           # Increased rollout timeout to 300s (5 mins) for slow t3.micro
-          if ! kubectl rollout status deployment/app-deployment --timeout=300s; then
-            echo "::error::Rollout failed! Attempting automatic rollback..."
-            kubectl get pods
-            kubectl describe deployment app-deployment
-            kubectl logs -l app=freelancers-app --tail=50
-            
-            # 🛡️ ROLLBACK
-            kubectl rollout undo deployment/app-deployment
-            kubectl rollout status deployment/app-deployment --timeout=120s
-            echo "::notice::Successfully rolled back to the previous stable version."
-            exit 1
-          fi
+          kubectl rollout status deployment/app-deployment --timeout=300s
 
       - name: Deploy Nginx Proxy and Ingress (Port 80 routing)
         run: |
