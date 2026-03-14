@@ -1,0 +1,135 @@
+﻿name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  APP_IMAGE: ghcr.io/${{ github.repository_owner }}/freelancers-app
+  KUBECONFIG_B64: "YXBpVmVyc2lvbjogdjEKY2x1c3RlcnM6Ci0gY2x1c3RlcjoKICAgIGNlcnRpZmljYXRlLWF1dGhvcml0eS1kYXRhOiBMUzB0TFMxQ1JVZEpUaUJEUlZKVVNVWkpRMEZVUlMwdExTMHRDazFKU1VKa2VrTkRRVkl5WjBGM1NVSkJaMGxDUVVSQlMwSm5aM0ZvYTJwUFVGRlJSRUZxUVdwTlUwVjNTSGRaUkZaUlVVUkVRbWh5VFROTmRHTXlWbmtLWkcxV2VVeFhUbWhSUkVVelRucE5lazU2UlRCUFZHdDNTR2hqVGsxcVdYZE5la1Y2VFVSTmVFMVVUVFZYYUdOT1RYcFpkMDE2UlhkTlJFMTRUVlJOTlFwWGFrRnFUVk5GZDBoM1dVUldVVkZFUkVKb2NrMHpUWFJqTWxaNVpHMVdlVXhYVG1oUlJFVXpUbnBOZWs1NlJUQlBWR3QzVjFSQlZFSm5ZM0ZvYTJwUENsQlJTVUpDWjJkeGFHdHFUMUJSVFVKQ2QwNURRVUZUVW1aVmRWcEJiMWxsYkhwVUsxZFVZVVZPYkRaUFREUTJhWEZsWldWTFlWWjRjR0o1T1ZsQlNUSUtjbXN3YUVzNFYxTk1Obko2VnpOaFUwdHNUbEprTXpkT2REZDRhM0ZFZEU1MVdGQkRhMDlpU0ROT2EzRnZNRWwzVVVSQlQwSm5UbFpJVVRoQ1FXWTRSUXBDUVUxRFFYRlJkMFIzV1VSV1VqQlVRVkZJTDBKQlZYZEJkMFZDTDNwQlpFSm5UbFpJVVRSRlJtZFJWWFJ6Um10clNrZ3hZMHRpUmtkdlR6TkpkekIxQ21JeU9YTlhWVTEzUTJkWlNVdHZXa2w2YWpCRlFYZEpSRk5CUVhkU1VVbG9RVkJJVkhZNFdtcHlaWFpsY1ROVGFWbDVXVXc0UmpjM2RYTk1aWGhSVlM4S2FsUlZTV0Y2V1hZck4yZzNRV2xDYVdKSlVFaHBiREJRVVZvdmEyRnVZMnhXYjFVMWEyMWlTRlF2TmpSUVdWSnFRVEI1V2xWV1JFMXVVVDA5Q2kwdExTMHRSVTVFSUVORlVsUkpSa2xEUVZSRkxTMHRMUzBLCiAgICBzZXJ2ZXI6IGh0dHBzOi8vMzQuMjA3LjExMS4xMTc6NjQ0MwogIG5hbWU6IGRlZmF1bHQKY29udGV4dHM6Ci0gY29udGV4dDoKICAgIGNsdXN0ZXI6IGRlZmF1bHQKICAgIHVzZXI6IGRlZmF1bHQKICBuYW1lOiBkZWZhdWx0CmN1cnJlbnQtY29udGV4dDogZGVmYXVsdApraW5kOiBDb25maWcKdXNlcnM6Ci0gbmFtZTogZGVmYXVsdAogIHVzZXI6CiAgICBjbGllbnQtY2VydGlmaWNhdGUtZGF0YTogTFMwdExTMUNSVWRKVGlCRFJWSlVTVVpKUTBGVVJTMHRMUzB0Q2sxSlNVSnJSRU5EUVZSbFowRjNTVUpCWjBsSlYzSkxSVEZYUTBod09WVjNRMmRaU1V0dldrbDZhakJGUVhkSmQwbDZSV2hOUWpoSFFURlZSVUYzZDFrS1lYcE9la3hYVG5OaFYxWjFaRU14YWxsVlFYaE9lbU42VFhwamVFNUVhelZOUWpSWVJGUkpNazFFVFhoTmVrRjZUVlJGZWs5V2IxaEVWRWt6VFVSTmVBcE5la0Y2VFZSRmVrOVdiM2ROUkVWWVRVSlZSMEV4VlVWRGFFMVBZek5zZW1SSFZuUlBiVEZvWXpOU2JHTnVUWGhHVkVGVVFtZE9Wa0pCVFZSRVNFNDFDbU16VW14aVZIQm9Xa2N4Y0dKcVFscE5RazFIUW5seFIxTk5ORGxCWjBWSFEwTnhSMU5OTkRsQmQwVklRVEJKUVVKSmRHTnBSRXhyY1c1b0wwTldaVGNLVDBsd01VOXhiREprV0VsbE5DOWlabFpaYjJGMU9FbFJabGMxU2pKWVVXVllWVUZ4UW1OTFVHRlVUbGRwUjFkM1lUbFpjREJOVlVSUkwyVkZWR1pzYndwekwxWmlWa1Z4YWxORVFrZE5RVFJIUVRGVlpFUjNSVUl2ZDFGRlFYZEpSbTlFUVZSQ1owNVdTRk5WUlVSRVFVdENaMmR5UW1kRlJrSlJZMFJCYWtGbUNrSm5UbFpJVTAxRlIwUkJWMmRDVkhaUVFsTjNjbTVoVkZBd1ZpOUtUVXRzT0U1MlFWUk5UVEo0UkVGTFFtZG5jV2hyYWs5UVVWRkVRV2RPU0VGRVFrVUtRV2xDV0haT1J6ZFZURXRUYkV0MlZXOHhNMjFKV2pCR1JtSm9SRmcwV0hSRk9FRm9VbUYxTmk5aWVVUldRVWxuWVVobFVuaDJWRkJEYjJkSlFuaG1iUXBRWW5aeU1uUnhSMWxpV2xRMWRXOXlXWGx3UzNaa09GQktRVEE5Q2kwdExTMHRSVTVFSUVORlVsUkpSa2xEUVZSRkxTMHRMUzBLTFMwdExTMUNSVWRKVGlCRFJWSlVTVVpKUTBGVVJTMHRMUzB0Q2sxSlNVSmtla05EUVZJeVowRjNTVUpCWjBsQ1FVUkJTMEpuWjNGb2EycFBVRkZSUkVGcVFXcE5VMFYzU0hkWlJGWlJVVVJFUW1oeVRUTk5kRmt5ZUhBS1dsYzFNRXhYVG1oUlJFVXpUbnBOZWs1NlJUQlBWR3QzU0doalRrMXFXWGROZWtWNlRVUk5lRTFVVFRWWGFHTk9UWHBaZDAxNlJYZE5SRTE0VFZSTk5RcFhha0ZxVFZORmQwaDNXVVJXVVZGRVJFSm9jazB6VFhSWk1uaHdXbGMxTUV4WFRtaFJSRVV6VG5wTmVrNTZSVEJQVkd0M1YxUkJWRUpuWTNGb2EycFBDbEJSU1VKQ1oyZHhhR3RxVDFCUlRVSkNkMDVEUVVGUksyRlRiWEpzU1dkUWNsbERURzFwWmtWMlJqZDNVRzQxT1VkV1prMVZkRkpYVFdOQlJUQjBkSFlLZFRONk1FaFpVVGRIYXpGVUszWk9SekpuSzFKVWVIQmxSMVYzVG1obFJuaEJaSGhDVlRKa1YyUnhjVkZ2TUVsM1VVUkJUMEpuVGxaSVVUaENRV1k0UlFwQ1FVMURRWEZSZDBSM1dVUldVakJVUVZGSUwwSkJWWGRCZDBWQ0wzcEJaRUpuVGxaSVVUUkZSbWRSVlRkNmQxVnpTelV5YTNvNVJtWjVWRU53WmtSaUNuZEZla1JPYzFGM1EyZFpTVXR2V2tsNmFqQkZRWGRKUkZOQlFYZFNVVWxvUVV4MlNWTXdabGhHUVRCU1ExTjNlR0o2V2pocUwwa3hhMnBDWm05aldVY0tURVp1YkVGcmVHdzJlR1pNUVdsQ1dGQjZkMGQyTjI1eVYxTnVlWE4zVGpsdGF6Uk1iWGhXWVd4NE9VOHhiVEpHY204MlRHbFRhMlp2UVQwOUNpMHRMUzB0UlU1RUlFTkZVbFJKUmtsRFFWUkZMUzB0TFMwSwogICAgY2xpZW50LWtleS1kYXRhOiBMUzB0TFMxQ1JVZEpUaUJGUXlCUVVrbFdRVlJGSUV0RldTMHRMUzB0Q2sxSVkwTkJVVVZGU1UxYVJuZExTMVJ6Y1V0d1JtbDBTVnBzSzBONU1YSmFWRTFHWkU5QlRGcGlVR3hxY0RSWVVqaHFaVGR2UVc5SFEwTnhSMU5OTkRrS1FYZEZTRzlWVVVSUlowRkZhVEY1U1UxMVUzRmxTRGhLVmpkek5HbHVWVFp4V0ZveFkyZzNhamwwT1ZacGFIRTNkMmhDT1dKcmJscGtRalZrVVVOdlJncDNiemx3VFRGaFNWcGlRbkl4YVc1UmVGRk9SRGswVWs0clYybDZPVlowVlZOblBUMEtMUzB0TFMxRlRrUWdSVU1nVUZKSlZrRlVSU0JMUlZrdExTMHRMUW89Cg=="
+  BACKEND_ENV_B64: "SEZfQVBJX0tFWT1oZl9tVHVPUGJKQndwQ25Uek1MV2x3RFZncHlUY1NxRmxpRExDCkhGX01PREVMPWdvb2dsZS9mbGFuLXQ1LWxhcmdlClJBWk9SUEFZX0tFWV9JRD1yenBfdGVzdF9TTmRzZEFCQkFGSnNJbwpSQVpPUlBBWV9TRUNSRVQ9WE5IaGdsM0FxWFAzUWZwMDJnSDZJRXVC"
+  FRONTEND_ENV_B64: "VklURV9GSVJFQkFTRV9BUElfS0VZPUFJemFTeURJT2JKei1NWFd6VnI1T0RrRjVIUTFwc3RMeHVzWHhnOApWSVRFX0ZJUkVCQVNFX0FVVEhfRE9NQUlOPWhhY2thdGhvbi1mZTZhNS5maXJlYmFzZWFwcC5jb20KVklURV9GSVJFQkFTRV9QUk9KRUNUX0lEPWhhY2thdGhvbi1mZTZhNQpWSVRFX0ZJUkVCQVNFX1NUT1JBR0VfQlVDS0VUPWhhY2thdGhvbi1mZTZhNS5maXJlYmFzZXN0b3JhZ2UuYXBwClZJVEVfRklSRUJBU0VfTUVTU0FHSU5HX1NFTkRFUl9JRD0yODM5NDI2MzU3OTgKVklURV9GSVJFQkFTRV9BUFBfSUQ9MToyODM5NDI2MzU3OTg6d2ViOmJmZWI3ZDhhYjVjZTU1ZGNkMWU4MzcKVklURV9GSVJFQkFTRV9NRUFTVVJFTUVOVF9JRD1HLVJWTEpXWVM1UDAKUkFaT1JQQVlfS0VZX0lEPXJ6cF90ZXN0X1NOZHNkQUJCQUZKc0lvClJBWk9SUEFZX0tFWV9TRUNSRVQ9WE5IaGdsM0FxWFAzUWZwMDJnSDZJRXVCClZJVEVfUkFaT1JQQVlfS0VZX0lEPXJ6cF90ZXN0X1NOZHNkQUJCQUZKc0lvClZJVEVfQVBJX0JBU0VfVVJMPQ=="
+  EC2_PUBLIC_IP: "34.207.111.117"
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ github.sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ≡ƒö╣ Build consolidated application image (Internal Tag Only)
+      - name: Build and push application image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.APP_IMAGE }}:${{ github.sha }}
+          build-args: |
+            FRONTEND_ENV_B64=${{ env.FRONTEND_ENV_B64 }}
+            BACKEND_ENV_B64=${{ env.BACKEND_ENV_B64 }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    permissions:
+      contents: read
+      packages: write
+
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ env.KUBECONFIG_B64 }}" | tr -d '[:space:]' | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy application
+        run: |
+          echo "≡ƒÜÇ Applying new deployment..."
+          sed "s|IMAGE_PLACEHOLDER_APP|${{ env.APP_IMAGE }}:${{ github.sha }}|g" \
+            k8s/app-deployment.yaml | kubectl apply --request-timeout=120s --validate=false -f -
+          
+          # Wait for rollout and show status on failure
+          if ! kubectl rollout status deployment/app-deployment --timeout=180s; then
+            echo "::error::Rollout failed! Attempting automatic rollback..."
+            kubectl get pods
+            kubectl describe deployment app-deployment
+            kubectl logs -l app=freelancers-app --tail=50
+            
+            # ≡ƒ¢í∩╕Å ROLLBACK
+            kubectl rollout undo deployment/app-deployment
+            kubectl rollout status deployment/app-deployment --timeout=120s
+            echo "::notice::Successfully rolled back to the previous stable version."
+            exit 1
+          fi
+
+      - name: Deploy Nginx Proxy and Ingress (Port 80 routing)
+        run: |
+          kubectl apply --request-timeout=120s --validate=false -f k8s/nginx-proxy.yaml
+          kubectl apply --request-timeout=120s --validate=false -f k8s/ingress.yaml
+
+      - name: Promote to latest
+        run: |
+          echo "≡ƒÅ╖∩╕Å Tagging image as latest..."
+          docker pull ${{ env.APP_IMAGE }}:${{ github.sha }}
+          docker tag ${{ env.APP_IMAGE }}:${{ github.sha }} ${{ env.APP_IMAGE }}:latest
+          docker push ${{ env.APP_IMAGE }}:latest
+          echo "Γ£à Successfully promoted to latest!"
+
+
+      - name: Print deployment summary
+        run: |
+          echo "=============================="
+          echo "  Deployment Summary"
+          echo "=============================="
+          echo ""
+          kubectl get pods -o wide
+          echo ""
+          kubectl get services
+          echo ""
+          echo "≡ƒîÉ Website:  http://${{ env.EC2_PUBLIC_IP }}"
+          echo ""
+          echo "=============================="
+

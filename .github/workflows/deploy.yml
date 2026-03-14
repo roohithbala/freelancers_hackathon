@@ -85,49 +85,41 @@ jobs:
           echo "${{ env.KUBECONFIG_B64 }}" | tr -d '[:space:]' | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Hard Cluster Reset (Safe Cleanup)
+      - name: Restore Node State (Safe Cleanup)
         run: |
-          echo "🧹 Cleaning up existing application resources..."
-          # Delete only our app's resources to avoid breaking system services like 'kubernetes'
-          kubectl delete deployment,service,ingress -l app=freelancers-app --force --grace-period=0 || true
-          kubectl delete deployment,service,ingress -l app=nginx-proxy --force --grace-period=0 || true
-          
-          # 🚨 PURGE ALL EVICTED/FAILED PODS (Crucial for t3.micro recovery)
+          echo "🧹 Performing lightweight pod cleanup..."
+          # Only clear ghost/evicted pods to free up node space
           kubectl get pods -A | grep -E "Evicted|Error|Completed|Failed" | awk '{print $2 " --namespace " $1}' | xargs -I {} -r kubectl delete pod {} --force --grace-period=0 || true
-
-          # 🛑 DELETE MONITORING (Ensuring it's gone)
-          kubectl delete namespace monitoring --request-timeout=60s --ignore-not-found=true || true
-
-          echo "⏳ Waiting 15s for resources to clear..."
-          sleep 15
-          kubectl get nodes
-          kubectl describe nodes | grep -E "Pressure|Capacity|Allocatable"
 
       - name: Deploy application
         run: |
           echo "🚀 Applying new deployment..."
           sed "s|IMAGE_PLACEHOLDER_APP|${{ env.APP_IMAGE }}:${{ github.sha }}|g" \
-            k8s/app-deployment.yaml | kubectl apply --request-timeout=300s --validate=false -f -
+            k8s/app-deployment.yaml | kubectl apply --request-timeout=120s --validate=false -f -
           
-          # Show pod status immediately for faster feedback
+          # Show live status for transparency
           kubectl get pods -w & PID=$!
           
-          # Wait for rollout but show why it's pending if it fails
-          if ! kubectl rollout status deployment/app-deployment --timeout=300s; then
+          # Wait for rollout and show status on failure
+          if ! kubectl rollout status deployment/app-deployment --timeout=180s; then
             kill $PID
-            echo "::error::Rollout failed! Showing pod and node details for debugging..."
+            echo "::error::Rollout failed! Showing diagnostics..."
             kubectl get pods
             kubectl describe pods
             kubectl describe nodes | grep -A 20 "Capacity"
             kubectl get events --sort-by='.lastTimestamp' | tail -n 20
+            
+            # 🛡️ ROLLBACK (Restored from successful commit behavior)
+            kubectl rollout undo deployment/app-deployment
+            kubectl rollout status deployment/app-deployment --timeout=120s
             exit 1
           fi
           kill $PID
 
       - name: Deploy Nginx Proxy and Ingress (Port 80 routing)
         run: |
-          kubectl apply --request-timeout=300s --validate=false -f k8s/nginx-proxy.yaml
-          kubectl apply --request-timeout=300s --validate=false -f k8s/ingress.yaml
+          kubectl apply --request-timeout=120s --validate=false -f k8s/nginx-proxy.yaml
+          kubectl apply --request-timeout=120s --validate=false -f k8s/ingress.yaml
 
       - name: Promote to latest
         run: |
