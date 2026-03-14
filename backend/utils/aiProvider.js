@@ -46,7 +46,7 @@ async function callGroq(messages, apiKey, options = {}) {
     try {
         const payload = {
             messages: messages,
-            model: "llama-3.1-8b-instant",
+            model: options.model || "llama-3.1-8b-instant",
             temperature: typeof options.temperature === 'number' ? options.temperature : 0.2,
         };
         if (options.maxTokens) payload.max_tokens = Math.min(options.maxTokens, 8192);
@@ -159,7 +159,19 @@ async function callHuggingFace(messages, apiKey, options = {}) {
 }
 
 async function generateCompletion(messages, avoidList = [], options = {}) {
-    // 1. Try OpenAI GPT (Primary)
+    // 1. Try Groq (Primary) - Basic/Fast Model
+    if (process.env.GROQ_API_KEY) {
+        try {
+            return await callGroq(messages, process.env.GROQ_API_KEY, {
+                ...options,
+                model: process.env.GROQ_MODEL || "llama-3.1-8b-instant"
+            });
+        } catch (e) {
+            console.error(`Groq Attempt Failed: ${e.message}`);
+        }
+    }
+
+    // 2. Try OpenAI GPT (Secondary)
     if (process.env.OPENAI_API_KEY) {
         try {
             return await callOpenAI(messages, process.env.OPENAI_API_KEY, options);
@@ -168,21 +180,12 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
         }
     }
 
-    // 2. Try Hugging Face (Secondary)
+    // 3. Try Hugging Face (Tertiary)
     if (process.env.HF_API_KEY) {
         try {
             return await callHuggingFace(messages, process.env.HF_API_KEY, options);
         } catch (e) {
             console.error(`HF Attempt Failed: ${e.message}`);
-        }
-    }
-
-    // 3. Try Groq (Tertiary)
-    if (process.env.GROQ_API_KEY) {
-        try {
-            return await callGroq(messages, process.env.GROQ_API_KEY, options);
-        } catch (e) {
-            console.error(e.message);
         }
     }
 

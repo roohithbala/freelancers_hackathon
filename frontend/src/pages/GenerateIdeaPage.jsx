@@ -73,7 +73,8 @@ const GenerateIdeaPage = () => {
       return;
     }
 
-    // Tier Enforcement
+    // Tier Enforcement - Removed as requested
+    /*
     if (formData.goal === 'Hackathon' && userTier === 'free') {
       error('Innovator Tier required for Hackathon projects.');
       return;
@@ -82,6 +83,8 @@ const GenerateIdeaPage = () => {
       error('Architect Tier required for Startup MVP blueprints.');
       return;
     }
+    */
+    
 
     setLoading(true);
     setIdeas([]);
@@ -160,7 +163,7 @@ const GenerateIdeaPage = () => {
     details: { title: 'Details', icon: <Eye className="w-5 h-5" /> },
     flow: { title: 'Flow Diagram', icon: <Globe className="w-5 h-5" /> },
     storyboard: { title: 'Storyboard', icon: <Map className="w-5 h-5" /> },
-    ...(userTier === 'elite' && { audit: { title: 'Technical Audit', icon: <ShieldCheck className="w-5 h-5" /> } })
+    audit: { title: 'Technical Audit', icon: <ShieldCheck className="w-5 h-5" /> }
   };
 
   const pricingPlans = [
