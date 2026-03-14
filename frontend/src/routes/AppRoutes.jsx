@@ -51,11 +51,6 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
-      <Route path="/monitoring" element={
-        <ProtectedRoute>
-          <MonitoringPage />
-        </ProtectedRoute>
-      } />
 
       {/* Fallback */}
       <Route path="*" element={<LandingPage />} />
