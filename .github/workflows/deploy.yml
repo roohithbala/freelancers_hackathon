@@ -104,8 +104,18 @@ jobs:
           sed "s|IMAGE_PLACEHOLDER_APP|${{ env.APP_IMAGE }}:${{ github.sha }}|g" \
             k8s/app-deployment.yaml | kubectl apply --request-timeout=300s --validate=false -f -
           
-          # Increased rollout timeout to 300s (5 mins) for slow t3.micro
-          kubectl rollout status deployment/app-deployment --timeout=300s
+          # Show pod status immediately for faster feedback
+          kubectl get pods -w & PID=$!
+          
+          # Wait for rollout but show why it's pending if it fails
+          if ! kubectl rollout status deployment/app-deployment --timeout=300s; then
+            kill $PID
+            echo "::error::Rollout failed! Showing pod details for debugging..."
+            kubectl get pods
+            kubectl describe pods
+            exit 1
+          fi
+          kill $PID
 
       - name: Deploy Nginx Proxy and Ingress (Port 80 routing)
         run: |
