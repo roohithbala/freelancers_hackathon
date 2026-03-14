@@ -30,6 +30,8 @@ metadata:
   name: nginx-proxy
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: nginx-proxy

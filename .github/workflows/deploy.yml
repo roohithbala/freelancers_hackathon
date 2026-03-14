@@ -85,6 +85,19 @@ jobs:
           echo "${{ env.KUBECONFIG_B64 }}" | tr -d '[:space:]' | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
+      - name: Cluster Cleanup (Crucial for t3.micro)
+        run: |
+          echo "🧹 Cleaning up old failed pods and replicasets..."
+          # Delete pods in Error or Evicted state to free up node pod slots
+          kubectl delete pods --field-selector=status.phase=Failed -A || true
+          kubectl delete pods --field-selector=status.phase=Succeeded -A || true
+          
+          # Delete old replicasets that aren't active
+          kubectl get rs -o json | jq -r '.items[] | select(.spec.replicas == 0) | .metadata.name' | xargs -r kubectl delete rs || true
+          
+          # Force delete anything stuck in "Terminating" for too long
+          kubectl get pods -A | grep Terminating | awk '{print $2 " --namespace " $1}' | xargs -I {} -r kubectl delete pod {} --force --grace-period=0 || true
+
       - name: Deploy application
         run: |
           echo "🚀 Applying new deployment..."
