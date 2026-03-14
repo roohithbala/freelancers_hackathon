@@ -87,21 +87,24 @@ jobs:
 
       - name: Restore Node State (Safe Cleanup)
         run: |
-          echo "🧹 Performing lightweight pod cleanup..."
-          # Only clear ghost/evicted pods to free up node space
-          kubectl get pods -A | grep -E "Evicted|Error|Completed|Failed" | awk '{print $2 " --namespace " $1}' | xargs -I {} -r kubectl delete pod {} --force --grace-period=0 || true
+          echo "🧹 Performing pod cleanup..."
+          # Purge all non-running pods to free up node bookkeeping
+          kubectl delete pods --all --field-selector=status.phase!=Running --force --grace-period=0 || true
+          
+          echo "💾 Checking Disk Space..."
+          kubectl get nodes -o wide
+          df -h || true
 
       - name: Force Untaint Nodes (Allow scheduling on t3.micro)
         run: |
           echo "🔓 Removing NoSchedule taints from all nodes..."
-          # Allow scheduling on control-plane/master nodes (common for single-node k3s)
+          # Allow scheduling on control-plane/master nodes
           kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
           kubectl taint nodes --all node-role.kubernetes.io/master- || true
           
-          # Forcefully remove pressure taints if stuck (RISKY but needed for t3.micro recovery)
+          # Forcefully remove pressure taints
           kubectl taint nodes --all node.kubernetes.io/disk-pressure- || true
           kubectl taint nodes --all node.kubernetes.io/memory-pressure- || true
-          kubectl taint nodes --all node.kubernetes.io/pid-pressure- || true
           kubectl taint nodes --all node.kubernetes.io/unschedulable- || true
 
       - name: Deploy application
