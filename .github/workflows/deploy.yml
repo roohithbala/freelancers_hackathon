@@ -88,15 +88,15 @@ jobs:
       - name: Cluster Cleanup (Crucial for t3.micro)
         run: |
           echo "🧹 Cleaning up old failed pods and replicasets..."
-          # Delete pods in Error or Evicted state to free up node pod slots
+          # Delete pods in Error, Evicted, or Completed state
           kubectl delete pods --field-selector=status.phase=Failed -A || true
           kubectl delete pods --field-selector=status.phase=Succeeded -A || true
           
-          # Delete old replicasets that aren't active
-          kubectl get rs -o json | jq -r '.items[] | select(.spec.replicas == 0) | .metadata.name' | xargs -r kubectl delete rs || true
-          
-          # Force delete anything stuck in "Terminating" for too long
+          # Force delete anything stuck in "Terminating"
           kubectl get pods -A | grep Terminating | awk '{print $2 " --namespace " $1}' | xargs -I {} -r kubectl delete pod {} --force --grace-period=0 || true
+
+          # Purge old Replicasets
+          kubectl get rs -o json | jq -r '.items[] | select(.spec.replicas == 0) | .metadata.name' | xargs -r kubectl delete rs || true
 
       - name: Deploy application
         run: |
@@ -104,8 +104,8 @@ jobs:
           sed "s|IMAGE_PLACEHOLDER_APP|${{ env.APP_IMAGE }}:${{ github.sha }}|g" \
             k8s/app-deployment.yaml | kubectl apply --request-timeout=300s --validate=false -f -
           
-          # Wait for rollout and show status on failure
-          if ! kubectl rollout status deployment/app-deployment --timeout=180s; then
+          # Increased rollout timeout to 300s (5 mins) for slow t3.micro
+          if ! kubectl rollout status deployment/app-deployment --timeout=300s; then
             echo "::error::Rollout failed! Attempting automatic rollback..."
             kubectl get pods
             kubectl describe deployment app-deployment
