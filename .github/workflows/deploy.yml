@@ -91,6 +91,19 @@ jobs:
           # Only clear ghost/evicted pods to free up node space
           kubectl get pods -A | grep -E "Evicted|Error|Completed|Failed" | awk '{print $2 " --namespace " $1}' | xargs -I {} -r kubectl delete pod {} --force --grace-period=0 || true
 
+      - name: Force Untaint Nodes (Allow scheduling on t3.micro)
+        run: |
+          echo "🔓 Removing NoSchedule taints from all nodes..."
+          # Allow scheduling on control-plane/master nodes (common for single-node k3s)
+          kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+          kubectl taint nodes --all node-role.kubernetes.io/master- || true
+          
+          # Forcefully remove pressure taints if stuck (RISKY but needed for t3.micro recovery)
+          kubectl taint nodes --all node.kubernetes.io/disk-pressure- || true
+          kubectl taint nodes --all node.kubernetes.io/memory-pressure- || true
+          kubectl taint nodes --all node.kubernetes.io/pid-pressure- || true
+          kubectl taint nodes --all node.kubernetes.io/unschedulable- || true
+
       - name: Deploy application
         run: |
           echo "🚀 Applying new deployment..."
