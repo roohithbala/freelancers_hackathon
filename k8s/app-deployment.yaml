@@ -8,8 +8,6 @@ spec:
   replicas: 1
   strategy:
     type: Recreate
-  strategy:
-    type: Recreate
   minReadySeconds: 10
   selector:
     matchLabels:
