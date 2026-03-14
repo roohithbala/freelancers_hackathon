@@ -155,7 +155,7 @@ jobs:
           
           helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
             --namespace monitoring --create-namespace \
-            -f monitoring-values.yaml --request-timeout=300s
+            -f monitoring-values.yaml --timeout 300s
             
           kubectl apply -f k8s/monitoring.yaml
           
