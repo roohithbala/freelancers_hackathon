@@ -85,23 +85,18 @@ jobs:
           echo "${{ env.KUBECONFIG_B64 }}" | tr -d '[:space:]' | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Cluster Cleanup (Crucial for t3.micro)
+      - name: Hard Cluster Reset (Nuclear Cleanup)
         run: |
-          echo "🧹 Cleaning up old failed pods and replicasets..."
+          echo "☢️ Performing hard reset of the default namespace..."
+          # Delete all deployments, services, pods, etc. to clear RAM
+          kubectl delete all --all --force --grace-period=0 || true
           
-          # 🛑 DELETE RESIDUAL MONITORING (Crucial to free up RAM on t3.micro)
-          # These residual pods from previous Helm attempts are likely blocking your app!
-          kubectl delete namespace monitoring --request-timeout=60s --ignore-not-found=true || true
+          # 🛑 DELETE MONITORING (Ensuring it's gone)
+          kubectl delete namespace monitoring --request-timeout=60s --ignore-not-found=true --force --grace-period=0 || true
 
-          # Delete pods in Error, Evicted, or Completed state
-          kubectl delete pods --field-selector=status.phase=Failed -A || true
-          kubectl delete pods --field-selector=status.phase=Succeeded -A || true
-          
-          # Force delete anything stuck in "Terminating"
-          kubectl get pods -A | grep Terminating | awk '{print $2 " --namespace " $1}' | xargs -I {} -r kubectl delete pod {} --force --grace-period=0 || true
-
-          # Purge old Replicasets
-          kubectl get rs -o json | jq -r '.items[] | select(.spec.replicas == 0) | .metadata.name' | xargs -r kubectl delete rs || true
+          echo "🧹 Cleaning up stuck namespaces..."
+          # Handle cases where namespaces get stuck in Terminating
+          kubectl get namespace monitoring -o json | jq '.spec.finalizers = []' | kubectl replace --raw /api/v1/namespaces/monitoring/finalize -f - || true
 
       - name: Deploy application
         run: |

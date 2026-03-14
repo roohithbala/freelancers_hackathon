@@ -13,8 +13,7 @@ import {
   History, 
   Zap,
   Layout,
-  Cpu,
-  Activity
+  Cpu
 } from 'lucide-react';
 import ProfileModal from './ProfileModal';
 
@@ -65,8 +64,7 @@ const Navigation = () => {
             <div className="hidden lg:flex items-center gap-8">
               {[
                 { path: '/generate', label: 'Synthesis', icon: Layout },
-                { path: '/saved', label: 'Repository', icon: History },
-                { path: '/monitoring', label: 'Metrics', icon: Activity }
+                { path: '/saved', label: 'Repository', icon: History }
               ].map(({ path, label, icon: Icon }) => (
                 <Link
                   key={path}

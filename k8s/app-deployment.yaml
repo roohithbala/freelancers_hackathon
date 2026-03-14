@@ -16,10 +16,6 @@ spec:
     metadata:
       labels:
         app: freelancers-app
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "5000"
-        prometheus.io/path: "/metrics"
     spec:
       containers:
       - name: app
@@ -27,6 +23,13 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 256Mi
 ---
 apiVersion: v1
 kind: Service

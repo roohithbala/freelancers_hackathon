@@ -10,7 +10,6 @@ import GenerateIdeaPage from '../pages/GenerateIdeaPage';
 import SavedIdeasPage from '../pages/SavedIdeasPage';
 import ProjectFlowPage from '../pages/ProjectFlowPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
-import MonitoringPage from '../pages/MonitoringPage';
 
 const AppRoutes = () => {
   const { loading } = useAuth();
