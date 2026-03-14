@@ -34,6 +34,7 @@ const httpRequestDurationMicroseconds = new client.Histogram({
 register.registerMetric(httpRequestDurationMicroseconds);
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -44,7 +45,7 @@ app.use((req, res, next) => {
     res.on('finish', () => {
         const durationInSeconds = ((process.hrtime(start)[0] * 1e9 + process.hrtime(start)[1]) / 1e9);
         httpRequestDurationMicroseconds
-            .labels(req.method, req.path, res.statusCode)
+            .labels(req.method, req.path, String(res.statusCode))
             .observe(durationInSeconds);
     });
     next();
