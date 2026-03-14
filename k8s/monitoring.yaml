@@ -14,7 +14,7 @@ spec:
       - default
   selector:
     matchLabels:
-      app: backend
+      app: freelancers-app
   endpoints:
     - port: http
       path: /metrics
