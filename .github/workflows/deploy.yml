@@ -89,7 +89,7 @@ jobs:
         run: |
           echo "🚀 Applying new deployment..."
           sed "s|IMAGE_PLACEHOLDER_APP|${{ env.APP_IMAGE }}:${{ github.sha }}|g" \
-            k8s/app-deployment.yaml | kubectl apply --request-timeout=120s --validate=false -f -
+            k8s/app-deployment.yaml | kubectl apply --request-timeout=300s --validate=false -f -
           
           # Wait for rollout and show status on failure
           if ! kubectl rollout status deployment/app-deployment --timeout=180s; then
@@ -107,8 +107,8 @@ jobs:
 
       - name: Deploy Nginx Proxy and Ingress (Port 80 routing)
         run: |
-          kubectl apply --request-timeout=120s --validate=false -f k8s/nginx-proxy.yaml
-          kubectl apply --request-timeout=120s --validate=false -f k8s/ingress.yaml
+          kubectl apply --request-timeout=300s --validate=false -f k8s/nginx-proxy.yaml
+          kubectl apply --request-timeout=300s --validate=false -f k8s/ingress.yaml
 
       - name: Promote to latest
         run: |
