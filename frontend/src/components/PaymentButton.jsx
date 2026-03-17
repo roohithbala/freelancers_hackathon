@@ -29,7 +29,8 @@ const PaymentButton = ({ amount = 499, plan = 'pro', onSuccess }) => {
         }
 
         try {
-            const orderResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/payment/order`, {
+            const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') + '/api';
+            const orderResponse = await fetch(`${apiBase}/payment/order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount, currency: 'INR' })
@@ -46,7 +47,8 @@ const PaymentButton = ({ amount = 499, plan = 'pro', onSuccess }) => {
                 description: `Upgrade to ${plan.toUpperCase()}`,
                 order_id: order.id,
                 handler: async (response) => {
-                    const verifyRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/payment/verify`, {
+                    const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '') + '/api';
+                    const verifyRes = await fetch(`${apiBase}/payment/verify`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(response)
