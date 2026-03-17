@@ -61,16 +61,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
-          envs: GITHUB_SHA
-          script: |
-            # Create/update kubernetes secret from GitHub secrets
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+
+            # Create/update kubernetes secret from individual values
             kubectl create secret generic app-secrets \
               --from-literal=HF_API_KEY="${{ secrets.HF_API_KEY }}" \
               --from-literal=HF_MODEL="${{ secrets.HF_MODEL }}" \
@@ -84,8 +87,8 @@ jobs:
             cd ~/freelancers_hackathon
             git pull origin main || true
 
-            # Apply deployments — image tag is passed via GITHUB_SHA env var
-            sed "s|IMAGE_PLACEHOLDER_APP|ghcr.io/${{ github.repository_owner }}/freelancers-app:${GITHUB_SHA}|g" \
+            # Apply deployments
+            sed "s|IMAGE_PLACEHOLDER_APP|ghcr.io/${{ github.repository_owner }}/freelancers-app:${{ github.sha }}|g" \
               k8s/app-deployment.yaml | kubectl apply -f -
 
             kubectl apply -f k8s/monitoring.yaml
@@ -99,7 +102,8 @@ jobs:
             echo "=============================="
             kubectl get pods -o wide
             kubectl get services
-            echo "🌐 Website:  http://${{ secrets.EC2_HOST }}"
-            echo "📊 Grafana:  http://${{ secrets.EC2_HOST }}:30030"
-            echo "🔥 Prometheus: http://${{ secrets.EC2_HOST }}:30090"
+            echo "🌐 Website:     http://${{ secrets.EC2_HOST }}"
+            echo "📊 Grafana:     http://${{ secrets.EC2_HOST }}:30030"
+            echo "🔥 Prometheus:  http://${{ secrets.EC2_HOST }}:30090"
             echo "=============================="
+          ENDSSH
