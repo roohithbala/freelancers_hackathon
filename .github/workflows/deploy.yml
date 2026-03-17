@@ -62,11 +62,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup SSH key
-        env:
-          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
           echo "UserKnownHostsFile /dev/null" >> ~/.ssh/config
@@ -74,7 +72,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa \
-            ubuntu@3.238.174.159 << 'ENDSSH'
+            ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
 
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
@@ -107,8 +105,8 @@ jobs:
             echo "=============================="
             kubectl get pods -o wide
             kubectl get services
-            echo "🌐 Website:     http://3.238.174.159"
-            echo "📊 Grafana:     http://3.238.174.159:30030"
-            echo "🔥 Prometheus:  http://3.238.174.159:30090"
+            echo "🌐 Website:     http://${{ secrets.EC2_HOST }}"
+            echo "📊 Grafana:     http://${{ secrets.EC2_HOST }}:30030"
+            echo "🔥 Prometheus:  http://${{ secrets.EC2_HOST }}:30090"
             echo "=============================="
           ENDSSH
