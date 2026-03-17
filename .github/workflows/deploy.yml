@@ -23,25 +23,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate Build Secrets
-        run: |
-          MISSING=0
-          check_secret() {
-            if [ -z "$1" ]; then
-              echo "❌ Error: $2 is missing!"
-              MISSING=1
-            else
-              echo "✅ $2 is configured."
-            fi
-          }
-          check_secret "${{ secrets.EC2_HOST }}" "EC2_HOST"
-          check_secret "${{ secrets.VITE_FIREBASE_API_KEY }}" "VITE_FIREBASE_API_KEY"
-          check_secret "${{ secrets.VITE_FIREBASE_APP_ID }}" "VITE_FIREBASE_APP_ID"
-          if [ $MISSING -eq 1 ]; then
-            echo "Critical build secrets are missing. Please ensure they are in Settings > Secrets and variables > Actions."
-            exit 1
-          fi
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -67,7 +48,7 @@ jobs:
             VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
             VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
             VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID }}
-            VITE_API_BASE_URL=http://${{ secrets.EC2_HOST }}/api
+            VITE_API_BASE_URL=http://3.238.174.159/api
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -79,39 +60,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate Deploy Secrets
-        run: |
-          MISSING=0
-          check_secret() {
-            if [ -z "$1" ]; then
-              echo "❌ Error: $2 is missing!"
-              MISSING=1
-            else
-              echo "✅ $2 is configured."
-            fi
-          }
-          check_secret "${{ secrets.EC2_HOST }}" "EC2_HOST"
-          check_secret "${{ secrets.EC2_SSH_KEY }}" "EC2_SSH_KEY"
-          check_secret "${{ secrets.EC2_USERNAME }}" "EC2_USERNAME"
-          if [ $MISSING -eq 1 ]; then
-            echo "Critical deploy secrets are missing. Please ensure they are in Settings > Secrets and variables > Actions."
-            exit 1
-          fi
-
       - name: Deploy to EC2 via SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
-          # setup ssh
           mkdir -p ~/.ssh
           printf "%s\n" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           
-          # run remote script
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          # Use hardcoded IP and user to be safe
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@3.238.174.159 << 'ENDSSH'
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
             
-            # Re-create secrets from repository secrets
+            # Ensure workspace exists
+            if [ ! -d "~/freelancers_hackathon" ]; then
+              git clone https://github.com/${{ github.repository }}.git ~/freelancers_hackathon || true
+            fi
+            cd ~/freelancers_hackathon
+            git pull origin main || true
+
+            # Create/update secrets
             kubectl create secret generic app-secrets \
               --from-literal=HF_API_KEY="${{ secrets.HF_API_KEY }}" \
               --from-literal=HF_MODEL="${{ secrets.HF_MODEL }}" \
@@ -121,28 +89,23 @@ jobs:
               --from-literal=GROQ_MODEL="${{ secrets.GROQ_MODEL }}" \
               --dry-run=client -o yaml | kubectl apply -f -
 
-            # Pull latest code
-            cd ~/freelancers_hackathon
-            git pull origin main || true
-
-            # Deploy latest image
+            # Deploy manifests with image replacement
             IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/freelancers-app:${{ github.sha }}"
+            
             sed "s|IMAGE_PLACEHOLDER_APP|${IMAGE_TAG}|g" k8s/app-deployment.yaml | kubectl apply -f -
             sed "s|IMAGE_PLACEHOLDER_APP|${IMAGE_TAG}|g" k8s/nginx-proxy.yaml | kubectl apply -f -
-
-            # Apply supporting manifests
+            
             kubectl apply -f k8s/monitoring.yaml
-            kubectl apply -f k8s/nginx-proxy.yaml
             kubectl apply -f k8s/ingress.yaml
 
-            # Verify deployment
+            # Wait for deployment
             kubectl rollout status deployment/app-deployment --timeout=180s
+            kubectl rollout status deployment/nginx-proxy --timeout=180s
 
             echo "=============================="
-            echo "  Deployment Successful"
+            echo "  Deployment Complete"
             echo "=============================="
-            echo "🌐 Website:     http://${{ secrets.EC2_HOST }}"
-            echo "📊 Grafana:     http://${{ secrets.EC2_HOST }}:30030"
-            echo "🔥 Prometheus:  http://${{ secrets.EC2_HOST }}:30090"
+            kubectl get pods -A
+            echo "🌐 Website:  http://3.238.174.159"
             echo "=============================="
           ENDSSH
