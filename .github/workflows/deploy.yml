@@ -126,8 +126,9 @@ jobs:
             git pull origin main || true
 
             # Deploy latest image
-            sed "s|IMAGE_PLACEHOLDER_APP|ghcr.io/${{ github.repository_owner }}/freelancers-app:${{ github.sha }}|g" \
-              k8s/app-deployment.yaml | kubectl apply -f -
+            IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/freelancers-app:${{ github.sha }}"
+            sed "s|IMAGE_PLACEHOLDER_APP|${IMAGE_TAG}|g" k8s/app-deployment.yaml | kubectl apply -f -
+            sed "s|IMAGE_PLACEHOLDER_APP|${IMAGE_TAG}|g" k8s/nginx-proxy.yaml | kubectl apply -f -
 
             # Apply supporting manifests
             kubectl apply -f k8s/monitoring.yaml
