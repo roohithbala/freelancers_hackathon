@@ -62,11 +62,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
           envs: GITHUB_SHA
           script: |
             # Create/update kubernetes secret from GitHub secrets
@@ -83,8 +84,8 @@ jobs:
             cd ~/freelancers_hackathon
             git pull origin main || true
 
-            # Apply deployments
-            sed "s|IMAGE_PLACEHOLDER_APP|ghcr.io/${{ github.repository_owner }}/freelancers-app:$GITHUB_SHA|g" \
+            # Apply deployments — image tag is passed via GITHUB_SHA env var
+            sed "s|IMAGE_PLACEHOLDER_APP|ghcr.io/${{ github.repository_owner }}/freelancers-app:${GITHUB_SHA}|g" \
               k8s/app-deployment.yaml | kubectl apply -f -
 
             kubectl apply -f k8s/monitoring.yaml
