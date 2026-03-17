@@ -13,7 +13,7 @@ env:
 
 jobs:
   build-push-deploy:
-    name: Build, Push and Deploy
+    name: Build & Deploy
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,17 +53,19 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: 3.238.174.159
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
-          envs: GITHUB_SHA
-          script: |
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          # setup ssh
+          mkdir -p ~/.ssh
+          printf "%s\n" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # run remote script
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@3.238.174.159 << 'ENDSSH'
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-
-            # Create/update kubernetes secret
+            
+            # Re-create secrets from inputs passed via GHA secrets
             kubectl create secret generic app-secrets \
               --from-literal=HF_API_KEY="${{ secrets.HF_API_KEY }}" \
               --from-literal=HF_MODEL="${{ secrets.HF_MODEL }}" \
@@ -73,26 +75,26 @@ jobs:
               --from-literal=GROQ_MODEL="${{ secrets.GROQ_MODEL }}" \
               --dry-run=client -o yaml | kubectl apply -f -
 
-            # Pull latest manifests
+            # Pull latest code
             cd ~/freelancers_hackathon
             git pull origin main || true
 
-            # Apply deployments
+            # Deploy latest image
             sed "s|IMAGE_PLACEHOLDER_APP|ghcr.io/${{ github.repository_owner }}/freelancers-app:${{ github.sha }}|g" \
               k8s/app-deployment.yaml | kubectl apply -f -
 
+            # Apply supporting manifests
             kubectl apply -f k8s/monitoring.yaml
             kubectl apply -f k8s/nginx-proxy.yaml
             kubectl apply -f k8s/ingress.yaml
 
+            # Verify deployment
             kubectl rollout status deployment/app-deployment --timeout=180s
 
             echo "=============================="
-            echo "  Deployment Summary"
+            echo "  Deployment Successful"
             echo "=============================="
-            kubectl get pods -o wide
-            kubectl get services
-            echo "🌐 Website:     http://3.238.174.159"
-            echo "📊 Grafana:     http://3.238.174.159:30030"
-            echo "🔥 Prometheus:  http://3.238.174.159:30090"
+            echo "🌐 Website:  http://3.238.174.159"
+            echo "📊 Grafana:  http://3.238.174.159:30030"
             echo "=============================="
+          ENDSSH
