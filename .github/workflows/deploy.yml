@@ -48,7 +48,7 @@ jobs:
             VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
             VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
             VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID }}
-            VITE_API_BASE_URL=http://${{ secrets.EC2_HOST }}/api
+            VITE_API_BASE_URL=http://3.238.174.159/api
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -66,12 +66,13 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "UserKnownHostsFile /dev/null" >> ~/.ssh/config
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
-            ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          ssh -i ~/.ssh/id_rsa \
+            ${{ secrets.EC2_USERNAME }}@3.238.174.159 << 'ENDSSH'
 
             # Create/update kubernetes secret from individual values
             kubectl create secret generic app-secrets \
@@ -102,8 +103,8 @@ jobs:
             echo "=============================="
             kubectl get pods -o wide
             kubectl get services
-            echo "🌐 Website:     http://${{ secrets.EC2_HOST }}"
-            echo "📊 Grafana:     http://${{ secrets.EC2_HOST }}:30030"
-            echo "🔥 Prometheus:  http://${{ secrets.EC2_HOST }}:30090"
+            echo "🌐 Website:     http://3.238.174.159"
+            echo "📊 Grafana:     http://3.238.174.159:30030"
+            echo "🔥 Prometheus:  http://3.238.174.159:30090"
             echo "=============================="
           ENDSSH
