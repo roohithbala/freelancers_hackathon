@@ -56,8 +56,10 @@ const PaymentButton = ({ amount = 499, plan = 'pro', onSuccess }) => {
 
                     const verifyData = await verifyRes.json();
                     if (verifyData.success) {
-                        setTier(plan);
+                        await setTier(plan);
                         if (onSuccess) onSuccess();
+                    } else {
+                        error('Payment verification failed: ' + (verifyData.message || 'Unknown error'));
                     }
                 },
                 prefill: { email: currentUser?.email },
