@@ -48,7 +48,7 @@ jobs:
             VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
             VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}
             VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID }}
-            VITE_API_BASE_URL=http://${{ secrets.EC2_HOST }}/api
+            VITE_API_BASE_URL=http://3.238.174.159/api
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -64,8 +64,8 @@ jobs:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
+          host: 3.238.174.159
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           envs: GITHUB_SHA
