@@ -1,5 +1,8 @@
 const dotenv = require('dotenv');
 dotenv.config();
+const client = require('prom-client');
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ register: client.register });
 
 const express = require('express');
 const cors = require('cors');
@@ -24,6 +27,15 @@ app.use('/api/payment', paymentRoutes);
 
 app.get('/health', (req, res) => {
     res.send('AI Project Idea Generator API is running');
+});
+
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', client.register.contentType);
+        res.end(await client.register.metrics());
+    } catch (ex) {
+        res.status(500).end(ex);
+    }
 });
 
 // Final catch-all for SPA routing (Express 5 safe)
