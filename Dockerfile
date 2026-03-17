@@ -4,8 +4,19 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
-ARG FRONTEND_ENV_B64
-RUN if [ -n "$FRONTEND_ENV_B64" ]; then echo "$FRONTEND_ENV_B64" | base64 -d > .env; fi
+
+# Define ARGs for frontend build-time environment variables
+ARG VITE_FIREBASE_API_KEY
+ARG VITE_FIREBASE_AUTH_DOMAIN
+ARG VITE_FIREBASE_PROJECT_ID
+ARG VITE_FIREBASE_STORAGE_BUCKET
+ARG VITE_FIREBASE_MESSAGING_SENDER_ID
+ARG VITE_FIREBASE_APP_ID
+ARG VITE_FIREBASE_MEASUREMENT_ID
+ARG VITE_RAZORPAY_KEY_ID
+ARG VITE_API_BASE_URL
+
+# Build frontend
 RUN npm run build
 
 # Stage 2: Final Image (Backend + Frontend)
@@ -16,10 +27,6 @@ RUN npm install
 COPY backend/ ./
 # Copy frontend build output to backend static folder
 COPY --from=frontend-build /app/frontend/dist ./public
-
-# Decode backend environment variables at build/runtime
-ARG BACKEND_ENV_B64
-RUN if [ -n "$BACKEND_ENV_B64" ]; then echo "$BACKEND_ENV_B64" | base64 -d > .env; fi
 
 EXPOSE 5000
 CMD ["npm", "start"]
