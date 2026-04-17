@@ -22,6 +22,9 @@ const Navigation = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+
+  const isActive = (path) => location.pathname === path;
 
   const navLinks = [
     { path: '/generate', label: 'Synthesis', icon: Layout },
