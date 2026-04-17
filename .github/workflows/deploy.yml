@@ -107,16 +107,13 @@ jobs:
               --from-literal=GROQ_MODEL="$GROQ_MODEL" \
               --dry-run=client -o yaml | kubectl apply -f -
 
-            # Apply manifests with actual image tag substitution
-            sed "s|IMAGE_PLACEHOLDER_APP|${IMAGE_TAG}|g" k8s/app-deployment.yaml | kubectl apply -f -
-            sed "s|IMAGE_PLACEHOLDER_APP|${IMAGE_TAG}|g" k8s/nginx-proxy.yaml | kubectl apply -f -
-
+            # Only update secrets, monitoring, ingress (safe to apply)
             kubectl apply -f k8s/monitoring.yaml
             kubectl apply -f k8s/ingress.yaml
 
-            # Force rolling update on already-running pods
-            kubectl rollout restart deployment/app-deployment
-            kubectl rollout restart deployment/nginx-proxy
+            # Rolling update: only swap the image — do NOT overwrite existing deployment spec
+            kubectl set image deployment/app-deployment app="${IMAGE_TAG}"
+            kubectl set image deployment/nginx-proxy nginx-proxy="${IMAGE_TAG}"
 
             # Wait for rollout to complete
             kubectl rollout status deployment/app-deployment --timeout=180s
