@@ -193,9 +193,9 @@ const GenerateIdeaPage = () => {
         <div className="bg-noise absolute inset-0"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 md:px-8 py-10 md:py-20">
         {/* Tier Upgrade Section */}
-        <div className="mb-24 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="mb-24 grid grid-cols-1 lg:grid-cols-3 gap-8">
           {pricingPlans.map((plan) => (
             <div key={plan.id} className={`relative p-8 rounded-[40px] border-2 transition-all duration-700 ${
               userTier === plan.id 

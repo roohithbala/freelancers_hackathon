@@ -8,22 +8,11 @@ import {
   ArrowRight,
   Zap,
   Target,
-  Users,
-  Menu,
-  X,
-  LogIn,
   UserPlus,
-  TrendingUp,
-  Shield,
   Code,
-  Sun,
-  Moon,
   Rocket,
   Sparkles,
-  Github,
-  Award,
-  Eye,
-  Layers
+  Award
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
@@ -184,95 +173,7 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* GitHub Repository Pulse */}
-        <section className="px-6 py-24 bg-white dark:bg-[#020617]">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-3 gap-12 items-start">
-              {/* Left Column: Repo Summary */}
-              <div className="lg:col-span-1 space-y-8">
-                <div>
-                  <h2 className="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mb-4">Project Insights</h2>
-                  <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight">
-                    GitHub <span className="text-gradient">Pulse</span>
-                  </h3>
-                  <p className="mt-4 text-gray-500 dark:text-gray-400 font-medium">
-                    Powered by the most advanced neural models to provide deep architectural understanding of our codebase.
-                  </p>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { label: 'Stars', count: '0', icon: <Sparkles className="w-4 h-4 text-amber-500" /> },
-                    { label: 'Watchers', count: '0', icon: <Eye className="w-4 h-4 text-blue-500" /> },
-                    { label: 'Forks', count: '0', icon: <TrendingUp className="w-4 h-4 text-emerald-500" /> },
-                    { label: 'Packages', count: '3', icon: <Layers className="w-4 h-4 text-purple-500" /> }
-                  ].map((stat, i) => (
-                    <div key={i} className="p-6 rounded-2xl bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-800">
-                      <div className="mb-3">{stat.icon}</div>
-                      <div className="text-2xl font-black text-gray-900 dark:text-white">{stat.count}</div>
-                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Middle Column: Packages */}
-              <div className="lg:col-span-1 space-y-6">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Architecture Packages</h4>
-                <div className="space-y-4">
-                  {[
-                    { name: 'freelancers-app', desc: 'Core business logic & state management' },
-                    { name: 'freelancers-backend', desc: 'Secure API & Neural Inference engine' },
-                    { name: 'freelancers-frontend', desc: 'Premium UI/UX and Architect Console' }
-                  ].map((pkg, i) => (
-                    <div key={i} className="flex items-center p-5 rounded-2xl border-2 border-slate-50 dark:border-slate-800/50 bg-white dark:bg-slate-900/30 hover:border-indigo-500/30 transition-all group">
-                      <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mr-4 text-indigo-600 group-hover:scale-110 transition-transform">
-                        <Code className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-black text-gray-900 dark:text-white">{pkg.name}</p>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-tighter">{pkg.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right Column: Contributors */}
-              <div className="lg:col-span-1 space-y-6">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Core Contributors</h4>
-                <div className="grid gap-3">
-                  {[
-                    { name: 'Roohith Bala G', handle: '@roohithbala' },
-                    { name: 'Nesiya Selladurai', handle: '@Nesiya-Selladurai' },
-                    { name: 'Miruthula B', handle: '@Miruthulabalasubramanian' }
-                  ].map((dev, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-transparent hover:border-indigo-500/20 transition-all">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-0.5">
-                          <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden">
-                             <Users className="w-5 h-5 text-indigo-500" />
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-tight">{dev.name}</p>
-                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{dev.handle}</p>
-                        </div>
-                      </div>
-                      <Github className="w-4 h-4 text-gray-400" />
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="pt-4">
-                  <a href="https://github.com/roohithbala/freelancers_hackathon" target="_blank" rel="noreferrer" className="block w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl text-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 dark:hover:bg-indigo-50 transition-all shadow-xl">
-                    Explore Repository
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
@@ -305,16 +206,7 @@ const LandingPage = () => {
               </ul>
             </div>
 
-            <div className="col-span-2">
-              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-600 mb-6">Acknowledgments</h4>
-              <div className="p-6 rounded-2xl bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-800">
-                <p className="text-sm font-bold text-gray-900 dark:text-white mb-3">KEC Freelancer Club Internships</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  Heartfelt gratitude to <span className="text-indigo-500">KEC Freelancer Club</span> for providing internships via <span className="font-bold">Pick My Car</span>. 
-                  Special thanks to <span className="text-gray-900 dark:text-white">Mr. S. Selvaraj</span> and <span className="text-gray-900 dark:text-white">Ms. M. Geetha</span> for organizing this GitHub-centric event.
-                </p>
-              </div>
-            </div>
+
           </div>
 
           <div className="pt-8 border-t border-gray-100 dark:border-slate-900 text-center">

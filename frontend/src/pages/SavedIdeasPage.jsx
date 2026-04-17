@@ -169,7 +169,7 @@ const SavedIdeasPage = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8 md:py-16">
         {/* Header */}
         <Motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -312,7 +312,7 @@ const SavedIdeasPage = () => {
             )}
           </Motion.div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
             {filteredIdeas.map((idea, index) => (
               <Motion.div
                 key={idea.id}

@@ -170,10 +170,10 @@ const ProjectFlowPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-6 md:py-10">
         {/* Header */}
         <Motion.div
           initial={{ opacity: 0, y: -20 }}
