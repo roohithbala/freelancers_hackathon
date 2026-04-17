@@ -51,7 +51,7 @@ const ContactPage = () => {
               </div>
 
               <div className="flex flex-col space-y-4">
-                <a href="mailto:support@ideaforge.ai" className="flex items-center p-6 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 hover:border-indigo-500 transition-all group">
+                <a href="mailto:roohithbala18@gmail.com" className="flex items-center p-6 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 hover:border-indigo-500 transition-all group">
                   <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                     <Mail className="w-6 h-6 text-indigo-600" />
                   </div>
