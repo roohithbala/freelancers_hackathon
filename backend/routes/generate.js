@@ -136,6 +136,7 @@ router.post('/', async (req, res) => {
             // Allow client to request lower-cost generation by supplying maxTokens and lower temperature
             const genOptions = {
                 mode: mode,
+                ideaCount: ideaCount,
                 maxTokens: req.body.maxTokens || (mode === 'ideas' ? (userTier === 'architect' ? 3500 : 2500) : 4096),
                 temperature: typeof req.body.temperature === 'number' ? req.body.temperature : 0.2
             };
