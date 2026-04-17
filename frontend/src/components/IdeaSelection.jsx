@@ -63,7 +63,7 @@ const IdeaCard = ({ idea, index, onSelect, isLoading }) => (
                     {/* Footer */}
                     <div className="mt-auto pt-6 border-t-2 border-gray-100 dark:border-slate-800">
                         <div className="flex flex-wrap gap-2 mb-6">
-                            {idea.tech_stack?.slice(0, 3).map((tech, i) => (
+                            {idea.tech_stack?.map((tech, i) => (
                                 <span key={i} className="text-[10px] font-black px-3 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-lg text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-slate-700 tracking-wider uppercase">
                                     {tech}
                                 </span>
