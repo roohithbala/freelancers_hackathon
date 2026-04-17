@@ -42,13 +42,13 @@ const Button = ({
       {...props}
     >
       {loading ? (
-        <span className="loader-ring" aria-hidden>
-          <Loader2 className="w-5 h-5 text-white" />
-        </span>
+        <Loader2 className="w-5 h-5 animate-spin" />
       ) : (
-        icon && <span className="inline-flex items-center">{icon}</span>
+        <>
+          {icon && <span className="flex-shrink-0">{icon}</span>}
+          {children}
+        </>
       )}
-      <span style={{ display: 'inline-block' }}>{children}</span>
     </Motion.button>
   );
 };

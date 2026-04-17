@@ -306,9 +306,9 @@ const SavedIdeasPage = () => {
                 variant="primary"
                 size="lg"
                 className="shadow-2xl backdrop-blur-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 rounded-xl px-8"
+                icon={<Lightbulb className="w-6 h-6" />}
               >
-                <Lightbulb className="w-6 h-6" />
-                <span className="ml-2">Generate Ideas</span>
+                Generate Ideas
               </Button>
             )}
           </Motion.div>
@@ -411,9 +411,9 @@ const SavedIdeasPage = () => {
                         size="sm"
                         fullWidth
                         className="shadow-lg backdrop-blur-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 rounded-xl"
+                        icon={<Eye className="w-4 h-4" />}
                       >
-                        <Eye className="w-4 h-4" />
-                        <span className="ml-2">Open Project</span>
+                        Open Project
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </div>

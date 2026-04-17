@@ -14,7 +14,11 @@ import {
   Shield,
   Globe,
   Users,
-  Zap
+  Zap,
+  MessageCircle,
+  Mail,
+  Twitter,
+  X
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -33,6 +37,7 @@ const ProjectFlowPage = () => {
   const [projectData, setProjectData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState('overview');
+  const [showShareModal, setShowShareModal] = useState(false);
 
   React.useEffect(() => {
     const loadProject = async () => {
@@ -66,17 +71,30 @@ const ProjectFlowPage = () => {
     if (navigator.share) {
       navigator.share({
         title: projectData.title,
-        text: `Check out this project idea: ${projectData.title}`,
+        text: `Check out this project idea generated on IdeaForge: ${projectData.title}`,
         url: window.location.href
-      }).then(() => {
-        success('Project shared successfully');
-      }).catch(() => {
-        // Fallback to copying link
-        copyToClipboard(window.location.href);
+      }).catch((err) => {
+        if (err.name !== 'AbortError') setShowShareModal(true);
       });
     } else {
-      copyToClipboard(window.location.href);
+      setShowShareModal(true);
     }
+  };
+
+  const shareViaWhatsApp = () => {
+    const text = encodeURIComponent(`Check out this project idea on IdeaForge: ${projectData.title}\n\n${window.location.href}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
+  const shareViaEmail = () => {
+    const subject = encodeURIComponent(`IdeaForge Project: ${projectData.title}`);
+    const body = encodeURIComponent(`I found this amazing project idea on IdeaForge and wanted to share it with you:\n\nProject: ${projectData.title}\nDomain: ${projectData.domain}\n\nLink: ${window.location.href}`);
+    window.open(`mailto:?subject=${subject}&body=${body}`);
+  };
+
+  const shareViaTwitter = () => {
+    const text = encodeURIComponent(`Just generated an amazing project idea: ${projectData.title} on IdeaForge! 🚀`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${window.location.href}`, '_blank');
   };
 
   const copyToClipboard = (text) => {
@@ -172,9 +190,9 @@ const ProjectFlowPage = () => {
               variant="secondary"
               size="sm"
               className="shadow-lg"
+              icon={<ArrowLeft className="w-4 h-4" />}
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="ml-2">Back to Saved</span>
+              Back to Saved
             </Button>
             
             <div className="flex items-center space-x-3">
@@ -183,18 +201,18 @@ const ProjectFlowPage = () => {
                 variant="secondary"
                 size="sm"
                 className="shadow-lg"
+                icon={<Share2 className="w-4 h-4" />}
               >
-                <Share2 className="w-4 h-4" />
-                <span className="ml-2">Share</span>
+                Share
               </Button>
               <Button
                 onClick={handleExport}
                 variant="secondary"
                 size="sm"
                 className="shadow-lg"
+                icon={<Download className="w-4 h-4" />}
               >
-                <Download className="w-4 h-4" />
-                <span className="ml-2">Export</span>
+                Export
               </Button>
             </div>
           </div>
@@ -373,6 +391,66 @@ const ProjectFlowPage = () => {
           )}
         </Motion.div>
       </div>
+
+      {/* Share Modal Overlay */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md">
+          <Motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden"
+          >
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-gray-900">Share Project</h3>
+              <button onClick={() => setShowShareModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="p-6 grid grid-cols-2 gap-4">
+              <button 
+                onClick={shareViaWhatsApp}
+                className="flex flex-col items-center justify-center p-4 bg-green-50 rounded-2xl hover:bg-green-100 transition-colors group"
+              >
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white mb-2 shadow-lg group-hover:scale-110 transition-transform">
+                  <MessageCircle className="w-6 h-6" />
+                </div>
+                <span className="text-sm font-semibold text-green-700">WhatsApp</span>
+              </button>
+
+              <button 
+                onClick={shareViaEmail}
+                className="flex flex-col items-center justify-center p-4 bg-blue-50 rounded-2xl hover:bg-blue-100 transition-colors group"
+              >
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white mb-2 shadow-lg group-hover:scale-110 transition-transform">
+                  <Mail className="w-6 h-6" />
+                </div>
+                <span className="text-sm font-semibold text-blue-700">Gmail</span>
+              </button>
+
+              <button 
+                onClick={shareViaTwitter}
+                className="flex flex-col items-center justify-center p-4 bg-sky-50 rounded-2xl hover:bg-sky-100 transition-colors group"
+              >
+                <div className="w-12 h-12 bg-sky-400 rounded-full flex items-center justify-center text-white mb-2 shadow-lg group-hover:scale-110 transition-transform">
+                  <Twitter className="w-6 h-6" />
+                </div>
+                <span className="text-sm font-semibold text-sky-700">Twitter</span>
+              </button>
+
+              <button 
+                onClick={() => { copyToClipboard(window.location.href); setShowShareModal(false); }}
+                className="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors group"
+              >
+                <div className="w-12 h-12 bg-gray-500 rounded-full flex items-center justify-center text-white mb-2 shadow-lg group-hover:scale-110 transition-transform">
+                  <Globe className="w-6 h-6" />
+                </div>
+                <span className="text-sm font-semibold text-gray-700">Copy Link</span>
+              </button>
+            </div>
+          </Motion.div>
+        </div>
+      )}
     </div>
   );
 };
