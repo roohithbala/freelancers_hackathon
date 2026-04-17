@@ -209,17 +209,26 @@ router.post('/', async (req, res) => {
                 res.json({
                     blueprint: content,
                     data: mergedData,
-                    verification
+                    verification,
+                    provider: data.provider || 'IdeaForge Neural Engine'
                 });
             }
 
         } catch (error) {
-            console.error('Inner Error:', error);
-            res.status(500).json({ error: 'Failed to generate project ideas', details: error.message });
+            console.error('Synthesis Pipeline Error:', error);
+            res.status(500).json({ 
+                error: 'Architectural Synthesis Failed', 
+                details: error.message,
+                provider: 'System Error Handler'
+            });
         }
     } catch (mainError) {
-        console.error('Main Error:', mainError);
-        res.status(500).json({ error: 'Internal server error', details: mainError.message });
+        console.error('Critical Router Error:', mainError);
+        res.status(500).json({ 
+            error: 'Internal System Error', 
+            details: mainError.message,
+            provider: 'Global Error Handler'
+        });
     }
 });
 
