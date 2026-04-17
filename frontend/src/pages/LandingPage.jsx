@@ -70,29 +70,28 @@ const LandingPage = () => {
 
       <main className="relative z-10">
         {/* Hero Section */}
-        <section className="px-6 pt-20 pb-16 md:pt-32 md:pb-24">
-          <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+        <section className="px-6 pt-32 pb-32 md:pt-48 md:pb-48 min-h-[90vh] flex items-center justify-center">
+          <div className="max-w-[100rem] mx-auto flex flex-col items-center text-center">
             <Motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center space-x-2 bg-white/50 dark:bg-slate-900/30 border border-border rounded-full px-6 py-2.5 mb-8 shadow-sm backdrop-blur-md"
+              className="inline-flex items-center space-x-3 bg-white/50 dark:bg-slate-900/30 border border-border rounded-full px-8 py-3 mb-10 shadow-sm backdrop-blur-md"
             >
-              <Sparkles className="w-4 h-4 text-accent-500" />
-              <span className="text-sm font-bold text-accent-700 dark:text-accent-100 uppercase tracking-widest">The Intelligent Project Architect</span>
+              <Sparkles className="w-5 h-5 text-accent-500" />
+              <span className="text-xs font-black text-accent-700 dark:text-accent-100 uppercase tracking-[0.4em]">The Intelligent Project Architect</span>
             </Motion.div>
 
             <Motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-[1.05] font-heading"
+              className="text-7xl md:text-[10rem] font-black tracking-tight mb-10 leading-[0.9] font-heading"
             >
-              <span className="text-900">
+              <span className="text-900 block mb-2">
                 Blueprint Your
               </span>
-              <br />
-              <span className="text-gradient">
+              <span className="text-gradient block">
                 Next Innovation
               </span>
             </Motion.h1>
@@ -101,7 +100,7 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-lg md:text-xl text-700 dark:text-muted max-w-3xl mx-auto leading-relaxed mb-12 font-medium"
+              className="text-xl md:text-2xl text-700 dark:text-muted max-w-4xl mx-auto leading-relaxed mb-16 font-medium"
             >
               IdeaForge transforms your ambition into actionable projects.
               Get AI-generated blueprints with tech stacks, features, and roadmaps
@@ -112,19 +111,19 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center w-full sm:w-auto"
+              className="flex flex-col sm:flex-row gap-8 justify-center w-full sm:w-auto mb-32"
             >
               <Link to="/generate">
-                <Button size="xl" className="group text-base px-10 py-5 rounded-2xl bg-gradient-cosmic text-white border-0 shadow-2xl shadow-indigo-500/20 hover:scale-[1.02] transition-transform font-black uppercase tracking-widest">
-                  <Rocket className="w-5 h-5 mr-3 group-hover:animate-bounce" />
+                <Button size="xl" className="group text-lg px-12 py-6 rounded-[2rem] bg-gradient-cosmic text-white border-0 shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:scale-[1.05] transition-all font-black uppercase tracking-[0.2em]">
+                  <Rocket className="w-6 h-6 mr-4 group-hover:animate-bounce" />
                   Launch Project Agent
-                  <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-4 w-6 h-6 group-hover:translate-x-2 transition-transform" />
                 </Button>
               </Link>
               {!currentUser && (
                 <Link to="/signup">
-                  <Button variant="secondary" size="xl" className="text-base px-10 py-5 rounded-2xl card-glass text-900 shadow-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all font-black uppercase tracking-widest">
-                    <UserPlus className="w-5 h-5 mr-3" />
+                  <Button variant="secondary" size="xl" className="text-lg px-12 py-6 rounded-[2rem] card-glass text-900 shadow-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all font-black uppercase tracking-[0.2em]">
+                    <UserPlus className="w-6 h-6 mr-4" />
                     Join The Community
                   </Button>
                 </Link>
@@ -136,12 +135,12 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mt-24"
+              className="grid grid-cols-1 md:grid-cols-3 gap-16 w-full max-w-7xl pt-20 border-t border-slate-100 dark:border-white/5"
             >
               {stats.map((stat, index) => (
                 <div key={index} className="flex flex-col items-center">
-                  <div className="text-5xl font-black text-900 mb-2 font-heading">{stat.number}</div>
-                  <div className="text-sm font-bold text-500 uppercase tracking-widest font-body">{stat.label}</div>
+                  <div className="text-7xl font-black text-900 mb-4 font-heading tracking-tighter">{stat.number}</div>
+                  <div className="text-xs font-black text-500 uppercase tracking-[0.4em] font-body opacity-60">{stat.label}</div>
                 </div>
               ))}
             </Motion.div>
@@ -183,33 +182,90 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Integration Preview */}
-        <section className="px-6 py-24">
-          <div className="max-w-5xl mx-auto">
-            <div className="overflow-hidden rounded-[3rem] bg-[#020617] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] relative">
-              <div className="absolute inset-0 bg-noise opacity-10"></div>
-              <div className="p-16 flex flex-col items-center text-center relative z-10">
-                <div className="mb-10 p-5 bg-white/5 rounded-3xl backdrop-blur-md border border-white/10">
-                  <Code className="w-12 h-12 text-white" />
+        {/* GitHub Repository Pulse */}
+        <section className="px-6 py-24 bg-white dark:bg-[#020617]">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-3 gap-12 items-start">
+              {/* Left Column: Repo Summary */}
+              <div className="lg:col-span-1 space-y-8">
+                <div>
+                  <h2 className="text-xs font-black text-indigo-600 uppercase tracking-[0.3em] mb-4">Project Insights</h2>
+                  <h3 className="text-4xl font-black text-gray-900 dark:text-white leading-tight">
+                    GitHub <span className="text-gradient">Pulse</span>
+                  </h3>
+                  <p className="mt-4 text-gray-500 dark:text-gray-400 font-medium">
+                    Powered by the most advanced neural models to provide deep architectural understanding of our codebase.
+                  </p>
                 </div>
-                <h2 className="text-4xl md:text-7xl font-black text-white mb-8 leading-[1.1]">
-                  Build with <span className="text-gradient">Expert Precision</span>
-                </h2>
-                <p className="text-xl text-slate-400 max-w-2xl mb-12 font-medium">
-                  Join the elite group of developers using IdeaForge to architect
-                  their portfolio and production applications.
-                </p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  <Link to="/generate">
-                    <button className="rounded-2xl bg-white text-[#0F172A] hover:bg-slate-100 px-10 py-4 font-bold text-lg transition-all shadow-2xl hover:scale-105 active:scale-95">
-                      Get Started Free
-                    </button>
-                  </Link>
-                  <Link to="/saved">
-                    <button className="rounded-2xl border-2 border-white/10 text-white hover:bg-white/5 px-10 py-4 font-bold text-lg transition-all bg-transparent">
-                      View Examples
-                    </button>
-                  </Link>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: 'Stars', count: '0', icon: <Sparkles className="w-4 h-4 text-amber-500" /> },
+                    { label: 'Watchers', count: '0', icon: <Eye className="w-4 h-4 text-blue-500" /> },
+                    { label: 'Forks', count: '0', icon: <TrendingUp className="w-4 h-4 text-emerald-500" /> },
+                    { label: 'Packages', count: '3', icon: <Layers className="w-4 h-4 text-purple-500" /> }
+                  ].map((stat, i) => (
+                    <div key={i} className="p-6 rounded-2xl bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-800">
+                      <div className="mb-3">{stat.icon}</div>
+                      <div className="text-2xl font-black text-gray-900 dark:text-white">{stat.count}</div>
+                      <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Middle Column: Packages */}
+              <div className="lg:col-span-1 space-y-6">
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Architecture Packages</h4>
+                <div className="space-y-4">
+                  {[
+                    { name: 'freelancers-app', desc: 'Core business logic & state management' },
+                    { name: 'freelancers-backend', desc: 'Secure API & Neural Inference engine' },
+                    { name: 'freelancers-frontend', desc: 'Premium UI/UX and Architect Console' }
+                  ].map((pkg, i) => (
+                    <div key={i} className="flex items-center p-5 rounded-2xl border-2 border-slate-50 dark:border-slate-800/50 bg-white dark:bg-slate-900/30 hover:border-indigo-500/30 transition-all group">
+                      <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mr-4 text-indigo-600 group-hover:scale-110 transition-transform">
+                        <Code className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-gray-900 dark:text-white">{pkg.name}</p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-tighter">{pkg.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Column: Contributors */}
+              <div className="lg:col-span-1 space-y-6">
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Core Contributors</h4>
+                <div className="grid gap-3">
+                  {[
+                    { name: 'Roohith Bala G', handle: '@roohithbala' },
+                    { name: 'Nesiya Selladurai', handle: '@Nesiya-Selladurai' },
+                    { name: 'Miruthula B', handle: '@Miruthulabalasubramanian' }
+                  ].map((dev, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-transparent hover:border-indigo-500/20 transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-0.5">
+                          <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden">
+                             <Users className="w-5 h-5 text-indigo-500" />
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-tight">{dev.name}</p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{dev.handle}</p>
+                        </div>
+                      </div>
+                      <Github className="w-4 h-4 text-gray-400" />
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="pt-4">
+                  <a href="https://github.com/roohithbala/freelancers_hackathon" target="_blank" rel="noreferrer" className="block w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl text-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 dark:hover:bg-indigo-50 transition-all shadow-xl">
+                    Explore Repository
+                  </a>
                 </div>
               </div>
             </div>
@@ -244,7 +300,6 @@ const LandingPage = () => {
                 <li><a href="https://github.com/roohithbala" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">Roohith Bala G</a></li>
                 <li><a href="https://github.com/Nesiya-Selladurai" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">Nesiya Selladurai</a></li>
                 <li><a href="https://github.com/Miruthulabalasubramanian" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">Miruthula B</a></li>
-                <li><a href="https://github.com/Copilot" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">AI Copilot</a></li>
               </ul>
             </div>
 

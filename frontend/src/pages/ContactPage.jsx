@@ -8,8 +8,7 @@ const ContactPage = () => {
   const developers = [
     { name: 'Roohith Bala G', github: 'roohithbala', handle: '@roohithbala' },
     { name: 'Nesiya Selladurai', github: 'Nesiya-Selladurai', handle: '@Nesiya-Selladurai' },
-    { name: 'Miruthula B', github: 'Miruthulabalasubramanian', handle: '@Miruthula' },
-    { name: 'AI Copilot', github: 'Copilot', handle: '@Copilot' }
+    { name: 'Miruthula B', github: 'Miruthulabalasubramanian', handle: '@Miruthula' }
   ];
 
   return (
