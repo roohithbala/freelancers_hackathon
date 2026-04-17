@@ -170,9 +170,10 @@ class IdeaService {
           timeframe: formData.timeframe || '1 Month',
           mode: 'ideas',
           previousProjects: previousProjects,
+          userTier: formData.userTier || 'free',
           role: 'Student',
-          isPremium: false,
-          maxTokens: 1500,
+          isPremium: formData.userTier === 'architect',
+          maxTokens: formData.userTier === 'architect' ? 3500 : 2500,
           temperature: 0.2,
           promptHash
         }),
@@ -264,10 +265,11 @@ class IdeaService {
           timeframe: formData.timeframe || '1 Month',
           mode: 'blueprint',
           selectedIdea: idea,
-          isPremium: false,
+          userTier: formData.userTier || 'free',
+          isPremium: formData.userTier === 'architect',
           role: 'Student',
           // token limit and temperature to control cost and verbosity
-          maxTokens: 768,
+          maxTokens: formData.userTier === 'architect' ? 1500 : 768,
           temperature: 0.15,
           promptHash: blueprintPromptHash
         }),
@@ -287,6 +289,7 @@ class IdeaService {
         ...idea,
         blueprint: data.blueprint,
         data: data.data,
+        provider: data.provider,
         problem: data.data?.problem || idea.description || '',
         features: data.data?.features || idea.features || [],
         roadmap: data.data?.roadmap || idea.roadmap || [],
@@ -371,6 +374,7 @@ class IdeaService {
         scores: structuredData.scores || idea.scores || {},
         costEstimate: structuredData.costEstimate || idea.costEstimate || {},
         mockUI: structuredData.mockUI || idea.mockUI || {},
+        provider: idea.provider || 'IdeaForge Standard',
         createdAt: serverTimestamp(),
         savedAt: serverTimestamp(),
         saved: true

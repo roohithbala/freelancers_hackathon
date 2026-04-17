@@ -169,10 +169,11 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
     // 1. Try OpenAI GPT (Primary) - As requested "ChatGPT base model"
     if (process.env.OPENAI_API_KEY) {
         try {
-            return await callOpenAI(messages, process.env.OPENAI_API_KEY, {
+            const result = await callOpenAI(messages, process.env.OPENAI_API_KEY, {
                 ...options,
                 temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
             });
+            return { ...result, provider: 'OpenAI (GPT-4o-mini)' };
         } catch (e) {
             console.error(`OpenAI GPT Attempt Failed: ${e.message}`);
         }
@@ -181,11 +182,12 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
     // 2. Try Groq (Secondary)
     if (process.env.GROQ_API_KEY) {
         try {
-            return await callGroq(messages, process.env.GROQ_API_KEY, {
+            const result = await callGroq(messages, process.env.GROQ_API_KEY, {
                 ...options,
                 model: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
                 temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
             });
+            return { ...result, provider: `Groq (${process.env.GROQ_MODEL || "llama-3.1-8b-instant"})` };
         } catch (e) {
             console.error(`Groq Attempt Failed: ${e.message}`);
         }
@@ -194,10 +196,11 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
     // 3. Try Google Gemini Direct (Tertiary)
     if (process.env.GOOGLE_API_KEY) {
         try {
-            return await callGeminiDirect(messages, process.env.GOOGLE_API_KEY, {
+            const result = await callGeminiDirect(messages, process.env.GOOGLE_API_KEY, {
                 ...options,
                 temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
             });
+            return { ...result, provider: 'Google Gemini Pro' };
         } catch (e) {
             console.error(e.message);
         }
@@ -206,10 +209,11 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
     // 4. Try Hugging Face (Quaternary)
     if (process.env.HF_API_KEY) {
         try {
-            return await callHuggingFace(messages, process.env.HF_API_KEY, {
+            const result = await callHuggingFace(messages, process.env.HF_API_KEY, {
                 ...options,
                 temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
             });
+            return { ...result, provider: 'Hugging Face (Llama-3.1-8B)' };
         } catch (e) {
             console.error(`HF Attempt Failed: ${e.message}`);
         }
@@ -381,7 +385,8 @@ graph TD
             message: {
                 content: randomBlueprint
             }
-        }]
+        }],
+        provider: 'IdeaForge Neural Fallback (No API Keys Found)'
     };
 }
 

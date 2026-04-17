@@ -101,7 +101,12 @@ router.post('/', async (req, res) => {
         const techStack = req.body.techStack || 'Any';
         const goal = req.body.goal || 'Startup MVP';
         const timeframe = req.body.timeframe || '1 Month';
-        const { isPremium, previousProjects, role, mode, selectedIdea } = req.body;
+        const { isPremium, previousProjects, role, mode, selectedIdea, userTier } = req.body;
+
+        // Calculate counts based on tier
+        let ideaCount = 5;
+        if (userTier === 'innovator') ideaCount = 10;
+        if (userTier === 'architect') ideaCount = 20;
 
         const { fetchGroundingData } = require('../utils/hfDataset');
         const groundingContext = await fetchGroundingData(domain);
@@ -110,13 +115,13 @@ router.post('/', async (req, res) => {
         let userPrompt;
 
         if (mode === 'ideas') {
-            userPrompt = getIdeasPrompt({ domain, skillLevel, techStack, goal, timeframe }, previousProjects || []);
+            userPrompt = getIdeasPrompt({ domain, skillLevel, techStack, goal, timeframe }, previousProjects || [], ideaCount);
         } else {
             let specificGoal = goal;
             if (selectedIdea) {
                 specificGoal = `Build: ${selectedIdea.title}. ${selectedIdea.description}. Original Goal: ${goal}`;
             }
-            userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal: specificGoal, timeframe }, isPremium, previousProjects, role, groundingContext);
+            userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal: specificGoal, timeframe }, isPremium || (userTier === 'architect'), role, groundingContext);
         }
 
         try {
@@ -127,7 +132,7 @@ router.post('/', async (req, res) => {
 
             // Allow client to request lower-cost generation by supplying maxTokens and lower temperature
             const genOptions = {
-                maxTokens: req.body.maxTokens || (mode === 'ideas' ? 2048 : 4096),
+                maxTokens: req.body.maxTokens || (mode === 'ideas' ? (userTier === 'architect' ? 3500 : 2500) : 4096),
                 temperature: typeof req.body.temperature === 'number' ? req.body.temperature : 0.2
             };
 

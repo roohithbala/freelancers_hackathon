@@ -399,6 +399,11 @@ const SavedIdeasPage = () => {
                         <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full font-medium">
                           {(idea.roadmap || []).length} Steps
                         </span>
+                        {idea.provider && (
+                          <span className={`px-2 py-1 ${idea.provider.includes('Fallback') ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'} rounded-full font-black text-[9px] uppercase tracking-tighter`}>
+                            {idea.provider.split(' ')[0]}
+                          </span>
+                        )}
                       </div>
                     </div>
 

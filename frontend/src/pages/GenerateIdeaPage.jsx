@@ -94,7 +94,7 @@ const GenerateIdeaPage = () => {
       const previousProjects = await ideaService.getPreviousProjectTitles(currentUser);
       
       // 2. Generate with history as a constraint
-      const result = await ideaService.generateIdeas(formData, currentUser);
+      const result = await ideaService.generateIdeas({ ...formData, userTier }, currentUser);
       if (result.success) {
         setIdeas(result.data);
         setStep('selection');
@@ -112,7 +112,7 @@ const GenerateIdeaPage = () => {
   const handleIdeaSelect = async (idea) => {
     setLoading(true);
     try {
-      const result = await ideaService.generateBlueprint(idea, formData, currentUser);
+      const result = await ideaService.generateBlueprint(idea, { ...formData, userTier }, currentUser);
       if (result.success) {
         setGeneratedIdea(result.data);
         setStep('blueprint');
@@ -387,7 +387,15 @@ const GenerateIdeaPage = () => {
           <Motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
             {/* Title Banner */}
             <div className="rounded-3xl overflow-hidden shadow-xl">
-              <div className="bg-indigo-600 p-10 text-center">
+            <div className="bg-indigo-600 p-10 text-center relative overflow-hidden">
+                {/* Provider Badge */}
+                {generatedIdea.provider && (
+                  <div className="absolute top-4 right-4 flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
+                    <div className={`w-2 h-2 rounded-full ${generatedIdea.provider.includes('Fallback') ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}></div>
+                    <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">Engine: {generatedIdea.provider}</span>
+                  </div>
+                )}
+
                 <h2 className="text-4xl font-black text-white mb-4 tracking-tight">{generatedIdea.title}</h2>
                 <div className="flex justify-center gap-3 flex-wrap">
                   <span className="px-5 py-2 bg-white/20 backdrop-blur rounded-full text-white text-sm font-bold flex items-center gap-2 uppercase tracking-wider">

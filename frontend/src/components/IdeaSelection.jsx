@@ -4,7 +4,7 @@ import { ChevronRight, Layout } from 'lucide-react';
 
 const IdeaSelection = ({ ideas, onSelect, isLoading }) => {
     return (
-        <div className="w-full max-w-7xl mx-auto">
+        <div className="w-full max-w-[1400px] mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {ideas.map((idea, index) => (
                     <IdeaCard 
