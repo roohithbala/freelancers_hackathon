@@ -30,8 +30,21 @@ const generalLimiter = rateLimit({
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
-    message: { error: 'Slow down! Too many sensitive requests.' }
+    max: (req) => {
+        const tier = req.body.userTier || req.body.tier || 'free';
+        const tierLower = tier.toLowerCase();
+        if (tierLower === 'elite' || tierLower === 'architect') return 50;
+        if (tierLower === 'pro' || tierLower === 'innovator') return 15;
+        return 5; // Hobbyist / Free
+    },
+    keyGenerator: (req) => {
+        return req.body.userId || req.ip;
+    },
+    message: { 
+        error: 'Generation limit reached for your current tier. Upgrade to Innovator or Architect for higher limits!' 
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 app.use(generalLimiter);
