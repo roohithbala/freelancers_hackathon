@@ -12,6 +12,8 @@ data:
   prometheus.yml: |
     global:
       scrape_interval: 15s
+    rule_files:
+      - /etc/prometheus/rules/prometheus.rules.yml
     scrape_configs:
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
@@ -48,6 +50,83 @@ data:
         isDefault: true
         editable: true
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+data:
+  prometheus.rules.yml: |
+    groups:
+    - name: system_alerts
+      rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+      - alert: HighCPUUsage
+        expr: (sum(rate(container_cpu_usage_seconds_total[5m])) by (pod) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected on pod {{ $labels.pod }}"
+          description: "Pod {{ $labels.pod }} is using more than 80% CPU for over 2 minutes."
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-config
+  namespace: monitoring
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      options:
+        path: /etc/grafana/provisioning/dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-main
+  namespace: monitoring
+data:
+  kubernetes-pods.json: |
+    {
+      "title": "Application Metrics",
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Service Uptime (up)",
+          "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+          "targets": [{"expr": "up", "refId": "A", "legendFormat": "{{job}} - {{pod}}"}]
+        },
+        {
+          "type": "timeseries",
+          "title": "CPU Usage Rate",
+          "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+          "targets": [{"expr": "rate(container_cpu_usage_seconds_total[5m])", "refId": "A", "legendFormat": "{{pod}}"}]
+        },
+        {
+          "type": "timeseries",
+          "title": "Memory Usage",
+          "gridPos": {"x": 0, "y": 8, "w": 24, "h": 8},
+          "targets": [{"expr": "container_memory_usage_bytes", "refId": "A", "legendFormat": "{{pod}}"}]
+        }
+      ],
+      "schemaVersion": 30
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -80,13 +159,19 @@ spec:
             memory: "512Mi"
         volumeMounts:
         - name: prometheus-config
-          mountPath: /etc/prometheus/
+          mountPath: /etc/prometheus/prometheus.yml
+          subPath: prometheus.yml
+        - name: prometheus-rules
+          mountPath: /etc/prometheus/rules
         - name: prometheus-storage
           mountPath: /prometheus
       volumes:
       - name: prometheus-config
         configMap:
           name: prometheus-config
+      - name: prometheus-rules
+        configMap:
+          name: prometheus-rules
       - name: prometheus-storage
         emptyDir: {}
 ---
@@ -138,10 +223,22 @@ spec:
         - name: grafana-datasources
           mountPath: /etc/grafana/provisioning/datasources
           readOnly: true
+        - name: grafana-dashboards-config
+          mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
+          subPath: dashboards.yaml
+        - name: grafana-dashboard-main
+          mountPath: /etc/grafana/provisioning/dashboards/kubernetes-pods.json
+          subPath: kubernetes-pods.json
       volumes:
       - name: grafana-datasources
         configMap:
           name: grafana-datasources
+      - name: grafana-dashboards-config
+        configMap:
+          name: grafana-dashboards-config
+      - name: grafana-dashboard-main
+        configMap:
+          name: grafana-dashboard-main
 ---
 apiVersion: v1
 kind: Service

@@ -78,21 +78,21 @@ const ToastItem = ({ toast, onRemove }) => {
   const getIcon = () => {
     switch (toast.type) {
       case 'success':
-        return <Check className="w-5 h-5 text-emerald-500" />;
+        return <Check className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-rose-500" />;
+        return <AlertCircle className="w-5 h-5 text-rose-500 dark:text-rose-400" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-amber-500" />;
+        return <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400" />;
       default:
-        return <Sparkles className="w-5 h-5 text-indigo-500" />;
+        return <Sparkles className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />;
     }
   };
 
   const tone = {
-    success: { bg: 'bg-emerald-50', accent: 'text-emerald-500' },
-    error: { bg: 'bg-rose-50', accent: 'text-rose-500' },
-    warning: { bg: 'bg-amber-50', accent: 'text-amber-500' },
-    info: { bg: 'bg-indigo-50', accent: 'text-indigo-600' },
+    success: { bg: 'bg-emerald-50 dark:bg-emerald-900/50', accent: 'text-emerald-500 dark:text-emerald-400' },
+    error: { bg: 'bg-rose-50 dark:bg-rose-900/50', accent: 'text-rose-500 dark:text-rose-400' },
+    warning: { bg: 'bg-amber-50 dark:bg-amber-900/50', accent: 'text-amber-500 dark:text-amber-400' },
+    info: { bg: 'bg-indigo-50 dark:bg-indigo-900/50', accent: 'text-indigo-600 dark:text-indigo-400' },
   };
 
   const t = tone[toast.type] || tone.info;
@@ -109,7 +109,7 @@ const ToastItem = ({ toast, onRemove }) => {
       </div>
 
       <div className="flex-1">
-        <p className="text-sm font-semibold" style={{ color: 'var(--text-900)' }}>{toast.message}</p>
+        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{toast.message}</p>
       </div>
 
       {!toast.persistent && (
