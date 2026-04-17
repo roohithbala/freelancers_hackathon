@@ -1,5 +1,5 @@
 # Stage 1: Build Frontend
-FROM node:18-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
@@ -20,7 +20,7 @@ ARG VITE_API_BASE_URL
 RUN npm run build
 
 # Stage 2: Final Image (Backend + Frontend)
-FROM node:18-alpine
+FROM node:22-alpine
 WORKDIR /app
 COPY backend/package*.json ./
 RUN npm install
