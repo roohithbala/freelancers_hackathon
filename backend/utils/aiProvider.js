@@ -159,6 +159,13 @@ async function callHuggingFace(messages, apiKey, options = {}) {
 }
 
 async function generateCompletion(messages, avoidList = [], options = {}) {
+    console.log("AI Provider Status:", {
+        hasOpenAI: !!process.env.OPENAI_API_KEY,
+        hasGroq: !!process.env.GROQ_API_KEY,
+        hasGemini: !!process.env.GOOGLE_API_KEY,
+        hasHF: !!process.env.HF_API_KEY
+    });
+
     // 1. Try OpenAI GPT (Primary) - As requested "ChatGPT base model"
     if (process.env.OPENAI_API_KEY) {
         try {
