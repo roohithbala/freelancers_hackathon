@@ -54,9 +54,33 @@ async function callHfInference(prompt) {
   return text ? text.replace(formattedPrompt, '').trim() : '';
 }
 
+async function callGroqVerifier(prompt) {
+    if (!process.env.GROQ_API_KEY) throw new Error('Groq API key not configured.');
+
+    const client = new OpenAI({
+        apiKey: process.env.GROQ_API_KEY,
+        baseURL: "https://api.groq.com/openai/v1",
+    });
+
+    try {
+        const completion = await client.chat.completions.create({
+            messages: [
+                { role: "system", content: "You are a meticulous technical reviewer." },
+                { role: "user", content: prompt }
+            ],
+            model: "llama-3.1-8b-instant",
+            temperature: 0.1,
+            max_tokens: 1024,
+        });
+        return completion.choices[0]?.message?.content || '';
+    } catch (error) {
+        throw new Error(`Groq verifier failed: ${error.message}`);
+    }
+}
+
 /**
  * verifyBlueprint
- * Takes a generated blueprint markdown and asks an HF model to flag likely hallucinations,
+ * Takes a generated blueprint markdown and asks a Groq model to flag likely hallucinations,
  * unsupported claims, or risky/incorrect technical suggestions.
  */
 async function verifyBlueprint(markdown) {
@@ -79,13 +103,18 @@ Blueprint:
 ${markdown}`;
 
   try {
-    // Try GPT first, fall back to HuggingFace
+    // Try GPT first (Primary), fall back to Groq then HuggingFace
     let raw;
     try {
       raw = await callGptVerifier(prompt);
     } catch (gptErr) {
-      console.warn('GPT verifier failed, falling back to HuggingFace:', gptErr.message);
-      raw = await callHfInference(prompt);
+      console.warn('GPT verifier failed, falling back to Groq:', gptErr.message);
+      try {
+        raw = await callGroqVerifier(prompt);
+      } catch (groqErr) {
+        console.warn('Groq verifier failed, falling back to HuggingFace:', groqErr.message);
+        raw = await callHfInference(prompt);
+      }
     }
     // Extract JSON
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
@@ -93,7 +122,7 @@ ${markdown}`;
     
     return JSON.parse(jsonMatch[0]);
   } catch (e) {
-    console.warn('HF verifier failed:', e.message);
+    console.warn('Verifier pipeline failed:', e.message);
     return { summary: 'Verification unavailable at this time', issues: [] };
   }
 }

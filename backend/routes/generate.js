@@ -118,8 +118,11 @@ router.post('/', async (req, res) => {
             userPrompt = getIdeasPrompt({ domain, skillLevel, techStack, goal, timeframe }, previousProjects || [], ideaCount);
         } else {
             let specificGoal = goal;
+            const ideaTitle = selectedIdea?.title || 'Unknown Project';
+            const ideaDesc = selectedIdea?.description || 'No description provided';
+            
             if (selectedIdea) {
-                specificGoal = `Build: ${selectedIdea.title}. ${selectedIdea.description}. Original Goal: ${goal}`;
+                specificGoal = `Build: ${ideaTitle}. ${ideaDesc}. Original Goal: ${goal}`;
             }
             userPrompt = getUserPrompt({ domain, skillLevel, techStack, goal: specificGoal, timeframe }, isPremium || (userTier === 'architect'), role, groundingContext);
         }

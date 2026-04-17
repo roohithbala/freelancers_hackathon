@@ -166,7 +166,7 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
         hasHF: !!process.env.HF_API_KEY
     });
 
-    // 1. Try OpenAI GPT (Primary) - As requested "ChatGPT base model"
+    // 1. Try OpenAI GPT (Primary - Per User Request)
     if (process.env.OPENAI_API_KEY) {
         try {
             const result = await callOpenAI(messages, process.env.OPENAI_API_KEY, {
@@ -184,10 +184,10 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
         try {
             const result = await callGroq(messages, process.env.GROQ_API_KEY, {
                 ...options,
-                model: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
+                model: options.model || process.env.GROQ_MODEL || "llama-3.1-8b-instant",
                 temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
             });
-            return { ...result, provider: `Groq (${process.env.GROQ_MODEL || "llama-3.1-8b-instant"})` };
+            return { ...result, provider: `Groq (${options.model || process.env.GROQ_MODEL || "llama-3.1-8b-instant"})` };
         } catch (e) {
             console.error(`Groq Attempt Failed: ${e.message}`);
         }
