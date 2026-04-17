@@ -168,7 +168,7 @@ router.post('/', async (req, res) => {
                     return res.status(500).json({ error: 'AI returned no ideas. Please try again with different parameters.' });
                 }
 
-                res.json({ ideas });
+                res.json({ ideas, provider: data.provider });
             } else {
                 // Blueprint mode - parse markdown AND extract JSON block
                 let structuredData = {};

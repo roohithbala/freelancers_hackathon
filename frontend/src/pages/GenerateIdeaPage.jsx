@@ -97,6 +97,7 @@ const GenerateIdeaPage = () => {
       const result = await ideaService.generateIdeas({ ...formData, userTier }, currentUser);
       if (result.success) {
         setIdeas(result.data);
+        setProvider(result.provider);
         setStep('selection');
         success('Project ideas generated successfully!');
       } else {

@@ -379,7 +379,10 @@ graph TD
 
     if (available.length === 0) available = mockBlueprints;
     if (options.mode === 'ideas') {
-        const mockIdeas = available.map(bp => {
+        // Shuffle the mock blueprints for variety
+        const shuffled = [...available].sort(() => Math.random() - 0.5);
+        
+        const mockIdeas = shuffled.map(bp => {
             const titleMatch = bp.match(/# 🚀 Project: (.*?)(?:\s|##|$)/);
             const title = titleMatch ? titleMatch[1].trim() : "Mock Project";
             return {
@@ -389,7 +392,7 @@ graph TD
                 tech_stack: ["React", "Node.js", "AI"],
                 id: title.toLowerCase().replace(/\s+/g, '-')
             };
-        }).slice(0, 5);
+        }).slice(0, 8); // Show more ideas for variety
         
         return {
             choices: [{
