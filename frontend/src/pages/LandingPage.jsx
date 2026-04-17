@@ -22,7 +22,8 @@ import {
   Sparkles,
   Github,
   Award,
-  Eye
+  Eye,
+  Layers
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
