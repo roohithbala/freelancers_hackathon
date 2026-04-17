@@ -25,16 +25,26 @@ const getUserPrompt = (data, isPremium, role = 'Freelancer', groundingContext = 
   - Context: ${groundingContext}
 ]
 
-[REQUIREMENTS:
-  1. Title: Brandable & Disruptive
-  2. Problem: 300-word deep dive into industry pain points
-  3. Solution: Technical unfair advantage
-  4. MVP Features: 8-10 high-impact items
-  5. Architecture: Frontend, Backend, DB, Cloud (AWS/GCP/Azure)
-  6. Graph: Mermaid Flowchart (graph TD)
-  7. Roadmap: 4-week aggressive sprint
-  8. Resume: 5 staff-engineer level impact points
-]
+[REQUIREMENTS (USE EXACT MARKDOWN HEADERS):
+## Title
+Brandable & Disruptive Name
+## Core Problem
+300-word deep dive into industry pain points
+## Tech Stack
+- **Frontend**: framework
+- **Backend**: framework
+- **Database**: db
+## Core Features
+- Feature 1
+- Feature 2
+## Architecture
+Frontend, Backend, DB, Cloud (AWS/GCP/Azure)
+## Graph
+Mermaid Flowchart (graph TD)
+## Implementation Roadmap
+- Week 1: ...
+## Resume
+5 staff-engineer level impact points]
 
 [OUTPUT: Markdown + JSON Payload]
 

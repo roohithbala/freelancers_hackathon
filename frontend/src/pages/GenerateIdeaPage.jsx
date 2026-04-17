@@ -170,7 +170,7 @@ const GenerateIdeaPage = () => {
 
   const pricingPlans = [
     { id: 'free', name: 'Hobbyist', price: '₹0', features: ['Portfolio Concepts', 'Standard AI Rendering'], color: 'slate' },
-    { id: 'pro', name: 'Innovator', price: '₹199', features: ['Hackathon Mode', 'Priority GPT Inference', 'Architectural Grounding'], color: 'indigo' },
+    { id: 'pro', name: 'Innovator', price: '₹199', features: ['Hackathon Mode', 'Priority Llama Inference', 'Architectural Grounding'], color: 'indigo' },
     { id: 'elite', name: 'Architect', price: '₹499', features: ['Startup MVP Mode', 'VC-Grade Blueprints', 'Technical Hallucination Audit'], color: 'amber' },
   ];
 
@@ -521,7 +521,7 @@ const GenerateIdeaPage = () => {
                       </div>
                       <div>
                         <h3 className="text-2xl font-black text-gray-900 dark:text-white">Technical Audit</h3>
-                        <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">GPT-4o-mini Precision Review</p>
+                        <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Llama 3.1 8B Precision Review</p>
                       </div>
                     </div>
                     {generatedIdea.verification?.summary && (

@@ -103,16 +103,16 @@ Blueprint:
 ${markdown}`;
 
   try {
-    // Try GPT first (Primary), fall back to Groq then HuggingFace
+    // Try Groq first (Primary), fall back to GPT then HuggingFace
     let raw;
     try {
-      raw = await callGptVerifier(prompt);
-    } catch (gptErr) {
-      console.warn('GPT verifier failed, falling back to Groq:', gptErr.message);
+      raw = await callGroqVerifier(prompt);
+    } catch (groqErr) {
+      console.warn('Groq verifier failed, falling back to GPT:', groqErr.message);
       try {
-        raw = await callGroqVerifier(prompt);
-      } catch (groqErr) {
-        console.warn('Groq verifier failed, falling back to HuggingFace:', groqErr.message);
+        raw = await callGptVerifier(prompt);
+      } catch (gptErr) {
+        console.warn('GPT verifier failed, falling back to HuggingFace:', gptErr.message);
         raw = await callHfInference(prompt);
       }
     }

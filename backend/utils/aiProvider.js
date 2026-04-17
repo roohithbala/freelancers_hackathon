@@ -160,26 +160,13 @@ async function callHuggingFace(messages, apiKey, options = {}) {
 
 async function generateCompletion(messages, avoidList = [], options = {}) {
     console.log("AI Provider Status:", {
-        hasOpenAI: !!process.env.OPENAI_API_KEY,
         hasGroq: !!process.env.GROQ_API_KEY,
+        hasOpenAI: !!process.env.OPENAI_API_KEY,
         hasGemini: !!process.env.GOOGLE_API_KEY,
         hasHF: !!process.env.HF_API_KEY
     });
 
-    // 1. Try OpenAI GPT (Primary - Per User Request)
-    if (process.env.OPENAI_API_KEY) {
-        try {
-            const result = await callOpenAI(messages, process.env.OPENAI_API_KEY, {
-                ...options,
-                temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
-            });
-            return { ...result, provider: 'OpenAI (GPT-4o-mini)' };
-        } catch (e) {
-            console.error(`OpenAI GPT Attempt Failed: ${e.message}`);
-        }
-    }
-
-    // 2. Try Groq (Secondary)
+    // 1. Try Groq (Primary - Per User Request)
     if (process.env.GROQ_API_KEY) {
         try {
             const result = await callGroq(messages, process.env.GROQ_API_KEY, {
@@ -190,6 +177,19 @@ async function generateCompletion(messages, avoidList = [], options = {}) {
             return { ...result, provider: `Groq (${options.model || process.env.GROQ_MODEL || "llama-3.1-8b-instant"})` };
         } catch (e) {
             console.error(`Groq Attempt Failed: ${e.message}`);
+        }
+    }
+
+    // 2. Try OpenAI GPT (Secondary)
+    if (process.env.OPENAI_API_KEY) {
+        try {
+            const result = await callOpenAI(messages, process.env.OPENAI_API_KEY, {
+                ...options,
+                temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
+            });
+            return { ...result, provider: 'OpenAI (GPT-4o-mini)' };
+        } catch (e) {
+            console.error(`OpenAI GPT Attempt Failed: ${e.message}`);
         }
     }
 
