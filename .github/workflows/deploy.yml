@@ -66,7 +66,6 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
           IMAGE_TAG: ghcr.io/${{ github.repository_owner }}/freelancers-app:${{ github.sha }}
-          REPO_URL: https://github.com/${{ github.repository }}.git
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
           HF_MODEL: ${{ secrets.HF_MODEL }}
           RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
@@ -78,10 +77,11 @@ jobs:
           printf "%s\n" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -r k8s "${EC2_USER:-ubuntu}@${EC2_HOST}:~/"
+
           # Pass all variables as environment into the remote SSH session (no single-quoted heredoc)
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa "${EC2_USER:-ubuntu}@${EC2_HOST}" \
             IMAGE_TAG="$IMAGE_TAG" \
-            REPO_URL="$REPO_URL" \
             HF_API_KEY="$HF_API_KEY" \
             HF_MODEL="$HF_MODEL" \
             RAZORPAY_KEY_ID="$RAZORPAY_KEY_ID" \
@@ -96,12 +96,7 @@ jobs:
             sudo chown $(id -u):$(id -g) $HOME/.kube/config
             export KUBECONFIG=$HOME/.kube/config
 
-            # Ensure workspace exists and is up to date
-            if [ ! -d "$HOME/freelancers_hackathon" ]; then
-              git clone "$REPO_URL" "$HOME/freelancers_hackathon"
-            fi
-            cd "$HOME/freelancers_hackathon"
-            git pull origin main || true
+            cd $HOME
 
             # Create/update secrets
             kubectl create secret generic app-secrets \
