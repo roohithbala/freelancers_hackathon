@@ -45,17 +45,9 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      <Route path="/saved" element={
-        <ProtectedRoute>
-          <SavedIdeasPage />
-        </ProtectedRoute>
-      } />
+      <Route path="/saved" element={<SavedIdeasPage />} />
 
-      <Route path="/project/:id" element={
-        <ProtectedRoute>
-          <ProjectFlowPage />
-        </ProtectedRoute>
-      } />
+      <Route path="/project/:id" element={<ProjectFlowPage />} />
 
 
       {/* Fallback */}

@@ -60,11 +60,7 @@ const ProjectFlowPage = () => {
       }
     };
 
-    if (currentUser) {
-      loadProject();
-    } else {
-      setLoading(false);
-    }
+    loadProject();
   }, [id, navigate, error, currentUser]);
 
   const handleShare = () => {
@@ -218,23 +214,26 @@ const ProjectFlowPage = () => {
           </div>
 
           <div className="bg-white/70 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div className="mb-4 md:mb-0">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-4 tracking-tight leading-tight uppercase font-heading">
                   {projectData.title}
                 </h1>
-                <div className="flex items-center space-x-4">
-                  <span className={`px-4 py-2 bg-gradient-to-r ${getSkillLevelColor(projectData.skillLevel)} rounded-full text-white text-sm font-medium flex items-center`}>
+                <div className="flex flex-wrap gap-3">
+                  <span className={`px-4 py-2 bg-gradient-to-r ${getSkillLevelColor(projectData.skillLevel)} rounded-xl text-white text-[10px] font-black uppercase tracking-widest flex items-center shadow-lg shadow-indigo-500/20`}>
                     {getSkillLevelIcon(projectData.skillLevel)}
-                    <span className="ml-2">{capitalizeFirst(projectData.skillLevel)}</span>
+                    <span className="ml-2">{projectData.skillLevel}</span>
                   </span>
-                  <span className="px-4 py-2 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full text-white text-sm font-medium flex items-center">
-                    <Target className="w-4 h-4" />
-                    <span className="ml-2">{capitalizeFirst(projectData.domain)}</span>
+                  <span className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-xl text-gray-900 dark:text-white text-[10px] font-black uppercase tracking-widest flex items-center shadow-sm">
+                    <Target className="w-3.5 h-3.5 mr-2 text-indigo-500" />
+                    {projectData.domain}
                   </span>
-                  <span className="text-sm text-gray-500">
-                    Created {formatDate(projectData.createdAt)}
-                  </span>
+                  {projectData.isSample && (
+                    <span className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600 text-[10px] font-black uppercase tracking-widest flex items-center">
+                       <Zap className="w-3.5 h-3.5 mr-2" />
+                       Sample Blueprint
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -14,6 +14,45 @@ function cyrb53(str, seed = 0) {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 }
 
+const MOCK_IDEAS = [
+  {
+    id: 'sample-1',
+    title: 'AI Health Companion',
+    problem: 'Rural areas lack access to immediate medical consultation and symptom analysis.',
+    domain: 'health',
+    skillLevel: 'intermediate',
+    techStack: ['React Native', 'TensorFlow Lite', 'Node.js', 'MongoDB'],
+    features: ['Offline Symptom Checker', 'Multilingual Voice Interface', 'Automated Emergency Alerts'],
+    roadmap: ['Design Neural Model', 'Build MVP Mobile App', 'Local Language Integration'],
+    createdAt: new Date(),
+    isSample: true
+  },
+  {
+    id: 'sample-2',
+    title: 'DeFi Micro-Lending',
+    problem: 'Traditional banks exclude small-scale entrepreneurs in developing markets.',
+    domain: 'fintech',
+    skillLevel: 'advanced',
+    techStack: ['Solidity', 'Ethereum', 'React', 'Ethers.js'],
+    features: ['Peer-to-Peer Smart Contracts', 'Automated Credit Scoring', 'Liquidity Pools'],
+    roadmap: ['Write Lending Contract', 'Security Audit', 'Frontend Integration'],
+    createdAt: new Date(),
+    isSample: true
+  },
+  {
+    id: 'sample-3',
+    title: 'Edu-Stream Platform',
+    problem: 'High-quality education is expensive and difficult to scale geographically.',
+    domain: 'education',
+    skillLevel: 'beginner',
+    techStack: ['Vue.js', 'Firebase', 'WebRTC', 'Tailwind'],
+    features: ['Real-time Classrooms', 'AI-Generated Transcripts', 'Interactive Quizzes'],
+    roadmap: ['Setup Video Pipeline', 'Build Quiz Module', 'Scale Server Infrastructure'],
+    createdAt: new Date(),
+    isSample: true
+  }
+];
+
 class IdeaService {
   constructor() {
     const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/api\/?$/, '');
@@ -353,23 +392,24 @@ class IdeaService {
   }
 
   async getSavedIdeas(currentUser) {
-    if (!currentUser) return [];
+    if (!currentUser) return MOCK_IDEAS;
     try {
       const q = query(collection(db, "projects"), where("userId", "==", currentUser.uid));
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(d => {
+      const savedIdeas = querySnapshot.docs.map(d => {
         const data = d.data();
         return {
           id: d.id,
           ...data,
-          // Convert Firestore Timestamps to JS Dates for display
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt || new Date(),
           savedAt: data.savedAt?.toDate ? data.savedAt.toDate() : data.savedAt || data.createdAt?.toDate?.() || new Date()
         };
       });
+      // Merge with samples to show variety
+      return [...MOCK_IDEAS, ...savedIdeas];
     } catch (error) {
       console.error('Error reading saved ideas:', error);
-      return [];
+      return MOCK_IDEAS;
     }
   }
 

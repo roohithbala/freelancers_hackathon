@@ -159,169 +159,214 @@ async function callHuggingFace(messages, apiKey, options = {}) {
 }
 
 async function generateCompletion(messages, avoidList = [], options = {}) {
-    // 1. Try Groq (Primary) - Basic/Fast Model
+    // 1. Try OpenAI GPT (Primary) - As requested "ChatGPT base model"
+    if (process.env.OPENAI_API_KEY) {
+        try {
+            return await callOpenAI(messages, process.env.OPENAI_API_KEY, {
+                ...options,
+                temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
+            });
+        } catch (e) {
+            console.error(`OpenAI GPT Attempt Failed: ${e.message}`);
+        }
+    }
+
+    // 2. Try Groq (Secondary)
     if (process.env.GROQ_API_KEY) {
         try {
             return await callGroq(messages, process.env.GROQ_API_KEY, {
                 ...options,
-                model: process.env.GROQ_MODEL || "llama-3.1-8b-instant"
+                model: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
+                temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
             });
         } catch (e) {
             console.error(`Groq Attempt Failed: ${e.message}`);
         }
     }
 
-    // 2. Try OpenAI GPT (Secondary)
-    if (process.env.OPENAI_API_KEY) {
-        try {
-            return await callOpenAI(messages, process.env.OPENAI_API_KEY, options);
-        } catch (e) {
-            console.error(`OpenAI GPT Attempt Failed: ${e.message}`);
-        }
-    }
-
-    // 3. Try Hugging Face (Tertiary)
-    if (process.env.HF_API_KEY) {
-        try {
-            return await callHuggingFace(messages, process.env.HF_API_KEY, options);
-        } catch (e) {
-            console.error(`HF Attempt Failed: ${e.message}`);
-        }
-    }
-
-    // 4. Try Google Gemini Direct (Quaternary)
+    // 3. Try Google Gemini Direct (Tertiary)
     if (process.env.GOOGLE_API_KEY) {
         try {
-            return await callGeminiDirect(messages, process.env.GOOGLE_API_KEY, options);
+            return await callGeminiDirect(messages, process.env.GOOGLE_API_KEY, {
+                ...options,
+                temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
+            });
         } catch (e) {
             console.error(e.message);
         }
     }
 
-    // 4. Fallback: Mock Data
-    console.warn("All APIs failed. Switching to DEMO MODE with random blueprint.");
-    // ... [rest of mock data code remains same]
+    // 4. Try Hugging Face (Quaternary)
+    if (process.env.HF_API_KEY) {
+        try {
+            return await callHuggingFace(messages, process.env.HF_API_KEY, {
+                ...options,
+                temperature: typeof options.temperature === 'number' ? options.temperature : 0.4
+            });
+        } catch (e) {
+            console.error(`HF Attempt Failed: ${e.message}`);
+        }
+    }
+
+    // 5. Fallback: Expanded Mock Data for Variety
+    console.warn("All APIs failed or unavailable. Switching to HIGH-VARIETY DEMO MODE.");
 
     const mockBlueprints = [
-        `
-# 🚀 Project: SmartHarvest AI (Demo)
-
+        `# 🚀 Project: SmartHarvest AI
 ## 🎯 Core Problem
-Small-scale farmers lose 40% of crops due to unpredictable weather and pest attacks, lacking access to enterprise-grade agronomy data.
-
-## 🧠 Why Existing Solutions Fail
-*   **Too Expensive**: Solutions like John Deere are for industrial farms.
-*   **Too Complex**: Requires hardware sensors that are hard to maintain.
-
-## 🚀 Unique Innovation Layer
-*   **Computer Vision**: Uses simple smartphone photos to detect pests.
-*   **Local-First AI**: Runs on-device to work without internet.
-
+Small-scale farmers lose 40% of crops due to unpredictable weather and pest attacks.
 ## 🏗 Technical Architecture
-*   **Frontend**: React Native (Offline First)
-*   **Backend**: Node.js + GraphQL
-*   **AI**: Llama 3 via Groq (Cloud), TFLite (Local)
-*   **Database**: MongoDB (Sync via WatermelonDB)
-
+- **Frontend**: React Native
+- **AI**: TensorFlow Lite (On-device)
+- **Database**: MongoDB
 ## 🧩 Core Features (MVP)
-1.  **Pest Doctor**: Snap a photo, identifying disease.
-2.  **Weather Guard**: Hyper-local alerts.
-3.  **Market Connect**: Sell excess produce directly to consumers.
-
+1. Pest detection via computer vision.
+2. Hyper-local weather alerts.
 ## 📊 System Architecture Diagram
 \`\`\`mermaid
 graph TD
-    A[Mobile App] -->|Offline Sync| B[Local DB]
-    B -->|Sync| C[GraphQL API]
-    C --> D[MongoDB]
-    A -->|Image Analysis| E[TFLite Model]
-\`\`\`
-`,
-        `
-# 🚀 Project: FinWiz AI (Demo)
-
+    A[Mobile App] --> B[Local DB]
+    A --> C[AI Model]
+\`\`\``,
+        `# 🚀 Project: FinWiz AI
 ## 🎯 Core Problem
-Gen Z lacks financial literacy and struggles with basic budgeting, often falling into debt traps with credit cards.
-
-## 🧠 Why Existing Solutions Fail
-*   **Boring UI**: Spreadsheets and traditional banking apps are unengaging.
-*   **No Personalization**: Generic advice doesn't apply to gig-economy income.
-
-## 🚀 Unique Innovation Layer
-*   **Gamified Learning**: Earn crypto tokens for saving money.
-*   **AI Financial Coach**: Chat with a persona that analyzes your spending in real-time.
-
+Gen Z lacks financial literacy and struggles with basic budgeting.
 ## 🏗 Technical Architecture
-*   **Frontend**: Flutter (Cross-platform)
-*   **Backend**: Python FastAPI
-*   **AI**: OpenAI GPT-4o Mini
-*   **Database**: PostgreSQL + Redis
-
+- **Frontend**: Flutter
+- **Backend**: Python FastAPI
+- **Database**: PostgreSQL
 ## 🧩 Core Features (MVP)
-1.  **Expense Tracker**: Auto-categorize SMS transaction alerts.
-2.  **Goal Setter**: Visual saving jars with progress bars.
-3.  **Learn & Earn**: Short quizzes on finance to earn rewards.
-
+1. AI Financial Coach.
+2. Gamified savings rewards.
 ## 📊 System Architecture Diagram
 \`\`\`mermaid
 graph TD
-    A[User App] --> B[API Gateway]
-    B --> C[Auth Service]
-    B --> D[Finance Service]
-    D --> E[AI Analysis Engine]
-    E --> F[Vector DB]
-\`\`\`
-`,
-        `
-# 🚀 Project: MediConnect VR (Demo)
-
+    A[App] --> B[FastAPI]
+    B --> C[AI Engine]
+\`\`\``,
+        `# 🚀 Project: MediConnect VR
 ## 🎯 Core Problem
-Medical students lack realistic surgical practice without risking patient safety or using expensive cadavers.
-
-## 🧠 Why Existing Solutions Fail
-*   **Lack of Haptics**: Textbooks and videos are 2D.
-*   **High Cost**: VR simulators cost $50k+.
-
-## 🚀 Unique Innovation Layer
-*   **WebXR Support**: Runs in browser on Meta Quest 3 without app install.
-*   **Multiplayer**: Senior surgeons can guide students remotely.
-
+Medical students lack realistic surgical practice without risking safety.
 ## 🏗 Technical Architecture
-*   **Frontend**: Three.js + React Three Fiber
-*   **Backend**: Supabase (Realtime)
-*   **AI**: Stable Diffusion (Texture Generation)
-*   **Database**: Supabase PostgreSQL
-
+- **Frontend**: Three.js / WebXR
+- **Backend**: Supabase
 ## 🧩 Core Features (MVP)
-1.  **Virtual OR**: Interactive 3D operating room.
-2.  **Procedure Guide**: Step-by-step AI voice guidance.
-3.  **Global Leaderboard**: Score based on precision and time.
-
+1. Virtual OR environment.
+2. Real-time multiplayer guidance.
 ## 📊 System Architecture Diagram
 \`\`\`mermaid
 graph TD
-    A[VR Headset] -->|WebSockets| B[Realtime Server]
-    B --> C[State Sync]
-    C --> D[Database]
-    A -->|Assets| E[CDN]
-\`\`\`
-`
+    A[VR Headset] --> B[Supabase Realtime]
+\`\`\``,
+        `# 🚀 Project: CyberShield 360
+## 🎯 Core Problem
+Small businesses are highly vulnerable to ransomware attacks.
+## 🏗 Technical Architecture
+- **Engine**: Go / Python
+- **Stack**: ELK Stack for logging
+## 🧩 Core Features (MVP)
+1. Real-time threat detection.
+2. Automated immutable backups.
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[Agent] --> B[Central Engine]
+    B --> C[ELK Stack]
+\`\`\``,
+        `# 🚀 Project: EduStream Interactive
+## 🎯 Core Problem
+Low engagement rates in asynchronous online courses.
+## 🏗 Technical Architecture
+- **Frontend**: Vue.js
+- **Real-time**: Socket.io
+## 🧩 Features:
+1. Live collaborative whiteboards.
+2. Peer-to-peer mentoring rooms.
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[Student] --> B[Socket.io Server]
+    B --> C[Shared State]
+\`\`\``,
+        `# 🚀 Project: AquaSense IOT
+## 🎯 Core Problem
+Massive water wastage in urban apartments due to undetected leaks.
+## 🏗 Technical Architecture
+- **Hardware**: ESP32 / Arduino
+- **App**: React Native
+## 🧩 Features:
+1. Real-time flow monitoring.
+2. Automatic valve shut-off.
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[Sensors] --> B[MQTT Broker]
+    B --> C[Mobile App]
+\`\`\``,
+        `# 🚀 Project: GreenRoute Logistics
+## 🎯 Core Problem
+High carbon emissions in urban last-mile delivery.
+## 🏗 Technical Architecture
+- **Core**: Rust
+- **Map**: Google Maps API
+## 🧩 Features:
+1. AI route optimization for EVs.
+2. Verified carbon credit tracking.
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[Driver App] --> B[Rust Optimizer]
+    B --> C[PostgreSQL]
+\`\`\``,
+        `# 🚀 Project: MentalEase AI
+## 🎯 Problem: Crisis counselor burnout.
+## 🏗 Tech: Next.js, OpenAI Whisper, Redis.
+## 🧩 Features:
+1. Crisis triage automation.
+2. Counselor sentiment analysis.
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[User] --> B[Whisper API]
+    B --> C[Analysis Engine]
+\`\`\``,
+        `# 🚀 Project: SecureDoc Blockchain
+## 🎯 Problem: Medical record tampering.
+## 🏗 Tech: Solidity, IPFS, React.
+## 🧩 Features:
+1. Patient-owned data vaults.
+2. Immutable audit trails.
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[Clinic] --> B[Smart Contract]
+    B --> C[IPFS Storage]
+\`\`\``,
+        `# 🚀 Project: SkillSwap Portal
+## 🎯 Problem: Barter system for professional skills.
+## 🌐 Tech: React, Firebase, Algolia.
+## 🧩 Features:
+1. Skill matching algorithm.
+2. Video-verified endorsements.
+## 📊 System Architecture Diagram
+\`\`\`mermaid
+graph TD
+    A[User A] --> B[Matching Engine]
+    B --> C[User B]
+\`\`\``
     ];
 
     // Filter out avoidList if provided
     let available = mockBlueprints;
     if (avoidList && avoidList.length > 0) {
         available = mockBlueprints.filter(bp => {
-            const titleMatch = bp.match(/# 🚀 Project: (.*?) \(/);
-            const title = titleMatch ? titleMatch[1] : "";
-            // If the title is in avoidList (partial match), exclude it
-            return !avoidList.some(avoid => title.includes(avoid) || avoid.includes(title));
+            const titleMatch = bp.match(/# 🚀 Project: (.*?)(?:\s|##|$)/);
+            const title = titleMatch ? titleMatch[1].trim() : "";
+            return !avoidList.some(avoid => (title && avoid.toLowerCase().includes(title.toLowerCase())) || (title && title.toLowerCase().includes(avoid.toLowerCase())));
         });
     }
 
-    // If all filtered out, fallback to random from original
     if (available.length === 0) available = mockBlueprints;
-
     const randomBlueprint = available[Math.floor(Math.random() * available.length)];
 
     return {
