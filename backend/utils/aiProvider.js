@@ -46,7 +46,7 @@ async function callGroq(messages, apiKey, options = {}) {
     try {
         const payload = {
             messages: messages,
-            model: options.model || "llama-3.1-8b-instant",
+            model: options.model || process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
             temperature: typeof options.temperature === 'number' ? options.temperature : 0.2,
         };
         if (options.maxTokens) payload.max_tokens = Math.min(options.maxTokens, 8192);

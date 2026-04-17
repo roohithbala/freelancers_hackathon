@@ -133,8 +133,7 @@ class IdeaService {
           previousProjects: previousProjects,
           role: 'Student',
           isPremium: false,
-          // Ask backend to limit tokens and temperature to reduce cost and verbosity
-          maxTokens: 512,
+          maxTokens: 1500,
           temperature: 0.2,
           promptHash
         }),
@@ -146,6 +145,11 @@ class IdeaService {
       }
       
       const result = await res.json();
+
+      // Guard: if ideas array is missing or empty, treat as failure
+      if (!result.ideas || !Array.isArray(result.ideas) || result.ideas.length === 0) {
+        return { success: false, error: result.error || 'No ideas were generated. Please try again.' };
+      }
 
       // Save all generated ideas to Firestore (include promptHash)
       if (currentUser && result.ideas?.length) {

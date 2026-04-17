@@ -225,7 +225,7 @@ const getIdeasPrompt = (data, previousIdeas = []) => {
     return `
     You are a Silicon Valley Startup Mentor and Technical Co-Founder.
     
-    The user wants 15 HIGH-QUALITY, UNIQUE project ideas based on:
+    The user wants 4 HIGH-QUALITY, UNIQUE project ideas based on:
     - Domain: ${domain}
     - Skill Level: ${skillLevel}
     - Tech Stack: ${techStack}
@@ -236,7 +236,7 @@ const getIdeasPrompt = (data, previousIdeas = []) => {
     The following ideas have ALREADY been generated for this user. You MUST NOT regenerate any of them or anything similar.
     ${previousIdeas.length > 0 ? `Previously generated ideas (DO NOT USE THESE TITLES OR SIMILAR CONCEPTS):\n${previousIdeas.map(t => `    - "${t}"`).join('\n')}` : 'No previous ideas yet.'}
 
-    Return ONLY a valid JSON array of objects.
+    Return ONLY a valid JSON array of exactly 4 objects. No text before or after the JSON.
     
     JSON INTEGRITY RULES:
     1. DO NOT include any conversational text before or after the JSON.
@@ -250,7 +250,7 @@ const getIdeasPrompt = (data, previousIdeas = []) => {
     - "title": A catchy, professional name.
     - "description": A 1-sentence value prop.
     - "difficulty": "Novice", "Beginner", "Intermediate", or "Advanced".
-    - "tech_stack": Array of key technologies.
+    - "tech_stack": Array of key technologies (max 4 items).
     - "id": A unique string ID (kebab-case of title).
 
     Example Format:

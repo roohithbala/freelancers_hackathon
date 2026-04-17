@@ -140,12 +140,21 @@ router.post('/', async (req, res) => {
                     ideas = extractAndParseJSON(content);
                     // Ensure it's an array
                     if (!Array.isArray(ideas) && ideas.ideas) ideas = ideas.ideas;
-                    if (!Array.isArray(ideas)) ideas = []; 
+                    if (!Array.isArray(ideas)) {
+                        console.error("Ideas is not an array after parse:", ideas);
+                        return res.status(500).json({ error: 'AI returned invalid ideas format. Please try again.' });
+                    }
                 } catch (e) {
-                    console.error("Failed to parse ideas:", e);
-                    // Fallback: empty array to prevent crash
-                    ideas = [];
+                    console.error("Failed to parse ideas JSON:", e.message);
+                    console.error("Raw content snippet:", content?.slice(0, 300));
+                    return res.status(500).json({ error: 'AI response could not be parsed. Please try again.' });
                 }
+
+                if (ideas.length === 0) {
+                    console.error("AI returned empty ideas array. Raw content:", content?.slice(0, 300));
+                    return res.status(500).json({ error: 'AI returned no ideas. Please try again with different parameters.' });
+                }
+
                 res.json({ ideas });
             } else {
                 // Blueprint mode - parse markdown AND extract JSON block
