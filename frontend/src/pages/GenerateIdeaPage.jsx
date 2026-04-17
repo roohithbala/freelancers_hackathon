@@ -381,7 +381,17 @@ const GenerateIdeaPage = () => {
 
         {/* ============ Step 2: Idea Selection ============ */}
         {step === 'selection' && (
-          <IdeaSelection ideas={ideas} onSelect={handleIdeaSelect} isLoading={loading} />
+          <div className="space-y-8">
+            {provider && (
+              <div className="flex justify-center">
+                <div className="flex items-center gap-3 px-6 py-2.5 bg-white/10 backdrop-blur-md border-2 border-indigo-500/20 rounded-2xl shadow-xl">
+                  <div className={`w-3 h-3 rounded-full ${provider.includes('Fallback') ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}></div>
+                  <span className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">Engine: {provider}</span>
+                </div>
+              </div>
+            )}
+            <IdeaSelection ideas={ideas} onSelect={handleIdeaSelect} isLoading={loading} />
+          </div>
         )}
 
         {/* ============ Step 3: Blueprint ============ */}
