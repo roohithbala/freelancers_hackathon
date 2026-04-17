@@ -55,6 +55,7 @@ const GenerateIdeaPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [generatedIdea, setGeneratedIdea] = useState(null);
+  const [provider, setProvider] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [activeView, setActiveView] = useState('details');
   const [ideas, setIdeas] = useState([]);
