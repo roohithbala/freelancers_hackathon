@@ -90,7 +90,11 @@ jobs:
             GROQ_MODEL="$GROQ_MODEL" \
             bash << 'ENDSSH'
             set -e
-            export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+            # Fix k3s kubeconfig permissions for ubuntu user
+            mkdir -p $HOME/.kube
+            sudo cp /etc/rancher/k3s/k3s.yaml $HOME/.kube/config
+            sudo chown $(id -u):$(id -g) $HOME/.kube/config
+            export KUBECONFIG=$HOME/.kube/config
 
             # Ensure workspace exists and is up to date
             if [ ! -d "$HOME/freelancers_hackathon" ]; then
