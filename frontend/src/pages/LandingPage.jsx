@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Lightbulb, 
-  ArrowRight, 
-  Zap, 
-  Target, 
+import {
+  Lightbulb,
+  ArrowRight,
+  Zap,
+  Target,
   Users,
   Menu,
   X,
@@ -58,10 +58,10 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-[#020617] transition-colors duration-500 overflow-x-hidden relative">
       <Navigation />
-      
+
       {/* Noise Texture Overlay */}
       <div className="fixed inset-0 bg-noise z-[1]"></div>
-      
+
       {/* Decorative Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-indigo-500/10 dark:bg-indigo-600/20 blur-[120px] rounded-full"></div>
@@ -103,8 +103,8 @@ const LandingPage = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-lg md:text-xl text-700 dark:text-muted max-w-3xl mx-auto leading-relaxed mb-12 font-medium"
             >
-              IdeaForge transforms your ambition into actionable projects. 
-              Get AI-generated blueprints with tech stacks, features, and roadmaps 
+              IdeaForge transforms your ambition into actionable projects.
+              Get AI-generated blueprints with tech stacks, features, and roadmaps
               tailored to your unique skill set.
             </Motion.p>
 
@@ -190,26 +190,26 @@ const LandingPage = () => {
               <div className="absolute inset-0 bg-noise opacity-10"></div>
               <div className="p-16 flex flex-col items-center text-center relative z-10">
                 <div className="mb-10 p-5 bg-white/5 rounded-3xl backdrop-blur-md border border-white/10">
-                   <Code className="w-12 h-12 text-white" />
+                  <Code className="w-12 h-12 text-white" />
                 </div>
                 <h2 className="text-4xl md:text-7xl font-black text-white mb-8 leading-[1.1]">
                   Build with <span className="text-gradient">Expert Precision</span>
                 </h2>
                 <p className="text-xl text-slate-400 max-w-2xl mb-12 font-medium">
-                  Join the elite group of developers using IdeaForge to architect 
-                  their portfolio and production applications. 
+                  Join the elite group of developers using IdeaForge to architect
+                  their portfolio and production applications.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                   <Link to="/generate">
-                     <button className="rounded-2xl bg-white text-[#0F172A] hover:bg-slate-100 px-10 py-4 font-bold text-lg transition-all shadow-2xl hover:scale-105 active:scale-95">
-                       Get Started Free
-                     </button>
-                   </Link>
-                   <Link to="/saved">
-                     <button className="rounded-2xl border-2 border-white/10 text-white hover:bg-white/5 px-10 py-4 font-bold text-lg transition-all bg-transparent">
-                       View Examples
-                     </button>
-                   </Link>
+                  <Link to="/generate">
+                    <button className="rounded-2xl bg-white text-[#0F172A] hover:bg-slate-100 px-10 py-4 font-bold text-lg transition-all shadow-2xl hover:scale-105 active:scale-95">
+                      Get Started Free
+                    </button>
+                  </Link>
+                  <Link to="/saved">
+                    <button className="rounded-2xl border-2 border-white/10 text-white hover:bg-white/5 px-10 py-4 font-bold text-lg transition-all bg-transparent">
+                      View Examples
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -218,24 +218,53 @@ const LandingPage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="px-6 py-16 border-t border-gray-100 dark:border-slate-900 bg-white dark:bg-slate-950">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center space-x-3">
-             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-                <Lightbulb className="w-6 h-6 text-white" />
-             </div>
-             <span className="text-2xl font-black tracking-tighter text-gray-900 dark:text-white uppercase px-2">IdeaForge</span>
+      <footer className="px-6 py-20 border-t border-gray-100 dark:border-slate-900 bg-white dark:bg-slate-950">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1">
+              <div className="flex items-center space-x-3 mb-6">
+                 <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
+                    <Lightbulb className="w-6 h-6 text-white" />
+                 </div>
+                 <span className="text-2xl font-black tracking-tighter text-gray-900 dark:text-white uppercase px-2">IdeaForge</span>
+              </div>
+              <p className="text-gray-500 dark:text-gray-400 font-medium text-sm mb-8">
+                The neural-core powered project architect for the next generation of builders.
+              </p>
+              <div className="flex items-center space-x-6 text-xs font-black uppercase tracking-widest text-gray-400">
+                <Link to="/privacy" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link>
+                <Link to="/terms" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
+                <Link to="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
+              </div>
+            </div>
+
+            <div className="col-span-1">
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-600 mb-6">Ecosystem</h4>
+              <ul className="space-y-4 text-sm font-bold text-gray-600 dark:text-gray-400">
+                <li><a href="https://github.com/roohithbala" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">Roohith Bala G</a></li>
+                <li><a href="https://github.com/Nesiya-Selladurai" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">Nesiya Selladurai</a></li>
+                <li><a href="https://github.com/Miruthulabalasubramanian" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">Miruthula B</a></li>
+                <li><a href="https://github.com/Copilot" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">AI Copilot</a></li>
+              </ul>
+            </div>
+
+            <div className="col-span-2">
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-600 mb-6">Acknowledgments</h4>
+              <div className="p-6 rounded-2xl bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-800">
+                <p className="text-sm font-bold text-gray-900 dark:text-white mb-3">KEC Freelancer Club Internships</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                  Heartfelt gratitude to <span className="text-indigo-500">KEC Freelancer Club</span> for providing internships via <span className="font-bold">Pick My Car</span>. 
+                  Special thanks to <span className="text-gray-900 dark:text-white">Mr. S. Selvaraj</span> and <span className="text-gray-900 dark:text-white">Ms. M. Geetha</span> for organizing this GitHub-centric event.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center space-x-8 text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-             <a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a>
-             <a href="#" className="hover:text-indigo-600 transition-colors">Terms</a>
-             <a href="#" className="hover:text-indigo-600 transition-colors">Contact</a>
-             <div className="h-4 w-px bg-gray-200 dark:bg-slate-800"></div>
-             <a href="#" className="hover:text-indigo-600 transition-colors"><Github className="w-5 h-5" /></a>
+
+          <div className="pt-8 border-t border-gray-100 dark:border-slate-900 text-center">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em]">
+              Architected with Precision by the IdeaForge Core Team
+            </p>
           </div>
-        </div>
-        <div className="max-w-7xl mx-auto mt-12 text-center text-xs text-gray-400 dark:text-gray-600 font-bold uppercase tracking-[0.2em]">
-           © 2024 IdeaForge Systems Lab. All Rights Reserved.
         </div>
       </footer>
     </div>

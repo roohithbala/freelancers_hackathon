@@ -43,7 +43,49 @@ const SavedIdeasPage = () => {
 
   useEffect(() => {
     const loadIdeas = async () => {
-      if (!currentUser) return;
+      if (!currentUser) {
+        // Mock data for Guest Mode
+        const mockIdeas = [
+          {
+            id: 'sample-1',
+            title: 'NeuralHealth AI Assistant',
+            problem: 'Patients often struggle to track chronic symptoms and coordinate with multiple specialists in real-time.',
+            domain: 'health',
+            skillLevel: 'advanced',
+            techStack: ['React', 'Python', 'TensorFlow', 'FastAPI'],
+            features: ['Real-time symptom tracking', 'AI diagnosis assistant', 'Secure doctor-patient portal'],
+            roadmap: ['Define architecture', 'Train neural model', 'Develop frontend', 'HIPAA compliance audit'],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'sample-2',
+            title: 'DeFi Liquidity Protocol',
+            problem: 'Small-scale traders lack access to decentralized high-yield liquidity pools with low gas fees.',
+            domain: 'fintech',
+            skillLevel: 'intermediate',
+            techStack: ['Solidity', 'Hardhat', 'Ethers.js', 'Next.js'],
+            features: ['Automated market maker', 'Yield farming dashboard', 'Multi-chain support'],
+            roadmap: ['Smart contract draft', 'Security audit', 'Mainnet deployment', 'Liquidity mining launch'],
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'sample-3',
+            title: 'EduStream Interactive Learning',
+            problem: 'Traditional online courses lack engagement and real-time collaboration between students and mentors.',
+            domain: 'education',
+            skillLevel: 'beginner',
+            techStack: ['React', 'Node.js', 'Socket.io', 'MongoDB'],
+            features: ['Live collaborative whiteboards', 'Peer-to-peer mentoring', 'Interactive quiz system'],
+            roadmap: ['MVP development', 'Alpha testing', 'Content integration', 'Market launch'],
+            createdAt: new Date().toISOString()
+          }
+        ];
+        setIdeas(mockIdeas);
+        setFilteredIdeas(mockIdeas);
+        setLoading(false);
+        return;
+      }
+
       try {
         const savedIdeas = await ideaService.getSavedIdeas(currentUser);
         setIdeas(savedIdeas || []);

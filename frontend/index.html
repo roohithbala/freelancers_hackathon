@@ -23,7 +23,7 @@
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } }
         .status-box { margin-top: 40px; text-align: center; }
-        .brand { font-weight: 900; font-size: 18px; letter-spacing: 0.4em; text-transform: uppercase; background: linear-gradient(to right, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .brand { font-weight: 900; font-size: 18px; letter-spacing: 0.4em; text-transform: uppercase; background: linear-gradient(to right, #6366f1, #a855f7); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
         .status-text { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: #475569; }
         .status-text::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
         @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80% { content: '...'; } }

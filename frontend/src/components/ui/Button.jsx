@@ -29,7 +29,13 @@ const Button = ({
 
   const widthClass = fullWidth ? 'w-full' : '';
 
-  const classes = [variantMap[variant] || variantMap.primary, sizeMap[size] || sizeMap.md, widthClass, className].filter(Boolean).join(' ');
+  const classes = [
+    'flex flex-row items-center justify-center gap-2 whitespace-nowrap',
+    variantMap[variant] || variantMap.primary, 
+    sizeMap[size] || sizeMap.md, 
+    widthClass, 
+    className
+  ].filter(Boolean).join(' ');
 
   return (
     <Motion.button

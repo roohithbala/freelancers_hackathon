@@ -10,6 +10,9 @@ import GenerateIdeaPage from '../pages/GenerateIdeaPage';
 import SavedIdeasPage from '../pages/SavedIdeasPage';
 import ProjectFlowPage from '../pages/ProjectFlowPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
+import PrivacyPage from '../pages/PrivacyPage';
+import TermsPage from '../pages/TermsPage';
+import ContactPage from '../pages/ContactPage';
 
 const AppRoutes = () => {
   const { loading } = useAuth();
@@ -30,6 +33,9 @@ const AppRoutes = () => {
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="terms" element={<TermsPage />} />
+        <Route path="contact" element={<ContactPage />} />
       </Route>
 
       {/* Protected Routes */}
