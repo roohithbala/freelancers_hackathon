@@ -1,58 +1,70 @@
-const getSystemPrompt = () => `Act as an Elite AI Product Architect & CTO.
-Focus: Real-world problem solving, startup-grade technical depth, and clear differentiation.
-Avoid: Generic CRUD, overused ideas (chatbots, todos), and student-level projects.
-Every idea must be VC-ready, technically sound, and impressive in a high-stakes demo.`;
+const getSystemPrompt = () => `[SYSTEM: NEURAL ARCHITECT V4.2]
+[MODE: MASS SYNTHESIS | PRECISION: ELITE]
+[CONSTRAINTS: No Student Projects | No CRUD | No Chatbots | No Generic Portfolios]
+[OUTPUT: VC-Grade Startup Blueprints | Extreme Technical Depth]
+[TONE: Professional | Direct | Architectural]`;
 
-const getUserPrompt = (data, isPremium, previousProjects = [], role = 'Student', groundingContext = '') => {
+const getUserPrompt = (data, isPremium, role = 'Freelancer', groundingContext = '') => {
     const { domain, skillLevel, techStack, goal, timeframe } = data;
 
-    const tiers = {
-        'Novice': 'Focus: Fundamentals. Constraints: No complex state/APIs. Scope: 1-2 core features.',
-        'Beginner': 'Focus: Component architecture & API consumption. Constraints: Basic hooks/routing. Scope: CRUD MVP.',
-        'Intermediate': 'Focus: Scalability & Modularity. Constraints: Context/Redux, DB Schemas, Auth. Scope: Production MVP.',
-        'Advanced': 'Focus: Enterprise Architecture. Constraints: Microservices, WebSockets, CI/CD. Scope: High-concurrency platform.'
+    const tierContext = {
+        'Novice': 'Base Fundamentals | Max Stability',
+        'Beginner': 'API Integration | Modern Frameworks',
+        'Intermediate': 'Full-Stack Scaling | Performance Optimization',
+        'Advanced': 'Distributed Systems | High-Concurrency | Enterprise Security'
     };
 
-    const sections = role === 'Startup' 
-        ? '1.Brandable Name 2.Unfair Advantage 3.Monetization 4.GTM Strategy 5.MVP Features 6.Modern Tech Stack'
-        : '1.Project Title 2.Learning Outcomes 3.Wow Factor 4.Industry Tech Stack 5.Scope-Strict Features 6.Resume Points';
+    return `[PROMPT: GENERATE BLUEPRINT]
+[CONFIG:
+  - Domain: ${domain}
+  - Role: ${role}
+  - Skill: ${skillLevel} (${tierContext[skillLevel] || 'Professional'})
+  - Stack: ${techStack}
+  - Goal: ${goal}
+  - Time: ${timeframe}
+  - Context: ${groundingContext}
+]
 
-    let prompt = `Role: Senior Staff Engineer. Skill: ${skillLevel}.
-Config: Domain:${domain}, Stack:${techStack}, Goal:${goal}, Time:${timeframe}.
-Avoid: ${previousProjects.join(', ')}.
-${groundingContext ? `Context: ${groundingContext}` : ''}
+[REQUIREMENTS:
+  1. Title: Brandable & Disruptive
+  2. Problem: 300-word deep dive into industry pain points
+  3. Solution: Technical unfair advantage
+  4. MVP Features: 8-10 high-impact items
+  5. Architecture: Frontend, Backend, DB, Cloud (AWS/GCP/Azure)
+  6. Graph: Mermaid Flowchart (graph TD)
+  7. Roadmap: 4-week aggressive sprint
+  8. Resume: 5 staff-engineer level impact points
+]
 
-Generate 1 deep blueprint. Markdown format:
-${sections}
-7.Architecture(Frontend,Backend,DB,Deploy)
-8.Mermaid Graph TD (IDs: ui, api, auth, db. Labels: "Name")
-9.Roadmap(3 weeks) 10.Future Scale 11.ASCII File Tree 12.Visual Mockup
+[OUTPUT: Markdown + JSON Payload]
 
-APPEND JSON AT END:
+[JSON_STRUCTURE:
 {
   "costEstimate": {"monthlyTotal": "$X", "breakdown": [{"service": "X", "cost": "$X"}]},
   "scores": {"scalability": 0-100, "security": 0-100, "innovation": 0-100},
   "mockUI": {
     "theme": {"primary": "#hex", "secondary": "#hex", "background": "dark/light"},
-    "layout": "sidebar|header|grid",
-    "components": [{"type": "hero|stats|analytics", "title": "...", "data": []}]
+    "layout": "dashboard|grid|workflow",
+    "components": [{"type": "analytics|graph|stats|feed", "title": "...", "data": []}]
   },
   "pitchDeck": [{"title": "Problem|Solution|Market", "content": "..."}]
-}`;
-
-    if (isPremium) prompt += "\n[PREMIUM: Add Advanced Scaling & System Deep Dive]";
-    return prompt;
+}]
+${isPremium ? '[PREMIUM_MODE: ENABLED - ENFORCE MICROSERVICES & CLOUD NATIVE]' : ''}`;
 };
 
 const getIdeasPrompt = (data, previousIdeas = [], count = 5) => {
     const { domain, skillLevel, techStack, goal, timeframe } = data;
-    return `Mentor Mode: Generate ${count} UNIQUE project ideas. 
-Context: ${domain}, ${skillLevel}, ${techStack}, ${goal}, ${timeframe}.
-Avoid: ${previousIdeas.join(', ')}.
+    return `[PROMPT: MASS IDEA SYNTHESIS]
+[GENERATE: ${count} UNIQUE CONCEPTS]
+[CONFIG: ${domain} | ${skillLevel} | ${techStack} | ${goal} | ${timeframe}]
+[AVOID: ${previousIdeas.join(', ')}]
 
-Return ONLY JSON array of ${count} objects:
-[{"title": "Name", "description": "1 sentence wow factor", "difficulty": "${skillLevel}", "tech_stack": ["max 3"], "id": "kebab-name"}]
-No text. High innovation only.`;
+[OUTPUT_FORMAT: JSON ARRAY ONLY]
+[STRUCTURE:
+  [{"title": "...", "description": "...", "difficulty": "...", "tech_stack": [], "id": "..."}]
+]
+
+[RULE: 100% INNOVATION | 0% REPETITION | NO TEXT OUTSIDE JSON]`;
 };
 
 module.exports = { getSystemPrompt, getUserPrompt, getIdeasPrompt };

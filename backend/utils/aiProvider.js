@@ -370,10 +370,13 @@ graph TD
     // Filter out avoidList if provided
     let available = mockBlueprints;
     if (avoidList && avoidList.length > 0) {
+        // Ensure avoidList contains only valid strings to prevent toLowerCase crashes
+        const safeAvoidList = (avoidList || []).filter(a => typeof a === 'string');
+        
         available = mockBlueprints.filter(bp => {
             const titleMatch = bp.match(/# 🚀 Project: (.*?)(?:\s|##|$)/);
             const title = titleMatch ? titleMatch[1].trim() : "";
-            return !avoidList.some(avoid => (title && avoid.toLowerCase().includes(title.toLowerCase())) || (title && title.toLowerCase().includes(avoid.toLowerCase())));
+            return !safeAvoidList.some(avoid => (title && avoid.toLowerCase().includes(title.toLowerCase())) || (title && title.toLowerCase().includes(avoid.toLowerCase())));
         });
     }
 

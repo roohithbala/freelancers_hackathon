@@ -120,7 +120,7 @@ router.post('/', async (req, res) => {
             let specificGoal = goal;
             const ideaTitle = selectedIdea?.title || 'Unknown Project';
             const ideaDesc = selectedIdea?.description || 'No description provided';
-            
+
             if (selectedIdea) {
                 specificGoal = `Build: ${ideaTitle}. ${ideaDesc}. Original Goal: ${goal}`;
             }
@@ -181,7 +181,7 @@ router.post('/', async (req, res) => {
                 // Parse markdown to extract problem, features, techStack, roadmap
                 let parsedFields = {};
                 try {
-                     parsedFields = parseBlueprintMarkdown(content);
+                    parsedFields = parseBlueprintMarkdown(content);
                 } catch (e) {
                     console.warn("Markdown parsing failed:", e);
                 }
@@ -200,10 +200,10 @@ router.post('/', async (req, res) => {
                 console.log("Starting technical audit via Hugging Face Llama 3.1 8B...");
                 let verification = { summary: 'Verification skipped', issues: [] };
                 try {
-                   verification = await verifyBlueprint(content);
+                    verification = await verifyBlueprint(content);
                 } catch (e) {
-                   console.warn('Verification step failed:', e);
-                   verification = { summary: 'Technical audit service unavailable', issues: [] };
+                    console.warn('Verification step failed:', e);
+                    verification = { summary: 'Technical audit service unavailable', issues: [] };
                 }
 
                 res.json({
@@ -216,16 +216,16 @@ router.post('/', async (req, res) => {
 
         } catch (error) {
             console.error('Synthesis Pipeline Error:', error);
-            res.status(500).json({ 
-                error: 'Architectural Synthesis Failed', 
+            res.status(500).json({
+                error: 'Architectural Synthesis Failed',
                 details: error.message,
                 provider: 'System Error Handler'
             });
         }
     } catch (mainError) {
         console.error('Critical Router Error:', mainError);
-        res.status(500).json({ 
-            error: 'Internal System Error', 
+        res.status(500).json({
+            error: 'Internal System Error',
             details: mainError.message,
             provider: 'Global Error Handler'
         });
@@ -236,7 +236,7 @@ router.post('/', async (req, res) => {
 function extractAndParseJSON(text) {
     console.log("Raw AI Text Length:", text.length);
     if (text.length < 500) console.log("Raw AI Text Snippet:", text);
-    
+
     // 1. Try extracting from markdown code blocks
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
@@ -246,7 +246,7 @@ function extractAndParseJSON(text) {
     // 2. Try finding the first '{' or '[' and the last '}' or ']'
     const firstOpen = text.indexOf('{');
     const firstArray = text.indexOf('[');
-    
+
     let start = -1;
     let end = -1;
 
@@ -261,7 +261,7 @@ function extractAndParseJSON(text) {
 
     if (start !== -1) {
         let jsonStr = end !== -1 ? text.substring(start, end + 1) : text.substring(start).trim();
-        
+
         const tryParse = (str) => {
             try { return JSON.parse(str); } catch (e) { return null; }
         };
@@ -272,11 +272,11 @@ function extractAndParseJSON(text) {
 
         // 2. Surgical Repair
         console.warn("Direct parse failed, attempting surgical repair...");
-        
+
         // Fix A: AI often forgets to escape literal newlines inside strings.
         // We only escape newlines that are NOT followed by a potential JSON structural character (", }, ], {)
         let fixed = jsonStr.replace(/\n(?!\s*["\{\}\[\]])/g, '\\n');
-        
+
         result = tryParse(fixed);
         if (result) return result;
 
@@ -287,7 +287,7 @@ function extractAndParseJSON(text) {
             // We only stop at characters that could close a structure
             if (fixed[i] === '}' || fixed[i] === ']' || fixed[i] === '"') {
                 let temp = fixed.substring(0, i + 1);
-                
+
                 // If it ends with a quote, it might be a truncated string value
                 if (temp.endsWith('"') && (temp.match(/(?<!\\)"/g) || []).length % 2 !== 0) {
                     // Close the string
@@ -305,19 +305,19 @@ function extractAndParseJSON(text) {
                 let closer = "";
                 if (openB > closeB) closer += '}'.repeat(openB - closeB);
                 if (openBr > closeBr) closer += ']'.repeat(openBr - closeBr);
-                
+
                 let attempt = temp + closer;
                 // Final cleanup of trailing commas before closing
                 attempt = attempt.replace(/,\s*([\]\}])/g, '$1');
-                
+
                 result = tryParse(attempt);
                 if (result) return result;
             }
         }
-        
+
         throw new Error("JSON parse failed after all surgical recovery attempts.");
     }
-    
+
     throw new Error("No JSON found in response");
 }
 
