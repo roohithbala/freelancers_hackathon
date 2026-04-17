@@ -49,6 +49,7 @@ data:
         url: http://prometheus-service:9090
         isDefault: true
         editable: true
+        uid: Prometheus
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -108,20 +109,23 @@ data:
         {
           "type": "timeseries",
           "title": "Service Uptime (up)",
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
           "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
           "targets": [{"expr": "up", "refId": "A", "legendFormat": "{{job}} - {{pod}}"}]
         },
         {
           "type": "timeseries",
-          "title": "CPU Usage Rate",
+          "title": "Node.js CPU Usage",
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
           "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
-          "targets": [{"expr": "rate(container_cpu_usage_seconds_total[5m])", "refId": "A", "legendFormat": "{{pod}}"}]
+          "targets": [{"expr": "rate(process_cpu_user_seconds_total[5m])", "refId": "A", "legendFormat": "{{pod}}"}]
         },
         {
           "type": "timeseries",
-          "title": "Memory Usage",
+          "title": "Node.js Memory Usage",
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
           "gridPos": {"x": 0, "y": 8, "w": 24, "h": 8},
-          "targets": [{"expr": "container_memory_usage_bytes", "refId": "A", "legendFormat": "{{pod}}"}]
+          "targets": [{"expr": "process_resident_memory_bytes", "refId": "A", "legendFormat": "{{pod}}"}]
         }
       ],
       "schemaVersion": 30

@@ -11,8 +11,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="boot" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted-600);font:600 14px/1.2 Inter,system-ui,Segoe UI,Arial,sans-serif;letter-spacing:.06em;">
-      Loading UI…
+    <div id="boot" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#020617;color:#fff;font-family:Inter,sans-serif;z-index:9999;">
+      <style>
+        .loader { width: 48px; height: 48px; border: 3px solid #FFF; border-bottom-color: #6366f1; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; margin-bottom: 20px; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } 
+        .boot-text { font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; color: #6366f1; animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+      </style>
+      <span class="loader"></span>
+      <div class="boot-text">Initializing IdeaForge</div>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
