@@ -132,12 +132,17 @@ router.post('/', async (req, res) => {
 
             // Allow client to request lower-cost generation by supplying maxTokens and lower temperature
             const genOptions = {
+                mode: mode,
                 maxTokens: req.body.maxTokens || (mode === 'ideas' ? (userTier === 'architect' ? 3500 : 2500) : 4096),
                 temperature: typeof req.body.temperature === 'number' ? req.body.temperature : 0.2
             };
 
             const data = await generateCompletion(messages, previousProjects, genOptions);
-            const content = data.choices[0].message.content;
+            const content = data.choices?.[0]?.message?.content;
+            if (!content) {
+                console.error("AI returned empty content or invalid structure:", data);
+                return res.status(500).json({ error: 'AI synthesis failed. No content generated.' });
+            }
 
             if (mode === 'ideas') {
                 let ideas = [];

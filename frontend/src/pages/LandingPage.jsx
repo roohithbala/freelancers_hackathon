@@ -179,22 +179,31 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="px-6 py-20 border-t border-gray-100 dark:border-slate-900 bg-white dark:bg-slate-950">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
+            <div className="lg:col-span-1">
               <div className="flex items-center space-x-3 mb-6">
                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
                     <Lightbulb className="w-6 h-6 text-white" />
                  </div>
                  <span className="text-2xl font-black tracking-tighter text-gray-900 dark:text-white uppercase px-2">IdeaForge</span>
               </div>
-              <p className="text-gray-500 dark:text-gray-400 font-medium text-sm mb-8">
+              <p className="text-gray-500 dark:text-gray-400 font-medium text-sm mb-8 max-w-xs">
                 The neural-core powered project architect for the next generation of builders.
               </p>
-              <div className="flex items-center space-x-6 text-xs font-black uppercase tracking-widest text-gray-400">
-                <Link to="/privacy" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link>
-                <Link to="/terms" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
+              <div className="flex items-center space-x-6 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                <Link to="/privacy" className="hover:text-indigo-600 transition-colors">Privacy</Link>
+                <Link to="/terms" className="hover:text-indigo-600 transition-colors">Terms</Link>
                 <Link to="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
               </div>
+            </div>
+
+            <div className="col-span-1">
+              <h4 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-600 mb-6">Platform</h4>
+              <ul className="space-y-4 text-sm font-bold text-gray-600 dark:text-gray-400">
+                <li><Link to="/generate" className="hover:text-indigo-600 transition-colors">Design Architect</Link></li>
+                <li><Link to="/saved" className="hover:text-indigo-600 transition-colors">Project Library</Link></li>
+                <li><Link to="/profile" className="hover:text-indigo-600 transition-colors">Neural Profile</Link></li>
+              </ul>
             </div>
 
             <div className="col-span-1">
@@ -205,8 +214,6 @@ const LandingPage = () => {
                 <li><a href="https://github.com/Miruthulabalasubramanian" target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors">Miruthula B</a></li>
               </ul>
             </div>
-
-
           </div>
 
           <div className="pt-8 border-t border-gray-100 dark:border-slate-900 text-center">

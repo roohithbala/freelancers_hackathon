@@ -378,6 +378,29 @@ graph TD
     }
 
     if (available.length === 0) available = mockBlueprints;
+    if (options.mode === 'ideas') {
+        const mockIdeas = available.map(bp => {
+            const titleMatch = bp.match(/# 🚀 Project: (.*?)(?:\s|##|$)/);
+            const title = titleMatch ? titleMatch[1].trim() : "Mock Project";
+            return {
+                title: title,
+                description: "Revolutionizing the industry with AI-driven insights and scalable architecture.",
+                difficulty: "Intermediate",
+                tech_stack: ["React", "Node.js", "AI"],
+                id: title.toLowerCase().replace(/\s+/g, '-')
+            };
+        }).slice(0, 5);
+        
+        return {
+            choices: [{
+                message: {
+                    content: JSON.stringify(mockIdeas)
+                }
+            }],
+            provider: 'IdeaForge Neural Fallback (No API Keys Found)'
+        };
+    }
+
     const randomBlueprint = available[Math.floor(Math.random() * available.length)];
 
     return {
