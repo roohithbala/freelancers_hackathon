@@ -65,16 +65,19 @@ ${isPremium ? '[PREMIUM_MODE: ENABLED - ENFORCE MICROSERVICES & CLOUD NATIVE]' :
 const getIdeasPrompt = (data, previousIdeas = [], count = 5) => {
     const { domain, skillLevel, techStack, goal, timeframe } = data;
     return `[PROMPT: MASS IDEA SYNTHESIS]
-[GENERATE: ${count} UNIQUE CONCEPTS]
+[GENERATE EXACTLY: ${count} UNIQUE CONCEPTS]
 [CONFIG: ${domain} | ${skillLevel} | ${techStack} | ${goal} | ${timeframe}]
 [AVOID: ${previousIdeas.join(', ')}]
 
-[OUTPUT_FORMAT: JSON ARRAY ONLY]
+[OUTPUT_FORMAT: STRICT JSON ARRAY OF EXACTLY ${count} OBJECTS]
 [STRUCTURE:
-  [{"title": "...", "description": "...", "difficulty": "...", "tech_stack": [], "id": "..."}]
+  [
+    {"title": "...", "description": "...", "difficulty": "...", "tech_stack": [], "id": "..."},
+    // ... exactly ${count} objects
+  ]
 ]
 
-[RULE: 100% INNOVATION | 0% REPETITION | NO TEXT OUTSIDE JSON]`;
+[RULE: 100% INNOVATION | 0% REPETITION | NO TEXT OUTSIDE JSON | MUST RETURN EXACTLY ${count} ITEMS]`;
 };
 
 module.exports = { getSystemPrompt, getUserPrompt, getIdeasPrompt };
