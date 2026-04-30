@@ -15,6 +15,12 @@ data:
     rule_files:
       - /etc/prometheus/rules/prometheus.rules.yml
     scrape_configs:
+      - job_name: 'backend'
+        static_configs:
+          - targets: ['backend-service:5000']
+      - job_name: 'frontend'
+        static_configs:
+          - targets: ['frontend-service:80']
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
           - role: pod
@@ -105,30 +111,63 @@ data:
   kubernetes-pods.json: |
     {
       "title": "Application Metrics",
+      "refresh": "30s",
       "panels": [
         {
           "type": "timeseries",
-          "title": "Service Uptime (up)",
+          "title": "Scrape Success Rate",
           "datasource": {"type": "prometheus", "uid": "Prometheus"},
           "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
-          "targets": [{"expr": "up", "refId": "A", "legendFormat": "{{job}} - {{pod}}"}]
+          "targets": [
+            {
+              "expr": "up",
+              "refId": "A",
+              "legendFormat": "{{job}}"
+            }
+          ]
         },
         {
-          "type": "timeseries",
-          "title": "Node.js CPU Usage",
+          "type": "stat",
+          "title": "Backend Service Status",
           "datasource": {"type": "prometheus", "uid": "Prometheus"},
           "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
-          "targets": [{"expr": "rate(process_cpu_user_seconds_total[5m])", "refId": "A", "legendFormat": "{{pod}}"}]
+          "targets": [
+            {
+              "expr": "up{job=\"backend\"}",
+              "refId": "A",
+              "legendFormat": "Backend"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "type": "value",
+                  "options": {
+                    "1": {"text": "UP", "color": "green"},
+                    "0": {"text": "DOWN", "color": "red"}
+                  }
+                }
+              ]
+            }
+          }
         },
         {
           "type": "timeseries",
-          "title": "Node.js Memory Usage",
+          "title": "Scrape Duration",
           "datasource": {"type": "prometheus", "uid": "Prometheus"},
           "gridPos": {"x": 0, "y": 8, "w": 24, "h": 8},
-          "targets": [{"expr": "process_resident_memory_bytes", "refId": "A", "legendFormat": "{{pod}}"}]
+          "targets": [
+            {
+              "expr": "scrape_duration_seconds",
+              "refId": "A",
+              "legendFormat": "{{job}}"
+            }
+          ]
         }
       ],
-      "schemaVersion": 30
+      "schemaVersion": 30,
+      "version": 1
     }
 ---
 apiVersion: apps/v1
