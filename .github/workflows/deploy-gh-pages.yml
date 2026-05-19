@@ -2,6 +2,11 @@ name: Deploy Frontend to GitHub Pages
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - render
+    paths:
+      - 'frontend/**'
 
 permissions:
   contents: write
