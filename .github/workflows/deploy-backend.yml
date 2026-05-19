@@ -1,0 +1,43 @@
+name: Deploy Backend to Render
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync GitHub Secrets to Render Environment
+        run: |
+          echo "Updating Environment Variables on Render..."
+          
+          # We use the Render API to update env vars dynamically.
+          # Note: This step REQUIRES the RENDER_API_KEY secret to be set in GitHub!
+          response=$(curl -s -w "\n%{http_code}" --request PATCH \
+               --url https://api.render.com/v1/services/srv-d8626k6gvqtc73e9sr5g/env-vars \
+               --header "accept: application/json" \
+               --header "authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+               --header "content-type: application/json" \
+               --data '[
+                 { "key": "OPENAI_API_KEY", "value": "${{ secrets.OPENAI_API_KEY }}" },
+                 { "key": "RAZORPAY_KEY_ID", "value": "${{ secrets.RAZORPAY_KEY_ID }}" },
+                 { "key": "RAZORPAY_SECRET", "value": "${{ secrets.RAZORPAY_SECRET }}" },
+                 { "key": "EMAIL_USER", "value": "${{ secrets.EMAIL_USER }}" },
+                 { "key": "EMAIL_PASS", "value": "${{ secrets.EMAIL_PASS }}" }
+               ]')
+               
+          http_code=$(echo "$response" | tail -n1)
+          
+          if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 201 ]; then
+            echo "✅ Environment variables updated successfully!"
+          else
+            echo "❌ Failed to update environment variables. HTTP Code: $http_code"
+            echo "Did you remember to add RENDER_API_KEY to GitHub Secrets?"
+            exit 1
+          fi
+
+      - name: Trigger Render Deploy
+        run: |
+          echo "Triggering deployment using your Deploy Hook..."
+          curl -X POST "https://api.render.com/deploy/srv-d8626k6gvqtc73e9sr5g?key=vIyQC4c92mI"
+          echo "✅ Deployment triggered!"
