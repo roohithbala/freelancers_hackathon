@@ -2,6 +2,9 @@ name: Deploy Backend to Render
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - render
 
 jobs:
   update-and-deploy:
