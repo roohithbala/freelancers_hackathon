@@ -16,7 +16,7 @@ jobs:
           
           # We use the Render API to update env vars dynamically.
           # Note: This step REQUIRES the RENDER_API_KEY secret to be set in GitHub!
-          response=$(curl -s -w "\n%{http_code}" --request PATCH \
+          response=$(curl -s -w "\n%{http_code}" --request PUT \
                --url https://api.render.com/v1/services/srv-d8626k6gvqtc73e9sr5g/env-vars \
                --header "accept: application/json" \
                --header "authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
@@ -26,7 +26,12 @@ jobs:
                  { "key": "RAZORPAY_KEY_ID", "value": "${{ secrets.RAZORPAY_KEY_ID }}" },
                  { "key": "RAZORPAY_SECRET", "value": "${{ secrets.RAZORPAY_SECRET }}" },
                  { "key": "EMAIL_USER", "value": "${{ secrets.EMAIL_USER }}" },
-                 { "key": "EMAIL_PASS", "value": "${{ secrets.EMAIL_PASS }}" }
+                 { "key": "EMAIL_PASS", "value": "${{ secrets.EMAIL_PASS }}" },
+                 { "key": "GROQ_API_KEY", "value": "${{ secrets.GROQ_API_KEY }}" },
+                 { "key": "GROQ_MODEL", "value": "${{ secrets.GROQ_MODEL }}" },
+                 { "key": "HF_API_KEY", "value": "${{ secrets.HF_API_KEY }}" },
+                 { "key": "HF_MODEL", "value": "${{ secrets.HF_MODEL }}" },
+                 { "key": "PORT", "value": "5000" }
                ]')
                
           http_code=$(echo "$response" | tail -n1)
