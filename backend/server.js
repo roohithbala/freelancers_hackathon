@@ -71,14 +71,13 @@ app.get('/metrics', async (req, res) => {
     }
 });
 
-// Final catch-all for SPA routing (Express 5 safe)
+// Final catch-all for API routing
 app.use((req, res, next) => {
-    // If it's an API request that wasn't handled, return 404
     if (req.path.startsWith('/api')) {
         return res.status(404).json({ error: 'API route not found' });
     }
-    // Otherwise serve index.html for the frontend SPA
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    // Return API status for other paths
+    res.json({ message: "AI Project Idea Generator API is running", status: "ok" });
 });
 
 app.listen(PORT, () => {
