@@ -1,7 +1,7 @@
 services:
   - type: web
     name: ai-generator-backend
-    env: node
+    runtime: node
     plan: free
     rootDir: backend
     buildCommand: npm install
